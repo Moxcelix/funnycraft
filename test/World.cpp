@@ -1,0 +1,789 @@
+#include "World.h"
+#include<iostream>
+#include<fstream>
+#include<Windows.h>
+
+Terrain terrain; // экземпляр генератора
+int World::render_distance = 8; // дальность прорисовки по умолчанию
+int World::seed = 0; // зерно генерации
+bool World::is_day = true; // день
+string World::name = "my world"; // имя мира
+World::Settings World::settings = World::Settings(); // экземпляр параметров мира
+/// <summary>
+/// конструктор
+/// </summary>
+/// <param name="player"></param>
+World::World(Player* player)
+{
+	this->player = player;
+	player->world = this;
+
+	Create();
+}
+/// <summary>
+/// создание мира
+/// </summary>
+void World::Create()
+{
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	srand(time(NULL));	// инициализация датчика случайных чисел
+	ifstream istream;	// поток чтения
+	istream.open(save_folder + name + "/world.bin"); // открытие потока
+
+	if (istream.is_open()) // если файл есть
+	{
+		Debug::Log("world \"" + name + "\" opened");
+		istream >> World::seed; // зерно генерации мира
+
+		float x, y, z, xRot, zRot;
+		istream >> x >> y >> z >> xRot >> zRot; // положение игрока
+
+		for (int i = 0; i < 4; i++)
+			istream >> settings.params[i]; // параметр i
+
+		istream.close(); // закрытие потока
+
+		player->Init(x, y, z, xRot, zRot); // инициализация игрока
+	}
+	else // иначе
+	{
+		Debug::Log("world \"" + name + "\" created");
+		World::seed = rand(); // генерация нового сида
+		player->Init(player->start_pos.x, player->start_pos.y, player->start_pos.z, 0, 90); // инициализация игрока
+	}
+	// инициализация объектов
+	chunksLoaded = 0;
+	RenderQueue = new PosQueue();
+	CreateQueue = new PosQueue();
+	UpdateQueue = new PosQueue();
+	DeleteQueue = new queue<int>();
+	GlobalUpdateQueue = new queue<Vector3Int>();
+	terrain = Terrain(World::seed, this);
+}
+/// <summary>
+/// деструктор мира
+/// </summary>
+World::~World()
+{
+	ofstream stream; // поток записи
+	stream.open(save_folder + name + "/world.bin"); // путь записи
+	if (stream.is_open()) // если получисось открыть
+	{
+		stream << World::seed << endl; // зерно генерации
+		player->Save(stream); // сохранение параметров игрока
+		for (int i = 0; i < 4; i++)
+			stream << settings.params[i] << endl; // сохранение параметра i
+		stream.close(); // закрытие потока
+	}
+	GlobalBuffer.clear(); // очистка глобального буфера
+	// удаление очередей
+	delete RenderQueue;
+	delete CreateQueue;
+	delete UpdateQueue;
+	delete GlobalUpdateQueue;
+
+	// удаление чанков
+	for (int i = 0; i < chunksLoaded; i++)
+		delete Chunks[i];
+}
+
+/// <summary>
+/// обновление глобального освещения
+/// </summary>
+void World::UpdateWorldLighting()
+{
+	Debug::Log("global lighting update");
+
+	for (int j = 0; j < 2; j++)
+		for (int i = 0; i < chunksLoaded; i++)
+		{
+			Chunk* chunk = Chunks[i];
+			if (!chunk || GetChunk(chunk->pos.x, chunk->pos.y, chunk->pos.z + Chunk::ChunkSize))
+				continue;
+
+			for (int k = chunk->pos.z; k >= 0; k -= Chunk::ChunkSize)
+			{
+				GlobalUpdateQueue->push({ chunk->pos.x, chunk->pos.y, k });
+
+				Chunk* c = GetChunk(chunk->pos.x, chunk->pos.y, k);
+
+				if (c && c->is_solid)
+					break;
+			}
+		}
+}
+/// <summary>
+/// очистка мира
+/// </summary>
+void World::Clear()
+{
+	GlobalBuffer.clear();
+	RenderQueue->clear();
+	CreateQueue->clear();
+	for (int i = 0; i < chunksLoaded; i++)
+		delete Chunks[i];
+	chunksLoaded = 0;
+}
+/// <summary>
+/// добавление чанка в очередь создания
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::AddToCreate(int x, int y, int z)
+{
+	if (z < 0 || z >= WorldHeight * Chunk::ChunkSize)
+		return;
+
+	//chunk* c = GetChunk(x, y, z)
+
+	if (Chunk* c = GetChunk(x, y, z)) 
+	{
+		return;
+	}
+
+	if (x < 0)
+		x -= Chunk::ChunkSize - 1;
+	if (y < 0)
+		y -= Chunk::ChunkSize - 1;
+
+	x = (x / Chunk::ChunkSize) * Chunk::ChunkSize;
+	y = (y / Chunk::ChunkSize) * Chunk::ChunkSize;
+	z = (z / Chunk::ChunkSize) * Chunk::ChunkSize;
+
+	CreateQueue->add(new Vector3Int(x, y, z));
+}
+/// <summary>
+/// создание чанка
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+/// <returns></returns>
+bool World::CreateChunk(int x, int y, int z)
+{
+	if (chunksLoaded >= MaxChunksCount)
+		return true;
+
+	Chunk* chunk = GetChunk(x, y, z);
+
+	if (chunk)
+		return false;
+
+	if (Debug::active)
+		Debug::log << "chunk {" << x << ", " << y << ", " << z << "} created" << endl;
+
+	float d = Vector3Int::Distance(player->IntPosition, Vector3Int(x, y, z));
+
+	if (d > render_distance * Chunk::ChunkSize)
+		return false;
+
+	Chunks[chunksLoaded] = new Chunk(x, y, z, this);
+	Chunks[chunksLoaded]->UpdateMem();
+	Chunks[chunksLoaded]->Generate();
+	Chunks[chunksLoaded]->Update();
+	Chunks[chunksLoaded]->UpdateMesh();
+
+	for (int i = -1; i <= 1; i++)
+		for (int j = -1; j <= 1; j++)
+			for (int k = -1; k <= 1; k++)
+			{
+				if (i == 0 && j == 0 && k == 0)
+					continue;
+
+				int X = i * Chunk::ChunkSize + x;
+				int Y = j * Chunk::ChunkSize + y;
+				int Z = k * Chunk::ChunkSize + z;
+
+				RenderIfExcist(X, Y, Z);
+			}
+
+	chunksLoaded++;
+
+	return true;
+}
+/// <summary>
+/// рендер мира
+/// </summary>
+void World::Render(unsigned int texture)
+{
+	for (int i = 0; i < chunksLoaded; i++)
+	{
+		if (!Chunks[i]) // если чанка нет, пропустить
+			continue;
+
+		Vector3Int pos = Chunks[i]->pos; // позиция i-того чанка
+		glTranslatef(pos.x, pos.y, pos.z); // перемещение отрисовки на координаты
+		Chunks[i]->Render(texture); // рендер чанка
+		glTranslatef(-pos.x, -pos.y, -pos.z); // обраное перемещение 
+	}
+}
+/// <summary>
+/// ID блока
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+/// <returns>ID блока </returns>
+short int World::GetBlockID(int x, int y, int z)
+{
+	Chunk* chunk = GetChunk(x, y, z); // запрос чанка по координатам
+	if (chunk) // если чанк есть
+	{
+		return chunk->GetBlockID(
+			x - chunk->pos.x,
+			y - chunk->pos.y,
+			z - chunk->pos.z);
+	}
+
+	if (z < 0 || z >= WorldHeight * Chunk::ChunkSize)
+		return 0; // ID воздуха
+
+	return -1; // ID пустоты
+}
+/// <summary>
+/// ID блока
+/// </summary>
+/// <param name="pos"></param>
+/// <returns></returns>
+short int World::GetBlockID(Vector3 pos)
+{
+	return GetBlockID(pos.x, pos.y, pos.z);
+}
+/// <summary>
+/// указатель на блок
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+/// <returns>указатель на блок </returns>
+Block* World::GetBlock(int x, int y, int z)
+{
+	return Block::GetBlock(GetBlockID(x, y, z));
+}
+/// <summary>
+/// указатель на блок
+/// </summary>
+/// <param name="pos"></param>
+/// <returns>указатель на блок </returns>
+Block* World::GetBlock(Vector3 pos)
+{
+	return Block::GetBlock(GetBlockID(pos.x, pos.y, pos.z));
+}
+/// <summary>
+/// получить чанк
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+/// <returns>указатель на чанк</returns>
+Chunk* World::GetChunk(int x, int y, int z)
+{
+	if (x < 0)
+		x -= Chunk::ChunkSize - 1;
+	if (y < 0)
+		y -= Chunk::ChunkSize - 1;
+
+	if (z < 0 || z >= WorldHeight * Chunk::ChunkSize)
+		return nullptr;
+
+	x = (x / Chunk::ChunkSize) * Chunk::ChunkSize;
+	y = (y / Chunk::ChunkSize) * Chunk::ChunkSize;
+	z = (z / Chunk::ChunkSize) * Chunk::ChunkSize;
+
+	for (int i = 0; i < chunksLoaded; i++)
+	{
+		Chunk* c = Chunks[i];
+
+		if (c && c->pos.x == x && c->pos.y == y && c->pos.z == z)
+		{
+			return c;
+		}
+	}
+
+	return nullptr;
+}
+/// <summary>
+/// расчистка территории 
+/// </summary>
+/// <param name="pos"></param>
+void World::Explode(Vector3 pos)
+{
+	Explode(pos.x, pos.y, pos.z);
+}
+/// <summary>
+/// расчистка территории
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::Explode(int x, int y, int z)
+{
+	int r = rand() % 3 + 3;
+
+	for (int i = -r; i <= r; i++)
+		for (int j = -r; j <= r; j++)
+			for (int k = -r; k <= r; k++)
+			{
+				int R = r + rand() % 2;
+				if (i * i + j * j + k * k <= R * R)
+				{
+					int id = GetBlockID(x + i, y + j, z + k);
+
+					if (id == Block::bedrock->id)
+						continue;
+
+					SetBlock(x + i, y + j, z + k, 0, false);
+
+					if (id == Block::tnt->id)
+						Explode(x + i, y + j, z + k);
+
+					Chunk* chunk = GetChunk(x + i, y + j, z + k);
+
+					if (chunk)
+						chunk->Modify();
+				}
+			}
+
+	for (int i = -1; i <= 1; i++)
+		for (int j = -1; j <= 1; j++)
+			for (int k = -1; k <= 1; k++)
+			{
+				int X = i * Chunk::ChunkSize + x;
+				int Y = j * Chunk::ChunkSize + y;
+				int Z = k * Chunk::ChunkSize + z;
+
+				Chunk* chunk = GetChunk(X, Y, Z);
+
+				if (chunk)
+					chunk->UpdateMesh(), chunk->Update();
+			}
+
+	AddToUpdateColumn(x, y, z);
+}
+/// <summary>
+/// обновить чанки в точке
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::UpdateAtPoint(int x, int y, int z)
+{
+	for (int i = -1; i <= 1; i++)
+		for (int j = -1; j <= 1; j++)
+			for (int k = -1; k <= 1; k++)
+			{
+				if (i == 0 && j == 0 && k == 0)
+					continue;
+
+				int X = i * Chunk::ChunkSize + x;
+				int Y = j * Chunk::ChunkSize + y;
+				int Z = k * Chunk::ChunkSize + z;
+
+				UpdateIfExcist(X, Y, Z);
+			}
+}
+/// <summary>
+/// добавить в очередь обновления в точке
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::AddToUpdateAtPoint(int x, int y, int z)
+{
+	for (int i = -1; i <= 1; i++)
+		for (int j = -1; j <= 1; j++)
+			for (int k = -1; k <= 1; k++)
+			{
+				if (i == 0 && j == 0 && k == 0)
+					continue;
+
+				int X = i * Chunk::ChunkSize + x;
+				int Y = j * Chunk::ChunkSize + y;
+				int Z = k * Chunk::ChunkSize + z;
+
+				AddToUpdate(X, Y, Z);
+			}
+}
+/// <summary>
+/// отрисовать чанк, если существует
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::RenderIfExcist(int x, int y, int z)
+{
+	Chunk* chunk = GetChunk(x, y, z);
+
+	if (chunk)
+		AddToRender(chunk);
+}
+/// <summary>
+/// обновить чанк, если существует
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::UpdateIfExcist(int x, int y, int z)
+{
+	Chunk* chunk = GetChunk(x, y, z);
+
+	if (chunk)
+	{
+		AddToUpdate(chunk);
+	}
+}
+/// <summary>
+/// добавить в очередь первичной отрисовки
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::AddToRender(int x, int y, int z)
+{
+	RenderQueue->add(new Vector3Int(x, y, z));
+}
+/// <summary>
+/// добавить в очередь обновления
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::AddToUpdate(int x, int y, int z)
+{
+	UpdateQueue->add(new Vector3Int(x, y, z));
+}
+/// <summary>
+/// добавить чанк в очередь первичной отрисовки
+/// </summary>
+/// <param name="chunk"></param>
+void World::AddToRender(Chunk* chunk)
+{
+	AddToRender(chunk->pos.x, chunk->pos.y, chunk->pos.z);
+}
+/// <summary>
+/// добавить чанк в очередь обновления
+/// </summary>
+/// <param name="chunk"></param>
+void World::AddToUpdate(Chunk* chunk)
+{
+	AddToUpdate(chunk->pos.x, chunk->pos.y, chunk->pos.z);
+}
+/// <summary>
+/// значение света
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+/// <returns>значение света</returns>
+char World::GetLight(int x, int y, int z)
+{
+	Chunk* chunk = GetChunk(x, y, z);
+
+	if (chunk)
+		return chunk->GetLight(x - chunk->pos.x, y - chunk->pos.y, z - chunk->pos.z);
+
+	return 0;
+}
+/// <summary>
+/// добавить в очередь колонну чанков
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::AddToUpdateColumn(int x, int y, int z)
+{
+	int s = Chunk::ChunkSize;
+
+	z = (z / s) * s;
+
+	for (int k = z + s; k >= 0; k -= s)
+	{
+		Chunk* chunk = GetChunk(x, y, k);
+
+		if (!chunk)
+			break;
+
+		for (int i = -s; i <= s; i += s)
+			for (int j = -s; j <= s; j += s)
+				AddToUpdate(x + i, y + j, k);
+
+		if (chunk->is_solid)
+			break;
+	}
+}
+/// <summary>
+/// обновление
+/// </summary>
+void World::Update()
+{
+	// удаление чанков
+	for (int i = 0; i < chunksLoaded && i < 8; i++)
+	{
+		float d = Vector3Int::Distance(player->IntPosition, Chunks[i]->pos);
+
+		if (d > render_distance * Chunk::ChunkSize)
+		{
+			DeleteChunk(i);
+		}
+	}
+
+	
+	// поток первичного обновления чанков
+	thread t([&] {
+		for (int i = 0; i < render_chunk_throughput; i++)
+			if (RenderQueue->size())
+			{
+				Vector3Int* pos = RenderQueue->back();
+
+				if (UpdateQueue->contains(pos))
+				{
+					RenderQueue->pop_back();
+					continue;
+				}
+
+				Chunk* chunk = GetChunk(pos->x, pos->y, pos->z);
+				if (chunk)
+				{
+					chunk->UpdateMem();
+					chunk->UpdateMesh();
+				}
+				RenderQueue->pop_back();
+			}
+		});
+
+	// обновление глобального освещения
+	for (int i = 0; i < render_chunk_throughput * 2; i++)
+		if (GlobalUpdateQueue->size())
+		{
+			Vector3Int pos = GlobalUpdateQueue->front();
+			Chunk* chunk = GetChunk(pos.x, pos.y, pos.z);
+
+			if (chunk)
+				chunk->UpdateMesh();
+
+			GlobalUpdateQueue->pop();
+		}
+
+	// создание чанков
+	for (int i = 0; i < create_chunk_throughput; i++)
+	{
+		while (CreateQueue->size())
+		{
+			Vector3Int* pos = CreateQueue->back();
+			bool done = CreateChunk(pos->x, pos->y, pos->z);
+			CreateQueue->pop_back();
+
+			if (done)
+				break;
+		}
+	}
+	// обновление чанков
+	for (int i = 0; i < update_chunk_throughput; i++)
+		if (UpdateQueue->size())
+		{
+			Vector3Int* pos = UpdateQueue->front();
+
+			Chunk* chunk = GetChunk(pos->x, pos->y, pos->z);
+			if (chunk)
+			{
+				chunk->UpdateMesh();
+			}
+			UpdateQueue->pop_front();
+		}
+	t.join(); // синхронизация потоков
+
+	RationalizeBuffer(); // рационализация буфера блоков
+	RemoveCash(); // очистка кэша	
+}
+/// <summary>
+/// удаление чанка
+/// </summary>
+/// <param name="index"></param>
+void World::DeleteChunk(int index)
+{
+	float d = Vector3Int::Distance(player->IntPosition, Chunks[index]->pos);
+
+	if (d <= render_distance * Chunk::ChunkSize) // если чанк всё еще подлежит удалению
+		return;
+
+	int x = Chunks[index]->pos.x;
+	int y = Chunks[index]->pos.y;
+	int z = Chunks[index]->pos.z;
+
+	if (Debug::active)
+		Debug::log << "chunk {" << x << ", " << y << ", " << z << "} deleted" << endl;
+
+	delete Chunks[index]; // вызов деструктора
+	Chunks[index] = nullptr; // обнуление указателя
+	chunksLoaded--; // уменьшение количества загруженных чанков
+
+	if (chunksLoaded > 0) // сдвиг чанков в массиве
+	{
+		for (int i = index; i < chunksLoaded; i++)
+		{
+			Chunks[i] = Chunks[i + 1];
+		}
+
+		Chunks[chunksLoaded] = nullptr;
+	}
+	// обновление мемефикаций чанков
+	for (int i = -1; i <= 1; i++)
+		for (int j = -1; j <= 1; j++)
+			for (int k = -1; k <= 1; k++)
+			{
+				if (i == 0 && j == 0 && k == 0)
+					continue;
+
+				int X = i * Chunk::ChunkSize + x;
+				int Y = j * Chunk::ChunkSize + y;
+				int Z = k * Chunk::ChunkSize + z;
+
+				Chunk* chunk = GetChunk(X, Y, Z);
+
+				if (chunk)
+					chunk->UpdateMem();
+			}
+
+}
+/// <summary>
+/// обновление при условии
+/// </summary>
+/// <param name="value1"></param>
+/// <param name="value2"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+void World::UpdateIfEqual(int value1, int value2, int x, int y, int z)
+{
+	if (value1 == value2)
+	{
+		Chunk* chunk = GetChunk(x, y, z);
+
+		if (chunk)
+		{
+			chunk->UpdateMesh();
+		}
+	}
+}
+/// <summary>
+/// удаление кэша блоков
+/// </summary>
+void World::RemoveCash()
+{
+	int l = GlobalBuffer.size();
+	sort(toRemove.begin(), toRemove.end(), greater<int>());
+	for (int i = 0; i < toRemove.size(); i++)
+	{
+		if (toRemove[i] < l)
+			GlobalBuffer.erase(GlobalBuffer.begin() + toRemove[i]);
+	}
+	toRemove.clear();
+}
+/// <summary>
+/// рационализация буфера блоков
+/// </summary>
+void World::RationalizeBuffer()
+{
+	for (int i = 0; i < GlobalBuffer.size(); i++)
+		if (player->GetDistance(GlobalBuffer[i].x, GlobalBuffer[i].y, GlobalBuffer[i].z) > (render_distance + 1.1) * Chunk::ChunkSize)
+		{
+			toRemove.push_back(i);
+		}
+}
+/// <summary>
+/// установка блока
+/// </summary>
+/// <param name="pos"></param>
+/// <param name="block"></param>
+/// <param name="update"></param>
+void World::SetBlock(Vector3 pos, short int block, bool update)
+{
+	SetBlock(pos.x, pos.y, pos.z, block, update);
+}
+/// <summary>
+/// установка блока
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+/// <param name="block"></param>
+/// <param name="update"></param>
+void World::SetBlock(int x, int y, int z, short int block, bool update)
+{
+	Chunk* chunk = GetChunk(x, y, z);
+
+	if (chunk)
+	{
+		chunk->SetBlock(x - chunk->pos.x, y - chunk->pos.y, z - chunk->pos.z, block);
+		if (update)
+		{
+			chunk->UpdateMesh();
+			chunk->Modify();
+			chunk->Update();
+
+			// мгновенное обновление соседних чанков, если блок на границе
+			UpdateIfEqual(x - chunk->pos.x, 0, x - 1, y, z);
+			UpdateIfEqual(x - chunk->pos.x, Chunk::ChunkSize - 1, x + 1, y, z);
+			UpdateIfEqual(y - chunk->pos.y, 0, x, y - 1, z);
+			UpdateIfEqual(y - chunk->pos.y, Chunk::ChunkSize - 1, x, y + 1, z);
+			UpdateIfEqual(z - chunk->pos.z, 0, x, y, z - 1);
+			UpdateIfEqual(z - chunk->pos.z, Chunk::ChunkSize - 1, x, y, z + 1);
+
+			UpdateAtPoint(x, y, z);
+			AddToUpdateColumn(x, y, z);
+			AddToUpdate(chunk);
+		}
+	}
+	else // если чанка еще нет, добавляем блок в буфер
+		SetBufferBlock(x, y, z, block);
+
+}
+/// <summary>
+/// установить блок в буффер
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="z"></param>
+/// <param name="block"></param>
+void World::SetBufferBlock(int x, int y, int z, short block) 
+{
+	Chunk* chunk = GetChunk(x, y, z);
+
+	if (chunk)
+	{
+		chunk->SetBlock(x - chunk->pos.x, y - chunk->pos.y, z - chunk->pos.z, block);
+		return;
+	}
+
+	BlockPos block_pos = { x ,y, z ,block };
+	BlockPos* finded;
+
+	if (find_if(GlobalBuffer.begin(), GlobalBuffer.end(),
+		[&](BlockPos p) -> bool
+		{
+			if (p.x == block_pos.x && p.y == block_pos.y && p.z == block_pos.z)
+			{
+				finded = &p;
+				return true;
+			}
+			return false;
+		}) == GlobalBuffer.end())
+	{
+		GlobalBuffer.push_back(block_pos);
+	}
+	else
+	{
+		finded->block = block;
+	}
+}
+/// <summary>
+/// генерация
+/// </summary>
+/// <param name="chunk"></param>
+void World::Generate(Chunk* chunk)
+{
+	terrain.Generate(chunk);
+}

@@ -1,0 +1,22 @@
+#pragma once
+#include "UI.h"
+#include <iostream>
+
+using namespace std;
+/// <summary>
+/// класс инвентаря
+/// </summary>
+class Inventory
+{
+public:
+	const static int count = 14;	// количество элементов
+	int data[count];				// массив элементов
+	UI ui;							// пользовательский интерфейс
+	int current = 0;				// текщуая позиция
+	short int current_block = 0;	// ID текущего блока
+	void DrawInventory();			// отрисовка
+	void Init();					// инициализация
+	void Update();					// обновление
+	void AddBlock(int id);			// добавление блока
+};
+
