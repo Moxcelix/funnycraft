@@ -52,7 +52,7 @@ void Client::Pause(bool active)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <param name="id"></param>
-void Client::SetBlock(int x, int y, int z, int id)
+void Client::SetBlock(int x, int y, int z, block_id id)
 {
 	if (id && RigidBox::IsLocked(Vector3Int{x,y,z}))
 		return;
@@ -67,7 +67,7 @@ void Client::SetBlock(int x, int y, int z, int id)
 /// </summary>
 /// <param name="pos"></param>
 /// <param name="id"></param>
-void Client::SetBlock(Vector3 pos, int id)
+void Client::SetBlock(Vector3 pos, block_id id)
 {
 	if (id && RigidBox::IsLocked(Vector3Int(pos.x, pos.y, pos.z)))
 		return;
@@ -84,7 +84,7 @@ void Client::SetBlock(Vector3 pos, int id)
 /// <param name="id"></param>
 void Client::SetBlock()
 {
-	short id = inventory.current_block;
+	auto id = inventory.current_block;
 
 	if (id && RigidBox::IsLocked(player.add_pos))
 		return;

@@ -32,7 +32,7 @@ void Inventory::Update()
 /// добавление блока в инвентарь
 /// </summary>
 /// <param name="id"></param>
-void Inventory::AddBlock(int id)
+void Inventory::AddBlock(block_id id)
 {
 	for (int i = 0; i < count; i++) // проверка наличия блока в инвентаре
 	{

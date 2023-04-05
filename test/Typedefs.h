@@ -1,2 +1,2 @@
 #pragma once
-typedef short block_id;
+typedef char block_id;

@@ -227,7 +227,7 @@ void World::Render(unsigned int texture)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <returns>ID блока </returns>
-short int World::GetBlockID(int x, int y, int z)
+block_id World::GetBlockID(int x, int y, int z)
 {
 	Chunk* chunk = GetChunk(x, y, z); // запрос чанка по координатам
 	if (chunk) // если чанк есть
@@ -248,7 +248,7 @@ short int World::GetBlockID(int x, int y, int z)
 /// </summary>
 /// <param name="pos"></param>
 /// <returns></returns>
-short int World::GetBlockID(Vector3 pos)
+block_id World::GetBlockID(Vector3 pos)
 {
 	return GetBlockID(pos.x, pos.y, pos.z);
 }
@@ -330,14 +330,14 @@ void World::Explode(int x, int y, int z)
 				int R = r + rand() % 2;
 				if (i * i + j * j + k * k <= R * R)
 				{
-					int id = GetBlockID(x + i, y + j, z + k);
+					auto id = GetBlockID(x + i, y + j, z + k);
 
 					if (id == Block::bedrock->id)
 						continue;
 
 					SetBlock(x + i, y + j, z + k, 0, false);
 
-					if (id == Block::tnt->id)
+					if (id == Block::tnt->id) // та самая взрывная реакция :skull2:
 						Explode(x + i, y + j, z + k);
 
 					Chunk* chunk = GetChunk(x + i, y + j, z + k);
@@ -699,7 +699,7 @@ void World::RationalizeBuffer()
 /// <param name="pos"></param>
 /// <param name="block"></param>
 /// <param name="update"></param>
-void World::SetBlock(Vector3 pos, short int block, bool update)
+void World::SetBlock(Vector3 pos, block_id block, bool update)
 {
 	SetBlock(pos.x, pos.y, pos.z, block, update);
 }
@@ -711,7 +711,7 @@ void World::SetBlock(Vector3 pos, short int block, bool update)
 /// <param name="z"></param>
 /// <param name="block"></param>
 /// <param name="update"></param>
-void World::SetBlock(int x, int y, int z, short int block, bool update)
+void World::SetBlock(int x, int y, int z, block_id block, bool update)
 {
 	Chunk* chunk = GetChunk(x, y, z);
 
@@ -748,7 +748,7 @@ void World::SetBlock(int x, int y, int z, short int block, bool update)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <param name="block"></param>
-void World::SetBufferBlock(int x, int y, int z, short block) 
+void World::SetBufferBlock(int x, int y, int z, block_id block)
 {
 	Chunk* chunk = GetChunk(x, y, z);
 
@@ -758,8 +758,8 @@ void World::SetBufferBlock(int x, int y, int z, short block)
 		return;
 	}
 
-	BlockPos block_pos = { x ,y, z ,block };
-	BlockPos* finded;
+	BlockPos block_pos = { x ,y, z, block };
+	BlockPos* finded = nullptr;
 
 	if (find_if(GlobalBuffer.begin(), GlobalBuffer.end(),
 		[&](BlockPos p) -> bool

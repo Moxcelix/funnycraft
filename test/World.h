@@ -39,7 +39,7 @@ public:
 	struct BlockPos
 	{
 		int x, y, z;
-		short int block;
+		block_id block;
 	};
 
 	static bool is_day; // флаг дня
@@ -68,8 +68,8 @@ public:
 	Block* GetBlock(Vector3 pos); // указатель на блок
 
 	bool CreateChunk(int x, int y, int z); // создание чанка
-	short int GetBlockID(int x, int y, int z); // ID блока
-	short int GetBlockID(Vector3 pos); // ID блока
+	block_id GetBlockID(int x, int y, int z); // ID блока
+	block_id GetBlockID(Vector3 pos); // ID блока
 	void UpdateIfExcist(int x, int y, int z); // обновить чанк, если существует
 	void RenderIfExcist(int x, int y, int z); // отрисовать чанк, если существует
 	void AddToRender(int x, int y, int z); // добавить в очередь первичной отрисовки
@@ -80,8 +80,8 @@ public:
 	void Update(); // обновление
 	void UpdateWorldLighting(); // обновление глобального освещения
 	void Generate(Chunk* chunk); // генерация чанка
-	void SetBlock(int x, int y, int z, short int block, bool update = false); // установка блока
-	void SetBlock(Vector3 pos, short int block, bool update = false); // установка блока
+	void SetBlock(int x, int y, int z, block_id block, bool update = false); // установка блока
+	void SetBlock(Vector3 pos, block_id block, bool update = false); // установка блока
 	void Render(unsigned int texture); // рендер мира
 	void Clear(); // очистка мира
 	void Create(); // создание мира
@@ -94,7 +94,7 @@ public:
 	void Explode(int x, int y, int z); // расчистка территории
 	void Explode(Vector3 pos); // расчистка территории
 	void AddToUpdateColumn(int x, int y, int z); // добавить в очередь колонну чанков
-	void SetBufferBlock(int x, int y, int z, short block); // добавить блок в буффер
+	void SetBufferBlock(int x, int y, int z, block_id block); // добавить блок в буффер
 	char GetLight(int x, int y, int z); // значение света по координатами
 	World(Player* player); // конструктор
 	~World(); // деструктор

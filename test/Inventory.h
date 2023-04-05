@@ -13,10 +13,10 @@ public:
 	int data[count];				// массив элементов
 	UI ui;							// пользовательский интерфейс
 	int current = 0;				// текщуая позиция
-	short int current_block = 0;	// ID текущего блока
+	block_id current_block = 0;		// ID текущего блока
 	void DrawInventory();			// отрисовка
 	void Init();					// инициализация
 	void Update();					// обновление
-	void AddBlock(int id);			// добавление блока
+	void AddBlock(block_id id);		// добавление блока
 };
 

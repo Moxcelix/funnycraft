@@ -164,9 +164,11 @@ void Block::Init()
 
 	// распределение по ID
 	//for (int i = 0; i < size; i++)
-		for (int j = 0; j < size; j++)
-			//if (BlockList[j]->id == i)
-				blocks[BlockList[j]->id] = BlockList[j]; // :skull:
+	for (int j = 0; j < size; j++) {
+		if (BlockList[j]->id >= 0)
+		blocks[BlockList[j]->id] = BlockList[j]; // :skull:
+		
+	}
 
 	BlockList.clear();
 }
@@ -175,7 +177,7 @@ void Block::Init()
 /// </summary>
 /// <param name="id"></param>
 /// <param name="name"></param>
-Block::Block(short int id, string name)
+Block::Block(block_id id, string name)
 {
 	this->id = id;				// ID блока
 	this->name = name;			// имя блока
@@ -198,14 +200,7 @@ char Block::GetRenderLayer()
 class BlockAir : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockAir(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// твёрдость 
 	/// </summary>
@@ -244,14 +239,7 @@ public:
 class BlockGrass : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockGrass(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -289,14 +277,7 @@ public:
 class BlockStone : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockStone(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -314,14 +295,7 @@ public:
 class BlockDirt : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockDirt(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -338,14 +312,7 @@ public:
 class BlockOak : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockOak(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -370,14 +337,7 @@ public:
 class BlockCobblestone : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockCobblestone(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -394,14 +354,7 @@ public:
 class BlockMossyCobblestone : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockMossyCobblestone(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -418,14 +371,7 @@ public:
 class BlockLeaves : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockLeaves(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// данные меша
 	/// </summary>
@@ -524,14 +470,7 @@ public:
 class BlockBirchLeaves : public BlockLeaves
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockBirchLeaves(int id, string name) : BlockLeaves(id, name)
-	{
-	}
+	using BlockLeaves::BlockLeaves;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -557,14 +496,7 @@ public:
 class BlockGlass : public Block
 {
 public:
-	/// <summary>
-	/// констркутор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockGlass(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -597,14 +529,7 @@ public:
 class BlockNull : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockNull(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// данные меша
 	/// </summary>
@@ -635,14 +560,7 @@ public:
 class BlockBirch : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockBirch(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -667,14 +585,7 @@ public:
 class BlockTallGrass : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockTallGrass(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -754,14 +665,7 @@ public:
 class BlockPoppy : public BlockTallGrass
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockPoppy(int id, string name) : BlockTallGrass(id, name)
-	{
-	}
+	using BlockTallGrass::BlockTallGrass;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -795,14 +699,7 @@ public:
 class BlockDandelion : public BlockPoppy
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockDandelion(int id, string name) : BlockPoppy(id, name)
-	{
-	}
+	using BlockPoppy::BlockPoppy;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -819,14 +716,7 @@ public:
 class BlockPlanks : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockPlanks(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -843,14 +733,7 @@ public:
 class BlockSand : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockSand(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -867,14 +750,7 @@ public:
 class BlockWool : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockWool(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -891,14 +767,7 @@ public:
 class BlockTNT : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockTNT(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -923,14 +792,7 @@ public:
 class BlockObsidian : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockObsidian(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -947,14 +809,7 @@ public:
 class BlockBricks : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockBricks(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -971,14 +826,7 @@ public:
 class BlockBedrock : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockBedrock(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>
@@ -995,14 +843,7 @@ public:
 class BlockGlowstone : public Block
 {
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	BlockGlowstone(int id, string name) : Block(id, name)
-	{
-	}
+	using Block::Block;
 	/// <summary>
 	/// координаты текстуры
 	/// </summary>

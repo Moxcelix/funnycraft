@@ -18,7 +18,9 @@ struct Chunk;
 class Block 
 {
 public:
-	Block(short int id, string name); // конструктор блока
+	Block(block_id id, string name); // конструктор блока
+	Block& operator= (const Block&) = delete;
+	Block(const Block&) = delete;
 	block_id id = 0; // ID блока 
 	string name = "?"; // имя блока
 	Block(); // конструктор блока
@@ -60,7 +62,7 @@ public:
 	/// </summary>
 	/// <param name="ID"></param>
 	/// <returns></returns>
-	static constexpr inline Block* GetBlock(short int ID)
+	static constexpr Block* GetBlock(block_id ID)
 	{
 		if (ID == -1)
 			return null;

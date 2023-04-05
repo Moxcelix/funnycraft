@@ -37,27 +37,27 @@ public:
 	void ButtonUp();							// кнопка вверх
 	void ButtonDown();							// кнопка вверх
 	
-	void SetBlock(int x, int y, int z, int id); // установка блока
-	void SetBlock(Vector3 pos, int id);			// установка блока
-	void SetBlock();							// установка блока
-	void DestroyBlock(int x, int y, int z);		// разрушение блока
-	void DestroyBlock(Vector3 pos);				// разрушение блока
-	void DestroyBlock();						// разрушение блока
-	void CopyBlock();							// копирование блока
+	void SetBlock(int x, int y, int z, block_id id);	// установка блока
+	void SetBlock(Vector3 pos, block_id id);			// установка блока
+	void SetBlock();									// установка блока
+	void DestroyBlock(int x, int y, int z);				// разрушение блока
+	void DestroyBlock(Vector3 pos);						// разрушение блока
+	void DestroyBlock();								// разрушение блока
+	void CopyBlock();									// копирование блока
 
-	void Resize();								// изменение размеров окна
-	void MoveCamera(double delta_time);			// движение камеры
-	void UpdatePhantomPos();					// обновление позиции фантома
-	void CameraUpdate();						// обновление камеры
-	void NewWorld();							// создание нового мира
-	void SetRenderDistance(int d);				// установка дальности прорисовки
+	void Resize();									// изменение размеров окна
+	void MoveCamera(double delta_time);				// движение камеры
+	void UpdatePhantomPos();						// обновление позиции фантома
+	void CameraUpdate();							// обновление камеры
+	void NewWorld();								// создание нового мира
+	void SetRenderDistance(int d);					// установка дальности прорисовки
 
-	void Init();								// инициализация
-	void Update(float deltaTime);				// обновление 
-	void Clear();								// очистка
-	void Render();								// рендеринг
-	void RenderUI();							// рендеринг UI
-	void DrawMenu();							// отрисовка меню
+	void Init();									// инициализация
+	void Update(float deltaTime);					// обновление 
+	void Clear();									// очистка
+	void Render();									// рендеринг
+	void RenderUI();								// рендеринг UI
+	void DrawMenu();								// отрисовка меню
 
 	GLFWwindow* window;			// указатель на экземляр окна
 	UI ui, Menu, Settings;		// экземпляры пользовательского интерфейса

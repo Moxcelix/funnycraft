@@ -282,7 +282,7 @@ void Terrain::SetBlock(Chunk* chunk, int x, int y, int z, block_id block)
 
 	if (chunk->InRange(x, y, z))
 	{
-		int id = chunk->GetBlockID(x, y, z);
+		auto id = chunk->GetBlockID(x, y, z);
 
 		if (id == 0 || id == -1)
 			chunk->SetBlock(x, y, z, block);
