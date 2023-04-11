@@ -125,20 +125,12 @@ void Client::DestroyBlock(Vector3 pos)
 {
 	DestroyBlock(pos.x, pos.y, pos.z); // вызов полиморфа функции 
 }
-/// <summary>
-/// разрушение блока
-/// </summary>
-/// <param name="pos"></param>
-void Client::DestroyBlock()
-{
-	DestroyBlock(player.look_pos); // вызов полиморфа функции 
+
+void Client::DestroyBlock() {
+	DestroyBlock(player.look_pos); 
 }
-/// <summary>
-/// Обновление
-/// </summary>
-/// <param name="deltaTime"></param>
-void Client::Update(float deltaTime) 
-{
+
+void Client::Update(float deltaTime) {
 	player.Update();				// обновление игрока
 	world->Update();				// обновление мира
 	player.LoadTerrain(world);		// прогрузка территории
@@ -147,16 +139,14 @@ void Client::Update(float deltaTime)
 	
 	vector<int> ToRemove;			// вектор на удаление частиц
 
-	for (int i = 0; i < particles.size(); i++) // перебор всех систем частиц
-	{
+	for (int i = 0; i < particles.size(); i++) {
 		if (particles[i]->working)				// если работает
 			particles[i]->Update(deltaTime);	// обновление системы
 		else
 			ToRemove.push_back(i);				// иначе добавить на очистку
 	}
 
-	for (int i = ToRemove.size() - 1; i >= 0; i--) 
-	{
+	for (int i = ToRemove.size() - 1; i >= 0; i--) {
 		particles[ToRemove[i]]->Clear();					// очистка данных системы частиц
 		particles.erase(particles.begin() + ToRemove[i]);	// удаление системы частиц из вектора
 	}
@@ -166,51 +156,33 @@ void Client::Update(float deltaTime)
 
 	MoveCamera(deltaTime);			// движение камеры
 }
-/// <summary>
-/// переход к странице настроек 
-/// </summary>
-void Client::ToSettings()
-{
+
+void Client::ToSettings() {
 	page = &page_settings;		// страница настроек
 	MenuPos = Vector2Int(0, 0);	// обнуление позиции в меню
 }
-/// <summary>
-/// переход к главной странице меню
-/// </summary>
-void Client::ToMenu()
-{
+
+void Client::ToMenu() {
 	page = &page_menu;			// страница меню
 	MenuPos = Vector2Int(0, 0);	// обнуление позиции в меню
 }
-/// <summary>
-/// переход к странице согласия
-/// </summary>
-void Client::ToAgree()
-{
+
+void Client::ToAgree() {
 	page = &page_agree;			// страница подтверждения
 	MenuPos = Vector2Int(0, 0); // обнуление позиции в меню
 }
-/// <summary>
-/// переход к странице создания нового мира
-/// </summary>
-void Client::ToNewWorld()
-{
+
+void Client::ToNewWorld() {
 	page = &page_new_world;		// страница создания нового мира
 	MenuPos = Vector2Int(0, 0);	// обнуление позиции в меню
 }
-/// <summary>
-/// переход к настройкам дальности прорисовки
-/// </summary>
-void Client::ToRenderDistance()
-{
+
+void Client::ToRenderDistance() {
 	page = &page_render_distance;	// страница настройки дальности прорисовки
 	MenuPos = Vector2Int(0, 0);		// обнуление позиции в меню
 }
-/// <summary>
-/// создание нового мира
-/// </summary>
-void Client::NewWorld()
-{
+
+void Client::NewWorld() {
 	for (auto p : particles) // очистка данных всех систем частиц
 		p->Clear();
 
@@ -228,11 +200,8 @@ void Client::NewWorld()
 
 	Pause(false);					// скрываем меню
 }
-/// <summary>
-/// кнопка вверх
-/// </summary>
-void Client::ButtonUp()
-{
+
+void Client::ButtonUp() {
 	if (pause) // если пауза
 		MenuPos.y -= 1; // позиция меню вниз
 	else // иначе вниз в инвентаре
@@ -241,11 +210,8 @@ void Client::ButtonUp()
 		else
 			inventory.current = 0;
 }
-/// <summary>
-/// кнопка вверх
-/// </summary>
-void Client::ButtonDown()
-{
+
+void Client::ButtonDown() {
 	if (pause) // если пауза
 		MenuPos.y += 1; // позиция меню вверх
 	else // иначе вверх в инвентаре
@@ -254,12 +220,8 @@ void Client::ButtonDown()
 		else
 			inventory.current = inventory.count - 1;
 }
-/// <summary>
-///  движение камеры
-/// </summary>
-/// <param name="delta_time"></param>
-void Client::MoveCamera(double delta_time)
-{
+
+void Client::MoveCamera(double delta_time) {
 	float sensitivity = 5.1; // чувствительность 
 	double posx, posy; // координаты курсора
 
@@ -268,8 +230,7 @@ void Client::MoveCamera(double delta_time)
 	
 	player.can_move = !pause;
 
-	if (!pause) // если не пауза
-	{
+	if (!pause) {
 		glfwGetCursorPos(window, &posx, &posy); // передаем позицю курсора по ссылкам
 		player.RotateCamera((mouse_pos_y - posy) / sensitivity, (mouse_pos_x - posx) / sensitivity); // поворачиваем камеру, согласно смещению курсора
 		glfwSetCursorPos(window, mouse_pos_x, mouse_pos_y); // возвращаем курсор на место
@@ -278,29 +239,20 @@ void Client::MoveCamera(double delta_time)
 	float rotation = -player.camera.zRot / 180 * M_PI; // поворот игрока
 	player.rot = rotation;	// поворот игрока
 
-	// обновление позиции камеры
 	player.camera.x = player.pos.x;
 	player.camera.y = player.pos.y;
 	player.camera.z = player.pos.z + player.head_height - 0.5f;
 
-	// обновление двидения игрового персонажа
 	player.MoveUpdate();
 }
-/// <summary>
-/// установка дальности прорисовки 
-/// </summary>
-/// <param name="d"></param>
-void Client::SetRenderDistance(int d)
-{
+
+void Client::SetRenderDistance(int d) {
 	world->Clear(); // очистка старых чанков
 	World::render_distance = d; // обновление дальности прорисовки
 	player.GenereateSphere(); // генерация сферы видимости
 }
-/// <summary>
-/// отрисовка меню
-/// </summary>
-void Client::DrawMenu()
-{
+
+void Client::DrawMenu() {
 	// если позиция меню ваходит за границы, зацикливаем значение
 	if (MenuPos.y < 0)
 		MenuPos.y = 0;
@@ -310,14 +262,12 @@ void Client::DrawMenu()
 	float indent = 0; // отступ
 
 	Menu.PrintText(UI::Corner::middle, 3, 0, 120, page->name, 1, 1, 0); // вывод на экран заголовка
-	for (int i = 0; i < page->count; i++) // вывод всех кнопок
-	{
+	for (int i = 0; i < page->count; i++) {
 		float r = 1, g = 1, b = 1;				// каналы цветов
 		string btn = page->buttons[i]->name;	// имя кнопки
 		indent += page->indents[i];				// добавление отступа
 
-		if (MenuPos.y == i) // если выбрана i-тая кнопка
-		{
+		if (MenuPos.y == i) {
 			// выделение кнопки символами и цветом
 			btn = ">" + btn + "<"; 
 			g = 0;
@@ -329,19 +279,15 @@ void Client::DrawMenu()
 			btn, r, g, b);
 	}
 
-	if (enter) // вызов метода по ссылке, согласно выбранной кнопке
-	{
-		enter = false;	// падение флага
-		page->buttons[MenuPos.y]->DoFunc();	// вызов метода
+	if (enter) {
+		enter = false;	
+		page->buttons[MenuPos.y]->DoFunc();
 	}
 
-	Menu.Render(); // рендеринг меню
+	Menu.Render(); 
 }
-/// <summary>
-/// обновление позиции фантома 
-/// </summary>
-void Client::UpdatePhantomPos()
-{
+
+void Client::UpdatePhantomPos() {
 	float length; // длина луча
 	Vector3 hit; // позиция поподания
 	Vector3 ref; // позиция отражения луча по нормали
@@ -355,31 +301,22 @@ void Client::UpdatePhantomPos()
 	Vector3 dir = Vector3(cosA * cosB, cosA * sinB, sinA); // вектор луча по полярным координатам
 
 	Ray ray(world, Vector3(player.camera.x, player.camera.y, player.camera.z), dir); // создание луча
-	if (player.looking = ray.Trace(7, length, hit, ref)) // если луч попал на блок
-	{
-		// позиция, куда смотрит игровой персонаж
+	if (player.looking = ray.Trace(7, length, hit, ref)) {
 		player.look_pos = hit;
-		// позиция, куда нужно будет помещать поставленный блок
 		player.add_pos = ref;
 
-		phantom.Render(hit.x, hit.y, hit.z, world); // отображаем фантом
+		phantom.Render(hit.x, hit.y, hit.z, world); 
 	}
 }
-/// <summary>
-/// обновление камеры
-/// </summary>
-void Client::CameraUpdate()
-{
+
+void Client::CameraUpdate() {
 	glRotatef(-player.camera.xRot, 1, 0, 0); // поворот по оси X
 	glRotatef(-player.camera.zRot, 0, 0, 1); // поворот по оси Z
 	glRotatef((sin(player.phasa) - 0.5) * 0.1, 0, 1, 0); // покачивание камеры
 	glTranslatef(-player.camera.x, -player.camera.y, -player.camera.z); // перемещение точки обзора на позицию камеры
 }
-/// <summary>
-/// рендеринг 
-/// </summary>
-void Client::Render()
-{
+
+void Client::Render() {
 	Resize(); // изменение размера содержимого
 
 	world->Render(main_texture); // Рендеринг чанков
@@ -387,54 +324,39 @@ void Client::Render()
 	if (!pause) // Если не пауза
 		UpdatePhantomPos(); // Обновить Позицию Фантома
 
-	for (int i = 0; i < particles.size(); i++)
-	{
-		if (particles[i]->working)	// если система частиц работает
-			particles[i]->Render(main_texture);	// рендеринг системы частиц
+	for (int i = 0; i < particles.size(); i++) {
+		if (particles[i]->working) {
+			particles[i]->Render(main_texture);
+		}
 	}
 
 	player.body->Render();
 }
-/// <summary>
-/// измениение размера и масштаб содержимого окна
-/// </summary>
-void Client::Resize()
-{
+
+void Client::Resize() {
 	int width, height;	// ширина и высота
 	glfwGetWindowSize(window, &width, &height); // Получение данных о размерах окна
 
 	mouse_pos_x = width / 2;	// позиция курсора абсцисса
 	mouse_pos_y = height / 2;	// позиция курсора ордината
 
-	//Измениение размера и масштаб содержимого окна
 	ui.SetSize(width, height);
 	Menu.SetSize(width, height);
 	inventory.ui.SetSize(width, height);
 }
-/// <summary>
-/// рендеринг пользовательского интерфейса
-/// </summary>
-void Client::RenderUI()
-{
+
+void Client::RenderUI() {
 	ui.Render();
 
-	if (pause) // если пауза, рисуем меню
-		DrawMenu();
-	else // если нет, рисуем инвентарь
-		inventory.DrawInventory();
+	if (pause) DrawMenu();
+	else inventory.DrawInventory();
 }
-/// <summary>
-/// копирование блока
-/// </summary>
-void Client::CopyBlock() 
-{
+
+void Client::CopyBlock() {
 	inventory.AddBlock(world->GetBlockID(player.look_pos));
 }
-/// <summary>
-/// очистка
-/// </summary>
-void Client::Clear()
-{
+
+void Client::Clear() {
 	pause = false;
 	close = false;
 
@@ -442,5 +364,5 @@ void Client::Clear()
 	Menu.Clear();
 	inventory.ui.Clear();
 
-	delete world; // удаление мира и вызов деструктора
+	delete world;
 }
