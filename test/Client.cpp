@@ -1,20 +1,21 @@
 #include "Client.h"
+#include <filesystem>
+
+Client::Client()
+{
+	//Block::Init();					// инициализация массива блоков
+	modifier = new Modifier(this);
+}
 
 void Client::Init()
 {
-	modifier = new Modifier(this);
-
+	inventory.Init();				// инициализация инвентаря
 	World::settings.Clear();		// очистка по умолчанию параметров генерации
-	Block::Init();					// инициализация массива блоков
+
 	player = Player();				// инициализация персонажа
-	MenuPos = Vector2Int(0, 0);		// позиция в меню
-	world = new World(&player);		// инициализация мира
-	page = &page_menu;				// ссылка на страницу меню
 
 	ui.SetFlags(UI_DRAW_CROSS);
 	Menu.SetFlags(UI_DRAW_BACK_GROUND);
-
-	Resize(); // изменения размера содержимого
 
 	// цвета меню
 	Vector3 gray = Vector3(0.2, 0.2, 0.2);
@@ -22,8 +23,17 @@ void Client::Init()
 	Vector3 colors[4]{ gray, gray, gray2, gray2 };
 	ColorSquad squad{ colors };
 
-	Menu.AddStaticPlane(UI::Corner::middle, 1, 0, 0, 480, 360, squad); // задний фон меню
-	inventory.Init(); // инициализация инвентаря 
+	Menu.AddStaticPlane(UI::Corner::middle, 1, 0, 0, 480, 360, squad); // задний фон меню 
+
+	MenuPos = Vector2Int(0, 0);		// позиция в меню
+	world = new World(&player);		// инициализация мира
+	page = &page_menu;				// ссылка на страницу меню
+
+	Resize(); // изменения размера содержимого
+}
+
+Client::~Client() {
+	//delete modifier;
 }
 /// <summary>
 /// активность меню 
@@ -209,7 +219,7 @@ void Client::NewWorld()
 	World::settings = gen_params;	// присвоение настроек создания
 	delete world;					// удаление старого экземпляра
 
-	for (const auto& entry : experimental::filesystem::directory_iterator(save_folder + World::name + "/"))
+	for (const auto& entry : std::experimental::filesystem::directory_iterator(save_folder + World::name + "/"))
 		std::experimental::filesystem::remove_all(entry.path()); // удаление файлов старого мира
 
 	world = new World(&player);		// создание нового экземпляра мира
@@ -427,8 +437,10 @@ void Client::Clear()
 {
 	pause = false;
 	close = false;
+
 	ui.Clear();
 	Menu.Clear();
 	inventory.ui.Clear();
+
 	delete world; // удаление мира и вызов деструктора
 }

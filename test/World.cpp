@@ -1,7 +1,6 @@
 #include "World.h"
 #include<iostream>
 #include<fstream>
-#include<Windows.h>
 
 Terrain terrain; // экземпляр генератора
 int World::render_distance = 4; // дальность прорисовки по умолчанию
@@ -25,40 +24,36 @@ World::World(Player* player)
 /// </summary>
 void World::Create()
 {
-	SetConsoleCP(1251);
-	SetConsoleOutputCP(1251);
+	//SetConsoleCP(1251);
+	//SetConsoleOutputCP(1251);
 
 	srand(time(NULL));	// инициализация датчика случайных чисел
 	ifstream istream;	// поток чтения
 	istream.open(save_folder + name + "/world.bin"); // открытие потока
 
-	if (istream.is_open()) // если файл есть
-	{
-		Debug::Log("world \"" + name + "\" opened");
-		istream >> World::seed; // зерно генерации мира
-
+	if (istream.is_open()){
 		float x, y, z, xRot, zRot;
-		istream >> x >> y >> z >> xRot >> zRot; // положение игрока
-
-		for (int i = 0; i < 4; i++)
-			istream >> settings.params[i]; // параметр i
-
+		Debug::Log("world \"" + name + "\" opened");
+		istream >> World::seed;
+		istream >> x >> y >> z >> xRot >> zRot;
+		for (int i = 0; i < 4; i++) istream >> settings.params[i];
 		istream.close(); // закрытие потока
-
-		player->Init(x, y, z, xRot, zRot); // инициализация игрока
-	}
-	else // иначе
-	{
+		player->Init(x, y, z, xRot, zRot);
+	}else{
 		Debug::Log("world \"" + name + "\" created");
-		World::seed = rand(); // генерация нового сида
-		player->Init(player->start_pos.x, player->start_pos.y, player->start_pos.z, 0, 90); // инициализация игрока
+		World::seed = rand();
+		player->Init(
+			player->start_pos.x,
+			player->start_pos.y,
+			player->start_pos.z,
+			0, 90);\
 	}
-	// инициализация объектов
-	chunksLoaded = 0;
-	RenderQueue = new PosQueue();
-	CreateQueue = new PosQueue();
-	UpdateQueue = new PosQueue();
-	GlobalUpdateQueue = new queue<Vector3Int>();
+	chunks_loaded = 0;
+	sky = new Sky();
+	render_queue = new PosQueue();
+	create_queue = new PosQueue();
+	update_queue = new PosQueue();
+	global_update_queue = new queue<Vector3Int>();
 	terrain = Terrain(World::seed, this);
 }
 /// <summary>
@@ -78,13 +73,14 @@ World::~World()
 	}
 	GlobalBuffer.clear(); // очистка глобального буфера
 	// удаление очередей
-	delete RenderQueue;
-	delete CreateQueue;
-	delete UpdateQueue;
-	delete GlobalUpdateQueue;
+	delete render_queue;
+	delete create_queue;
+	delete update_queue;
+	delete global_update_queue;
+	delete sky;
 
 	// удаление чанков
-	for (int i = 0; i < chunksLoaded; i++)
+	for (int i = 0; i < chunks_loaded; i++)
 		delete Chunks[i];
 }
 
@@ -96,7 +92,7 @@ void World::UpdateWorldLighting()
 	Debug::Log("global lighting update");
 
 	for (int j = 0; j < 2; j++)
-		for (int i = 0; i < chunksLoaded; i++)
+		for (int i = 0; i < chunks_loaded; i++)
 		{
 			Chunk* chunk = Chunks[i];
 			if (!chunk || GetChunk(chunk->pos.x, chunk->pos.y, chunk->pos.z + Chunk::ChunkSize))
@@ -104,7 +100,7 @@ void World::UpdateWorldLighting()
 
 			for (int k = chunk->pos.z; k >= 0; k -= Chunk::ChunkSize)
 			{
-				GlobalUpdateQueue->push({ chunk->pos.x, chunk->pos.y, k });
+				global_update_queue->push({ chunk->pos.x, chunk->pos.y, k });
 
 				Chunk* c = GetChunk(chunk->pos.x, chunk->pos.y, k);
 
@@ -119,11 +115,11 @@ void World::UpdateWorldLighting()
 void World::Clear()
 {
 	GlobalBuffer.clear();
-	RenderQueue->clear();
-	CreateQueue->clear();
-	for (int i = 0; i < chunksLoaded; i++)
+	render_queue->clear();
+	create_queue->clear();
+	for (int i = 0; i < chunks_loaded; i++)
 		delete Chunks[i];
-	chunksLoaded = 0;
+	chunks_loaded = 0;
 }
 /// <summary>
 /// добавление чанка в очередь создания
@@ -152,7 +148,7 @@ void World::AddToCreate(int x, int y, int z)
 	y = (y / Chunk::ChunkSize) * Chunk::ChunkSize;
 	z = (z / Chunk::ChunkSize) * Chunk::ChunkSize;
 
-	CreateQueue->add(new Vector3Int(x, y, z));
+	create_queue->add(new Vector3Int(x, y, z));
 }
 /// <summary>
 /// создание чанка
@@ -163,7 +159,7 @@ void World::AddToCreate(int x, int y, int z)
 /// <returns></returns>
 bool World::CreateChunk(int x, int y, int z)
 {
-	if (chunksLoaded >= MaxChunksCount)
+	if (chunks_loaded >= MaxChunksCount)
 		return true;
 
 	Chunk* chunk = GetChunk(x, y, z);
@@ -179,11 +175,11 @@ bool World::CreateChunk(int x, int y, int z)
 	if (d > render_distance * Chunk::ChunkSize)
 		return false;
 
-	Chunks[chunksLoaded] = new Chunk(x, y, z, this);
-	Chunks[chunksLoaded]->UpdateMem();
-	Chunks[chunksLoaded]->Generate();
-	Chunks[chunksLoaded]->Update();
-	Chunks[chunksLoaded]->UpdateMesh();
+	Chunks[chunks_loaded] = new Chunk(x, y, z, this);
+	Chunks[chunks_loaded]->UpdateMem();
+	Chunks[chunks_loaded]->Generate();
+	Chunks[chunks_loaded]->Update();
+	Chunks[chunks_loaded]->UpdateMesh();
 
 	for (int i = -1; i <= 1; i++)
 		for (int j = -1; j <= 1; j++)
@@ -199,7 +195,7 @@ bool World::CreateChunk(int x, int y, int z)
 				RenderIfExcist(X, Y, Z);
 			}
 
-	chunksLoaded++;
+	chunks_loaded++;
 
 	return true;
 }
@@ -208,7 +204,7 @@ bool World::CreateChunk(int x, int y, int z)
 /// </summary>
 void World::Render(unsigned int texture)
 {
-	for (int i = 0; i < chunksLoaded; i++)
+	for (int i = 0; i < chunks_loaded; i++)
 	{
 		if (!Chunks[i]) // если чанка нет, пропустить
 			continue;
@@ -287,7 +283,7 @@ Chunk* World::GetChunk(int x, int y, int z)
 	y = (int)(floor(y / (float)Chunk::ChunkSize) * Chunk::ChunkSize);
 	z = (int)(floor(z / (float)Chunk::ChunkSize) * Chunk::ChunkSize);
 
-	for (int i = 0; i < chunksLoaded; i++)
+	for (int i = 0; i < chunks_loaded; i++)
 	{
 		Chunk* c = Chunks[i];
 
@@ -437,7 +433,7 @@ void World::UpdateIfExcist(int x, int y, int z)
 /// <param name="z"></param>
 void World::AddToRender(int x, int y, int z)
 {
-	RenderQueue->add(new Vector3Int(x, y, z));
+	render_queue->add(new Vector3Int(x, y, z));
 }
 /// <summary>
 /// добавить в очередь обновления
@@ -447,7 +443,7 @@ void World::AddToRender(int x, int y, int z)
 /// <param name="z"></param>
 void World::AddToUpdate(int x, int y, int z)
 {
-	UpdateQueue->add(new Vector3Int(x, y, z));
+	update_queue->add(new Vector3Int(x, y, z));
 }
 /// <summary>
 /// добавить чанк в очередь первичной отрисовки
@@ -512,7 +508,7 @@ void World::AddToUpdateColumn(int x, int y, int z)
 void World::Update()
 {
 	// удаление чанков
-	for (int i = 0; i < chunksLoaded; i++)
+	for (int i = 0; i < chunks_loaded; i++)
 	{
 		float d = Vector3Int::Distance(player->IntPosition, Chunks[i]->pos);
 
@@ -526,13 +522,13 @@ void World::Update()
 	// поток первичного обновления чанков
 	//thread t([&] {
 		for (int i = 0; i < render_chunk_throughput; i++)
-			if (RenderQueue->size())
+			if (render_queue->size())
 			{
-				Vector3Int* pos = RenderQueue->back();
+				Vector3Int* pos = render_queue->back();
 
-				if (UpdateQueue->contains(pos))
+				if (update_queue->contains(pos))
 				{
-					RenderQueue->pop_back();
+					render_queue->pop_back();
 					continue;
 				}
 
@@ -542,31 +538,31 @@ void World::Update()
 					chunk->UpdateMem();
 					chunk->UpdateMesh();
 				}
-				RenderQueue->pop_back();
+				render_queue->pop_back();
 			}
 		//});
 
 	// обновление глобального освещения
 	for (int i = 0; i < render_chunk_throughput * 2; i++)
-		if (GlobalUpdateQueue->size())
+		if (global_update_queue->size())
 		{
-			Vector3Int pos = GlobalUpdateQueue->front();
+			Vector3Int pos = global_update_queue->front();
 			Chunk* chunk = GetChunk(pos.x, pos.y, pos.z);
 
 			if (chunk)
 				chunk->UpdateMesh();
 
-			GlobalUpdateQueue->pop();
+			global_update_queue->pop();
 		}
 
 	// создание чанков
 	for (int i = 0; i < create_chunk_throughput; i++)
 	{
-		while (CreateQueue->size())
+		while (create_queue->size())
 		{
-			Vector3Int* pos = CreateQueue->back();
+			Vector3Int* pos = create_queue->back();
 			bool done = CreateChunk(pos->x, pos->y, pos->z);
-			CreateQueue->pop_back();
+			create_queue->pop_back();
 
 			if (done)
 				break;
@@ -574,16 +570,16 @@ void World::Update()
 	}
 	// обновление чанков
 	for (int i = 0; i < update_chunk_throughput; i++)
-		if (UpdateQueue->size())
+		if (update_queue->size())
 		{
-			Vector3Int* pos = UpdateQueue->front();
+			Vector3Int* pos = update_queue->front();
 
 			Chunk* chunk = GetChunk(pos->x, pos->y, pos->z);
 			if (chunk)
 			{
 				chunk->UpdateMesh();
 			}
-			UpdateQueue->pop_front();
+			update_queue->pop_front();
 		}
 	//t.join(); // синхронизация потоков
 
@@ -610,16 +606,16 @@ void World::DeleteChunk(int index)
 
 	delete Chunks[index]; // вызов деструктора
 	Chunks[index] = nullptr; // обнуление указателя
-	chunksLoaded--; // уменьшение количества загруженных чанков
+	chunks_loaded--; // уменьшение количества загруженных чанков
 
-	if (chunksLoaded > 0) // сдвиг чанков в массиве
+	if (chunks_loaded > 0) // сдвиг чанков в массиве
 	{
-		for (int i = index; i < chunksLoaded; i++)
+		for (int i = index; i < chunks_loaded; i++)
 		{
 			Chunks[i] = Chunks[i + 1];
 		}
 
-		Chunks[chunksLoaded] = nullptr;
+		Chunks[chunks_loaded] = nullptr;
 	}
 	// обновление мемефикаций чанков
 	for (int i = -1; i <= 1; i++)

@@ -12,8 +12,6 @@
 #include"World.h"
 #include"RigidBox.h"
 
-using namespace std;
-
 /// <summary>
 /// класс частицы
 /// </summary>

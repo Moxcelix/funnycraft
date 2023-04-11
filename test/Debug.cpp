@@ -1,15 +1,15 @@
 #include "Debug.h"
-ofstream Debug::log = ofstream();
+std::ofstream Debug::log = std::ofstream();
 bool Debug::active = true;
 bool Debug::bounds = false;
 /// <summary>
 /// вывод сообщения в файл
 /// </summary>
 /// <param name="text"></param>
-void Debug::Log(string text)
+void Debug::Log(std::string text)
 {
 	if (active) // если активен
-		log << text << endl;
+		log << text << std::endl;
 }
 /// <summary>
 /// отрисовка рамок
@@ -63,6 +63,6 @@ Debug::Debug()
 Debug::~Debug()
 {
 	if (active) // если активен
-		log << "successfully closed" << endl;
+		log << "successfully closed" << std::endl;
 	log.close(); // закрыть поток
 }

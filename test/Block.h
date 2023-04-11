@@ -9,8 +9,6 @@
 #include<iostream>
 #include<vector>
 
-using std::string;
-using std::vector;
 struct Chunk;
 /// <summary>
 /// класс блока
@@ -18,11 +16,11 @@ struct Chunk;
 class Block 
 {
 public:
-	Block(block_id id, string name); // конструктор блока
+	Block(block_id id, std::string name); // конструктор блока
 	Block& operator= (const Block&) = delete;
 	Block(const Block&) = delete;
 	block_id id = 0; // ID блока 
-	string name = "?"; // имя блока
+	std::string name = "?"; // имя блока
 	Block(); // конструктор блока
 	// ссылки на статичные экземпляры блоков
 	static Block* air;					// воздух
@@ -56,12 +54,8 @@ public:
 		return id;
 	}
 
-	static vector<Block*> BlockList; // вектор блоков
-	/// <summary>
-	///  получение ссылки на блок по его ID
-	/// </summary>
-	/// <param name="ID"></param>
-	/// <returns></returns>
+	static std::vector<Block*> BlockList; // вектор блоков
+
 	static constexpr Block* GetBlock(block_id ID)
 	{
 		if (ID == -1)
@@ -69,10 +63,9 @@ public:
 
 		return blocks[ID];
 	}
+
 	static void Init(); // инициализация 
-	/// <summary>
-	/// перечисление направлений
-	/// </summary>
+
 	enum class Direction : int
 	{
 		Up = 0,

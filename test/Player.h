@@ -11,7 +11,6 @@
 #include<vector>
 #include<fstream>
 
-using namespace std;
 class World;
 class RigidBox;
 /// <summary>
@@ -46,19 +45,11 @@ public:
 		float velocity = 0;
 		float mult = 100;
 	public:
-		/// <summary>
-		/// смена состояния
-		/// </summary>
-		/// <param name="state"></param>
 		void Move(bool state = true)
 		{
 			move = state;
 		}
-		/// <summary>
-		/// движение
-		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="max_speed"></param>
+
 		void Move(float a, float max_speed)
 		{
 			if (move)
@@ -72,18 +63,11 @@ public:
 			if (velocity > max_speed)
 				velocity = max_speed;
 		}
-		/// <summary>
-		/// геттер состояния
-		/// </summary>
-		/// <returns></returns>
 		bool GetMove() 
 		{
 			return move;
 		}
-		/// <summary>
-		/// геттер скорости
-		/// </summary>
-		/// <returns></returns>
+
 		float GetVelocity()
 		{
 			return velocity;
@@ -130,14 +114,15 @@ public:
 	void Update(); // обновление
 	void LoadTerrain(World* world); // прогрузка территории
 	void GenereateSphere(); // генерация сферы видимости
-	void Save(ofstream& stream); // сохранение параметров игрока
+	void Save(std::ofstream& stream); // сохранение параметров игрока
 	void Init(float x, float y, float z, float xRot, float zRot); // инициализация
+	void SwitchFly();
 
 	float GetVelocity(); // получение скорости
 	float GetDistance(float x, float y, float z); // расстояние до точки
 
 	Vector3 start_pos = { 0, 0, 64 };	// стартовая позиция
-	vector<Vector3Int*>sphere;			// вектор координат сферы видимости
+	std::vector<Vector3Int*>sphere;			// вектор координат сферы видимости
 	Vector3Int IntPosition;				// вектор положения в целых координатах
 	Vector3Int ChunkPosition;			// вектор чанковой позиции
 	World* world;						// указатель на экземпляр мира

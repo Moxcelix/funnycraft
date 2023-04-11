@@ -6,7 +6,7 @@
 /// <param name="element"></param>
 void PosQueue::add(Vector3Int* element)
 {
-	lock_guard<mutex> guard(mtx);
+	std::lock_guard guard(mtx);
 
 	if (elementsAdded < MaxCount) // если элементов меньше максимального значения
 	{
@@ -35,7 +35,7 @@ int PosQueue::contains(Vector3Int* element)
 /// </summary>
 void PosQueue::clear()
 {
-	lock_guard<mutex> guard(mtx);
+	std::lock_guard guard(mtx);
 
 	for (int i = 0; i < elementsAdded; i++)
 		delete elements[i]; // удалить i-тый элемент
@@ -46,7 +46,7 @@ void PosQueue::clear()
 /// </summary>
 void PosQueue::pop_back()
 {
-	lock_guard<mutex> guard(mtx);
+	std::lock_guard guard(mtx);
 
 	if (elementsAdded == 0) // если кол-во равно 0
 		return;				// вернуть
@@ -59,7 +59,7 @@ void PosQueue::pop_back()
 /// </summary>
 void PosQueue::pop_front()
 {
-	lock_guard<mutex> guard(mtx);
+	std::lock_guard guard(mtx);
 
 	if (elementsAdded == 0) // если кол-во равно 0
 		return;				// вернуть

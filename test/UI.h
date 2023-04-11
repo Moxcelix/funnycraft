@@ -11,8 +11,6 @@
 #define UI_DRAW_CROSS			0b0001	// отрисовка крестика
 #define UI_DRAW_BACK_GROUND		0b0010	// отрисовка фона
 
-using namespace std;
-
 struct Text;
 struct Plane;
 struct UIElement;

@@ -46,7 +46,7 @@ void Player::GenereateSphere()
 /// <param name="world"></param>
 void Player::LoadTerrain(World* world)
 {
-	if (world->chunksLoaded < World::MaxChunksCount - 1) // если количество загруженных чанков меньше максимального 
+	if (world->chunks_loaded < World::MaxChunksCount - 1) // если количество загруженных чанков меньше максимального 
 		for (const Vector3Int* i : sphere) // обработка вектора сферы
 		{
 			// перевод координат в масштабы чанков
@@ -233,4 +233,8 @@ void Player::Save(ofstream& stream)
 	stream << pos.z << endl;
 	stream << camera.xRot << endl;
 	stream << camera.zRot << endl;
+}
+
+void Player::SwitchFly() {
+	fly = !fly;
 }

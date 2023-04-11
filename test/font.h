@@ -49,7 +49,7 @@
 //      Returns the number of quads.
 //
 //      If the buffer isn't large enough, it will truncate.
-//      Expect it to use an average of ~270 bytes per character.
+//      Expect it to use an average of ~270 byte2s per character.
 //
 //      If your API doesn't draw quads, build a reusable index
 //      list that allows you to render quads as indexed triangles.

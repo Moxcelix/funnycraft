@@ -4,10 +4,6 @@
 
 #include "Vector3.h"
 
-using namespace std;
-/// <summary>
-/// структура UI объекта
-/// </summary>
 struct UIObject
 {
 	virtual void Draw(int win_width, int win_height) = 0;
