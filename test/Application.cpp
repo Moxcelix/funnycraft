@@ -77,11 +77,6 @@ void Application::TextureInit(unsigned int& texture, const char* name) {
 void Application::GameInit() {
 	client.Init(); // инициализация клиента
 
-	TextureInit(client.main_texture, "terrain.png");		// Инициализация текстур
-	TextureInit(client.ui.font, "myfont.png");				// Инициализация шрифта
-	TextureInit(client.Menu.font, "myfont.png");			// Инициализация шрифта
-	TextureInit(client.inventory.ui.font, "myfont.png");	// Инициализация шрифта
-
 	glEnable(GL_ALPHA_TEST);		// Включение отрисовки альфа-канала
 	glAlphaFunc(GL_GREATER, 0.5);	// Утсановка границы Cut-off
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Скрыть курсор
@@ -185,7 +180,7 @@ void Application::LoadIcon() {
 	int ico_width, ico_height, ico_channels;
 	GLFWimage images[1]{};
 
-	image = stbi_load("logo.png", &ico_width, &ico_height, &ico_channels, 4);
+	image = stbi_load("resources/icon/logo.png", &ico_width, &ico_height, &ico_channels, 4);
 	images[0].height = ico_height;
 	images[0].width = ico_width;
 	images[0].pixels = image;
@@ -196,10 +191,11 @@ void Application::LoadIcon() {
 }
 
 void Application::LoadResources() {
-	TextureInit(client.main_texture, "terrain.png");		// Инициализация текстур
-	TextureInit(client.ui.font, "myfont.png");				// Инициализация шрифта
-	TextureInit(client.Menu.font, "myfont.png");			// Инициализация шрифта
-	TextureInit(client.inventory.ui.font, "myfont.png");	// Инициализация шрифта
+	TextureInit(client.main_texture, "resources/environment/terrain.png");		// Инициализация текстур
+	TextureInit(client.ui.font, "resources/fonts/font.png");					// Инициализация шрифта
+	TextureInit(client.Menu.font, "resources/fonts/font.png");					// Инициализация шрифта
+	TextureInit(client.inventory.ui.font, "resources/fonts/font.png");			// Инициализация шрифта
+
 }
 
 void Application::SetCallbacks() {
@@ -213,11 +209,11 @@ void Application::InputWorldName() {
 	std::cout << "Введите имя рабочего каталога -> ";
 	std::cin >> World::name;
 
-	if (std::experimental::filesystem::create_directory("saves"))
+	if (std::filesystem::create_directory("saves"))
 		Debug::Log("directory \"saves\" already exists");
-	if (std::experimental::filesystem::create_directory("saves/worlds"))
+	if (std::filesystem::create_directory("saves/worlds"))
 		Debug::Log("directory \"worlds\" already exists");
-	if (std::experimental::filesystem::create_directory((save_folder + World::name + "/").c_str()))
+	if (std::filesystem::create_directory((save_folder + World::name + "/").c_str()))
 		Debug::Log("directory \"" + World::name + "\" already exists");
 }
 

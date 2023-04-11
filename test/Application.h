@@ -9,17 +9,16 @@
 #include "Debug.h"
 #include "DeltaTime.h"
 
-class Application
-{
+class Application {
 public:
 	const int SIZE_X = 1280;	// первоначальна€ ширина окна в пиксел€х
 	const int SIZE_Y = 720;		// первоначальна€ высота окна в пиксел€х
 
 	GLFWwindow* window;			// указатель на экземл€р окна
-	DeltaTime delta_time;		// экземпл€р дельты времени
+	DeltaTime delta_time{};		// экземпл€р дельты времени
 
-	float d_time;				// дельта времени
-	double fps;					// количество кадров в секунду
+	float d_time{};				// дельта времени
+	double fps{};					// количество кадров в секунду
 	int lfps = 0, ms = 1;		// округленное количество кадров в секунду
 	bool wireframe = false;		// режим рамочного рендеренга
 

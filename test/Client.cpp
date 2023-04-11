@@ -219,8 +219,8 @@ void Client::NewWorld()
 	World::settings = gen_params;	// присвоение настроек создания
 	delete world;					// удаление старого экземпляра
 
-	for (const auto& entry : std::experimental::filesystem::directory_iterator(save_folder + World::name + "/"))
-		std::experimental::filesystem::remove_all(entry.path()); // удаление файлов старого мира
+	for (const auto& entry : std::filesystem::directory_iterator(save_folder + World::name + "/"))
+		std::filesystem::remove_all(entry.path()); // удаление файлов старого мира
 
 	world = new World(&player);		// создание нового экземпляра мира
 	player.world = world;			// обновление указателя на миры

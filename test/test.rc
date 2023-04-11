@@ -50,7 +50,7 @@ END
 // PNG
 //
 
-IDB_PNG1                PNG                     "D:\\Visual Studio и приколы\\test\\logo.png"
+IDB_PNG1                PNG                     ".\\resources\\icon\\logo.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ IDB_PNG1                PNG                     "D:\\Visual Studio и приколы\\te
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "D:\\Visual Studio и приколы\\test\\logo.ico"
+IDI_ICON1               ICON                    ".\\resources\\icon\\logo.ico"
 
 #endif    // Русский (Россия) resources
 /////////////////////////////////////////////////////////////////////////////
