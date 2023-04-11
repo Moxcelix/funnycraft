@@ -4,7 +4,7 @@
 #include<Windows.h>
 
 Terrain terrain; // экземпл€р генератора
-int World::render_distance = 8; // дальность прорисовки по умолчанию
+int World::render_distance = 4; // дальность прорисовки по умолчанию
 int World::seed = 0; // зерно генерации
 bool World::is_day = true; // день
 string World::name = "my world"; // им€ мира
@@ -58,7 +58,6 @@ void World::Create()
 	RenderQueue = new PosQueue();
 	CreateQueue = new PosQueue();
 	UpdateQueue = new PosQueue();
-	DeleteQueue = new queue<int>();
 	GlobalUpdateQueue = new queue<Vector3Int>();
 	terrain = Terrain(World::seed, this);
 }
@@ -281,23 +280,18 @@ Block* World::GetBlock(Vector3 pos)
 /// <returns>указатель на чанк</returns>
 Chunk* World::GetChunk(int x, int y, int z)
 {
-	if (x < 0)
-		x -= Chunk::ChunkSize - 1;
-	if (y < 0)
-		y -= Chunk::ChunkSize - 1;
-
 	if (z < 0 || z >= WorldHeight * Chunk::ChunkSize)
 		return nullptr;
 
-	x = (x / Chunk::ChunkSize) * Chunk::ChunkSize;
-	y = (y / Chunk::ChunkSize) * Chunk::ChunkSize;
-	z = (z / Chunk::ChunkSize) * Chunk::ChunkSize;
+	x = (int)(floor(x / (float)Chunk::ChunkSize) * Chunk::ChunkSize);
+	y = (int)(floor(y / (float)Chunk::ChunkSize) * Chunk::ChunkSize);
+	z = (int)(floor(z / (float)Chunk::ChunkSize) * Chunk::ChunkSize);
 
 	for (int i = 0; i < chunksLoaded; i++)
 	{
 		Chunk* c = Chunks[i];
 
-		if (c && c->pos.x == x && c->pos.y == y && c->pos.z == z)
+		if (c->pos.x == x && c->pos.y == y && c->pos.z == z)
 		{
 			return c;
 		}
@@ -495,19 +489,17 @@ char World::GetLight(int x, int y, int z)
 /// <param name="z"></param>
 void World::AddToUpdateColumn(int x, int y, int z)
 {
-	int s = Chunk::ChunkSize;
+	z = (z / Chunk::ChunkSize) * Chunk::ChunkSize;
 
-	z = (z / s) * s;
-
-	for (int k = z + s; k >= 0; k -= s)
+	for (int k = z + Chunk::ChunkSize; k >= 0; k -= Chunk::ChunkSize)
 	{
 		Chunk* chunk = GetChunk(x, y, k);
 
 		if (!chunk)
 			break;
 
-		for (int i = -s; i <= s; i += s)
-			for (int j = -s; j <= s; j += s)
+		for (int i = -Chunk::ChunkSize; i <= Chunk::ChunkSize; i += Chunk::ChunkSize)
+			for (int j = -Chunk::ChunkSize; j <= Chunk::ChunkSize; j += Chunk::ChunkSize)
 				AddToUpdate(x + i, y + j, k);
 
 		if (chunk->is_solid)
@@ -520,7 +512,7 @@ void World::AddToUpdateColumn(int x, int y, int z)
 void World::Update()
 {
 	// удаление чанков
-	for (int i = 0; i < chunksLoaded && i < 8; i++)
+	for (int i = 0; i < chunksLoaded; i++)
 	{
 		float d = Vector3Int::Distance(player->IntPosition, Chunks[i]->pos);
 
@@ -532,7 +524,7 @@ void World::Update()
 
 	
 	// поток первичного обновлени€ чанков
-	thread t([&] {
+	//thread t([&] {
 		for (int i = 0; i < render_chunk_throughput; i++)
 			if (RenderQueue->size())
 			{
@@ -552,7 +544,7 @@ void World::Update()
 				}
 				RenderQueue->pop_back();
 			}
-		});
+		//});
 
 	// обновление глобального освещени€
 	for (int i = 0; i < render_chunk_throughput * 2; i++)
@@ -593,7 +585,7 @@ void World::Update()
 			}
 			UpdateQueue->pop_front();
 		}
-	t.join(); // синхронизаци€ потоков
+	//t.join(); // синхронизаци€ потоков
 
 	RationalizeBuffer(); // рационализаци€ буфера блоков
 	RemoveCash(); // очистка кэша	

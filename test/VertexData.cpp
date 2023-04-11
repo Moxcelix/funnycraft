@@ -13,8 +13,6 @@ VertexData::VertexData()
 VertexData::~VertexData()
 {
 	Clear();
-	if (inied)
-		delete[] result;
 }
 /// <summary>
 /// очистка данных
@@ -24,23 +22,6 @@ void VertexData::Clear()
 	Vertices.clear();
 	Colors.clear();
 	face_count = 0;
-}
-/// <summary>
-/// преобразование в массив
-/// </summary>
-/// <returns></returns>
-float* VertexData::ToArray()
-{
-	inied = true;
-
-	int size = Vertices.size();
-
-	result = new GLfloat[size];
-
-	for (int i = 0; i < size; i++)
-		result[i] = Vertices[i];
-
-	return result;
 }
 /// <summary>
 /// верхняя грань
@@ -348,23 +329,6 @@ void VertexData::FaceBack(int x, int y, int z, ColorSquad colors)
 		Colors.push_back(colors.colors[i].y * Y_MULT);
 		Colors.push_back(colors.colors[i].z * Y_MULT);
 	}
-}
-
-/// <summary>
-/// цвета в массив
-/// </summary>
-/// <returns></returns>
-float* VertexData::ColorsToArray()
-{
-	int size = Colors.size();
-	result = new GLfloat[size];
-
-	for (int i = 0; i < size; i++)
-	{
-		result[i] = Colors[i];
-	}
-
-	return result;
 }
 /// <summary>
 /// диагональная грань

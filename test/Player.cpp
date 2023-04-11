@@ -47,7 +47,7 @@ void Player::GenereateSphere()
 void Player::LoadTerrain(World* world)
 {
 	if (world->chunksLoaded < World::MaxChunksCount - 1) // если количество загруженных чанков меньше максимального 
-		for (Vector3Int* i : sphere) // обработка вектора сферы
+		for (const Vector3Int* i : sphere) // обработка вектора сферы
 		{
 			// перевод координат в масштабы чанков
 			int x = this->pos.x + i->x * Chunk::ChunkSize;

@@ -16,10 +16,7 @@ Chunk::Chunk()
 /// </summary>
 Chunk::~Chunk()
 {
-	//cout << sizeof(this) << endl;
-
 	SaveChunk();					// сохранение чанка
-	delete[] Vertices, UVs, Colors; // удаление динамических массивов
 	world = nullptr;				// обнуление ссылки на мир
 	data.Clear();					// очистка данных меша
 	uv_data.Clear();				// очситка данных UV-карты
@@ -84,9 +81,9 @@ block_id Chunk::GetBlockID(int x, int y, int z)
 void Chunk::ClearCash()
 {
 	// удаление массивов
-	delete[] Vertices;
-	delete[] UVs;
-	delete[] Colors;
+	//delete[] Vertices;
+	//delete[] UVs;
+	//delete[] Colors;
 	// очистка данных
 	data.Clear();
 	uv_data.Clear();
@@ -97,9 +94,9 @@ void Chunk::ClearCash()
 void Chunk::Init()
 {
 	// инициализация массивов
-	Vertices = new GLfloat;
-	UVs = new GLfloat;
-	Colors = new GLfloat;
+	//Vertices = new GLfloat;
+	//UVs = new GLfloat;
+	//Colors = new GLfloat;
 
 	for (int i = 0; i < ChunkSize; i++)
 		for (int j = 0; j < ChunkSize; j++)
@@ -192,7 +189,7 @@ bool Chunk::InLightRange(int x, int y, int z)
 /// </summary>
 void Chunk::UpdateMesh() // обновление меша
 {
-	lock_guard<mutex> guard(mtx); // защита от посторонних потоков
+	//lock_guard<mutex> guard(mtx); // защита от посторонних потоков
 
 	UpdateLight();
 
@@ -207,9 +204,9 @@ void Chunk::UpdateMesh() // обновление меша
 				GetMeshData(&data, &uv_data, x, y, z, 0); // получение данных блоков
 
 	// конвертирование векторов в массивы
-	Vertices = data.ToArray();
-	UVs = uv_data.ToArray();
-	Colors = data.ColorsToArray();
+	//Vertices = data.ToArray();
+	//UVs = uv_data.ToArray();
+	//Colors = data.ColorsToArray();
 }
 /// <summary>
 /// Обновление состояния чанка
@@ -236,34 +233,18 @@ void Chunk::Update()
 
 	is_solid = b_count >= ChunkSize * ChunkSize; // твердрый, если количествао больше или равно площади
 }
-/// <summary>
-/// Установка блока
-/// </summary>
-/// <param name="x"> ордината точки</param>
-/// <param name="y"> абсцисса точки</param>
-/// <param name="z"> аппликата точки</param>
-/// <param name="block"> ID блока</param>
+
 inline void Chunk::SetBlock(int x, int y, int z, block_id block)
 {
-	if (InRange(x, y, z)) // если в рамках чанка
-		blocks[x][y][z] = block;
-	else // иначе передаем вызов в мир
-		world->SetBlock(x + pos.x, y + pos.y, z + pos.z, block);
+	if (InRange(x, y, z)) blocks[x][y][z] = block;
+	else world->SetBlock(x + pos.x, y + pos.y, z + pos.z, block);
 }
-/// <summary>
-/// Установка блока
-/// </summary>
-/// <param name="x"> ордината точки</param>
-/// <param name="y"> абсцисса точки</param>
-/// <param name="z"> аппликата точки</param>
-/// <param name="block"> указатель на экземпляр блока</param>
+
 void Chunk::SetBlock(int x, int y, int z, Block* block) //
 {
 	SetBlock(x, y, z, block->id); // установить блок
 }
-/// <summary>
-/// Сохранение чанка
-/// </summary>
+
 void Chunk::SaveChunk()
 {
 	if (!modified) // если чанк не изменялся, не сохраняем его
@@ -276,50 +257,41 @@ void Chunk::SaveChunk()
 		for (int y = 0; y < Chunk::ChunkSize; y++)
 			for (int z = 0; z < Chunk::ChunkSize; z++)
 			{
-				stream << blocks[x][y][z] << " "; // записываем все блоки в чанке
+				stream << blocks[x][y][z]; // записываем все блоки в чанке
 			}
 
 	stream.close(); // закрыть поток
 }
-/// <summary>
-/// Загрузка чанка
-/// </summary>
-/// <returns>Наличие у чанка сохранения</returns>
+
 bool Chunk::LoadChunk()
 {
-	ifstream stream; // объект потока чтения
+	ifstream stream;
 	stream.open(save_folder + World::name + "/" + to_string(pos.x) + " " + to_string(pos.y) + " " + to_string(pos.z) + ".dat");
 
 	if (stream.is_open())
 	{
-		for (int x = 0; x < Chunk::ChunkSize; x++)
-			for (int y = 0; y < Chunk::ChunkSize; y++)
-				for (int z = 0; z < Chunk::ChunkSize; z++)
-				{
-					stream >> blocks[x][y][z]; // считываем все блоки из файла
+		for (int x = 0; x < Chunk::ChunkSize; x++) {
+			for (int y = 0; y < Chunk::ChunkSize; y++) {
+				for (int z = 0; z < Chunk::ChunkSize; z++) {
+					blocks[x][y][z] = stream.get();
 				}
-		stream.close(); // закрыть поток
+			}
+		}
+
+		stream.close();
 		return true;
 	}
+
 	return false;
 }
-/// <summary>
-/// Получение цвета света
-/// </summary>
-/// <param name="x"> ордината точки</param>
-/// <param name="y"> абсцисса точки</param>
-/// <param name="z"> аппликата точки</param>
-/// <returns>Вектор, содержащий RGB каналы цвета</returns>
+
 Vector3 Chunk::GetLigthColor(int x, int y, int z)
 {
 	float l = (GetLight(x, y, z) / float(MaxLight)) * (1 - brightness) + brightness; // значение яркости
 	return Vector3(l, l, l); // значение цвета
 }
-/// <summary>
-/// Обновление мемефикаций
-/// </summary>
-void Chunk::UpdateMem()
-{
+
+void Chunk::UpdateMem(){
 	for (int x = 0; x < 3; x++)
 		for (int y = 0; y < 3; y++)
 			for (int z = 0; z < 3; z++)
@@ -333,11 +305,8 @@ void Chunk::UpdateMem()
 					world->GetChunk(pos.x + X, pos.y + Y, pos.z + Z);
 			}
 }
-/// <summary>
-/// Обновление света
-/// </summary>
-void Chunk::UpdateLight()
-{
+
+void Chunk::UpdateLight(){
 	for (int x = 0; x < ChunkSize * 3; x++)
 		for (int y = 0; y < ChunkSize * 3; y++)
 			for (int z = 0; z < ChunkSize * 3; z++)
@@ -420,13 +389,7 @@ void Chunk::UpdateLight()
 
 
 }
-/// <summary>
-/// Установка значения света
-/// </summary>
-/// <param name="x"> ордината точки</param>
-/// <param name="y"> абсцисса точки</param>
-/// <param name="z"> аппликата точки</param>
-/// <param name="l"></param>
+
 inline void Chunk::SetLight(int x, int y, int z, char l)
 {
 	if (light_map[x + ChunkSize][y + ChunkSize][z + ChunkSize] < l && GetBlock(x, y, z)->Transparent())
@@ -443,13 +406,7 @@ inline void Chunk::SetLight(int x, int y, int z, char l)
 		}
 	}
 }
-/// <summary>
-/// Значение свтеа
-/// </summary>
-/// <param name="x"> ордината точки</param>
-/// <param name="y"> абсцисса точки</param>
-/// <param name="z"> аппликата точки</param>
-/// <returns>Значение света</returns>
+
 inline char Chunk::GetLight(int x, int y, int z)
 {
 	if (InRange(x, y, z)) // если в границах
@@ -491,13 +448,7 @@ inline char Chunk::GetLight(int x, int y, int z)
 	// если за рамками чанка, возврат света через объект мира
 	return world->GetLight(x + pos.x, y + pos.y, z + pos.z);
 }
-/// <summary>
-/// Проверка света по коордитам
-/// </summary>
-/// <param name="x"> ордината точки</param>
-/// <param name="y"> абсцисса точки</param>
-/// <param name="z"> аппликата точки</param>
-/// <returns>Значение света</returns>
+
 inline int Chunk::CheckLight(int x, int y, int z)
 {
 	if (InRange(x, y, z)) // если в рамках чанка
@@ -506,18 +457,16 @@ inline int Chunk::CheckLight(int x, int y, int z)
 		return light_map[x + ChunkSize][y + ChunkSize][z + ChunkSize];
 	return 0;
 }
-/// <summary>
-/// изменение
-/// </summary>
+
 void Chunk::Modify()
 {
-	for (int i = 0; i < 27; i++) 
-		if (chunks[i])
+	for (int i = 0; i < 27; i++) {
+		if (chunks[i]) {
 			chunks[i]->modified = true;
+		}
+	}
 }
-/// <summary>
-/// Рендеринг чанка
-/// </summary>
+
 void Chunk::Render(unsigned int texture)
 {
 	if (data.face_count == 0) // если нет вершин в чанке, то не выолняется код ниже
@@ -528,12 +477,15 @@ void Chunk::Render(unsigned int texture)
 
 	glBindTexture(GL_TEXTURE_2D, texture); // Привязка текстуры к цели текстурирования
 	// установка указателей в массивах для отрисовки меша
+	GLfloat* UVs = &uv_data.UVs[0];
+	GLfloat* Vertices = &data.Vertices[0];
+	GLfloat* Colors = &data.Colors[0];
+
 	glTexCoordPointer(2, GL_FLOAT, 0, UVs);
 	glVertexPointer(3, GL_FLOAT, 0, Vertices);
 	glColorPointer(3, GL_FLOAT, 0, Colors);
 	//17 404
 	glDrawArrays(GL_QUADS, 0, data.face_count * 4); // отрисвока граней
-
 	glBindTexture(GL_TEXTURE_2D, 0);				// Отвзяка текстуры от цели текстурирования
 
 	if (Debug::bounds) // если включен режим границ чанков

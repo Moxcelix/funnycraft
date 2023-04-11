@@ -27,8 +27,8 @@ public:
 	~Chunk(); // деструктор чанка
 	Chunk(int x, int y, int z, World* world); // конструктор чанка
 
-	const static int ChunkSize = 8; // размер чанка
-	const static int MaxLight = 8;	// максимальное значение света
+	const static int ChunkSize = 16; // размер чанка
+	const static int MaxLight = 7;	// максимальное значение света
 
 	Vector3Int pos;				// позиция чанка
 	World* world;				// ссылка на мир
@@ -65,13 +65,8 @@ public:
 
 	
 private:
-	GLfloat* Vertices;	// динамический массив координат вершин
 	VertexData data;	// данные вершин
 	UVData uv_data;		// данные UV-карты
-	mutex mtx;			// мьютекс
-
-	float* Colors;		// динамеический массив каналов цветов вершин
-	float* UVs;			// динамический массив UV-координат текстурного атласа
 
 	block_id blocks[ChunkSize][ChunkSize][ChunkSize];				// трёхмерный массив-карта блоков
 	bool sky_light[ChunkSize][ChunkSize];							// двумерный массив-карта небесного света
@@ -82,5 +77,4 @@ private:
 	int timeout = 4;	// таймаут повторного обновления
 
 	void ClearCash();	// очистка данных
-	
 };

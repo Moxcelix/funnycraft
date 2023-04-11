@@ -163,11 +163,9 @@ void Block::Init()
 	blocks = new Block * [size]; // инициализация массива указателей блоков 
 
 	// распределение по ID
-	//for (int i = 0; i < size; i++)
 	for (int j = 0; j < size; j++) {
 		if (BlockList[j]->id >= 0)
-		blocks[BlockList[j]->id] = BlockList[j]; // :skull:
-		
+			blocks[BlockList[j]->id] = BlockList[j]; // :skull:
 	}
 
 	BlockList.clear();

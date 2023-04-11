@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #define STB_IMAGE_IMPLEMENTATION
 #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+
 //подключение библиотек и заголовочных файлов
 #include <GLFW/glfw3.h>
 #include <format>
@@ -15,7 +16,7 @@
 #include "Client.h"
 #include "Debug.h"
 #include "DeltaTime.h"
-#include <windows.h>
+//#include <windows.h>
 #include <experimental/filesystem>
 
 using namespace std;
@@ -218,7 +219,7 @@ void Render()
 
 	client.Render(); // вызов метода рендеринга в клиенте
 
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);	// Выход из состояния отрисовки текстур
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);	// Выход из состояния отрисовки текстур
 	glDisableClientState(GL_VERTEX_ARRAY);			// Отключение состояния массива вершин
 	glDisableClientState(GL_COLOR_ARRAY);			// Отключение состояния массива вершин
 	glDisable(GL_DEPTH_TEST);						// Выключение глубины отрисовки

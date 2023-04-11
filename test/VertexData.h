@@ -4,10 +4,10 @@
 #include "Vector3.h"
 #include <GLFW/glfw3.h>
 
-#define UP_MULT 1
-#define DOWN_MULT 0.5
-#define Y_MULT 0.67
-#define X_MULT 0.83
+constexpr auto UP_MULT = 1;
+constexpr auto DOWN_MULT = 0.5;
+constexpr auto Y_MULT = 0.67;
+constexpr auto X_MULT = 0.83;
 
 using std::vector;
 /// <summary>
@@ -64,16 +64,11 @@ private:
 
 public:
 	vector<GLfloat> Vertices; // вектор вершин
-	vector<float> Colors; // вектор цветов
+	vector<GLfloat> Colors; // вектор цветов
 
 	int face_count = 0; // количество граней
 	VertexData(); // конструктор
 	~VertexData(); // деструктор
-
-	float* ToArray(); // преобразование в массив
-	float* ColorsToArray(); // цвета в массив
-
-	GLfloat* result; // массив результата
 
 	void FaceUp(int x, int y, int z);		// верхн€€ грань
 	void FaceDown(int x, int y, int z);		// нижн€€ грань

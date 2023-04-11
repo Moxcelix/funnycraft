@@ -8,20 +8,6 @@ void PosQueue::add(Vector3Int* element)
 {
 	lock_guard<mutex> guard(mtx);
 
-	//if (int l = contains(element))
-	//{
-	//	/*delete elements[l - 1];
-
-	//	for (int i = l; i < elementsAdded; i++)
-	//	{
-	//		elements[i - 1] = elements[i];
-	//	}
-
-	//	elements[elementsAdded - 1] = element;*/
-
-	//	return;
-	//}
-
 	if (elementsAdded < MaxCount) // если элементов меньше максимального значения
 	{
 		elements[elementsAdded] = element; // добавление элемента

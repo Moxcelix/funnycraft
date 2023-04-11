@@ -48,7 +48,6 @@ public:
 
 	PosQueue *RenderQueue; // очередь рпервичного обновления
 	PosQueue *UpdateQueue; // очередь обновления
-	queue<int> *DeleteQueue; // очередь на удаление
 	queue<Vector3Int> *GlobalUpdateQueue; // очередь на глобальное обновление
 	PosQueue *CreateQueue; // очерель на создание
 	Player* player; // указатель на игрока

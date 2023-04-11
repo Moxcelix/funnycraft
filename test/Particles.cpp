@@ -42,9 +42,9 @@ void Particles::Clear()
 void Particles::Render(unsigned int texture)
 {
 	/// конвертирование векторов в массивы
-	GLfloat* vertices = vertexData.ToArray();
-	float* uvs = uvData.ToArray();
-	float* colors = vertexData.ColorsToArray();
+	GLfloat* vertices = &vertexData.Vertices[0];
+	GLfloat* uvs = &uvData.UVs[0];
+	GLfloat* colors = &vertexData.Colors[0];
 
 	int size = particles.size(); // кол-во систем частиц
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -76,12 +76,7 @@ void Particles::Render(unsigned int texture)
 		// возвращение точки отсчёта
 		glTranslatef(-particles[i]->my_pos.x, -particles[i]->my_pos.y, -particles[i]->my_pos.z);
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	// удаление массивов
-	delete[] vertices;
-	delete[] uvs;
-	delete[] colors;
+	//glBindTexture(GL_TEXTURE_2D, 0);
 }
 /// <summary>
 /// обновление

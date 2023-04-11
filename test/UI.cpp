@@ -50,7 +50,7 @@ void UI::PrintText(Text t)
 		else
 			t.uvs_data->AddUV(int(k % t.wCount), 15 - int(k / t.wCount));
 	}
-	t.uvs = t.uvs_data->ToArray();
+	t.uvs = &t.uvs_data->UVs[0];
 	IDCounter++;
 	texts.push_back(t);
 }
@@ -194,21 +194,22 @@ void UI::Render()
 
 	if(flags & UI_DRAW_CROSS)
 		cross.Draw(winWidth, winHeight);
-	bg = BackGround(1, 1, 1, 0.5);
-	bg.Draw(winWidth, winHeight);
+	//bg = BackGround(1, 1, 1, 0.5);
+	//bg.Draw(winWidth, winHeight);
 
-	for (Text t : texts)
+	for (const Text& t : texts)
 	{
 		delete t.uvs_data;
 		delete[] t.colors;
 		delete[] t.vertices;
 	}
 
-	for (Plane t : planes)
+	for (const Plane& t : planes)
 	{
 		delete[] t.colors;
 		delete[] t.vertices;
 	}
+
 	texts.clear();
 	planes.clear();
 
@@ -220,11 +221,11 @@ void UI::Render()
 void UI::PrintStatic()
 {
 	float q = winHeight / float(winWidth);
-	for (Plane p : static_planes)
+	for (const Plane& p : static_planes)
 	{
 		PrintPlane(p);
 	}
-	for (Text t : static_texts)
+	for (const Text& t : static_texts)
 	{
 		PrintText(t);
 	}

@@ -105,9 +105,10 @@ public:
 		world->UpdateWorldLighting();
 	}, };
 	Button btn_back{ "Назад", [&] {ToMenu(); } };					// кнопка перехода в меню
-	Button btn_small{ "Маленькая", [&] {SetRenderDistance(4); } };	// кнопка установки маленькой дальности прорисовки
-	Button btn_medium{ "Средняя", [&] {SetRenderDistance(6); } };	// кнопка установки средней дальности прорисовки
-	Button btn_large{ "Большая", [&] {SetRenderDistance(8); } };	// кнопка установки большой дальности прорисовки
+	Button btn_small{ "Маленькая", [&] {SetRenderDistance(3); } };	// кнопка установки маленькой дальности прорисовки
+	Button btn_medium{ "Средняя", [&] {SetRenderDistance(4); } };	// кнопка установки средней дальности прорисовки
+	Button btn_normal{ "Нормальная", [&] {SetRenderDistance(5); } };// кнопка установки большой дальности прорисовки
+	Button btn_large{ "Большая", [&] {SetRenderDistance(6); } };	// кнопка установки большой дальности прорисовки
 	Button btn_confirm{ "Продолжить", [&] {NewWorld(); } };			// кнопка продолжения
 	Button btn_cancel{ "Отменить", [&] {ToMenu(); } };				// кнопка отмены
 	Button btn_create{ "Создать", [&] {ToAgree(); } };				// кнопка создания мира
@@ -148,9 +149,9 @@ public:
 		float* indents;		// массив разметки по вертикали 
 	};
 	// страницы меню
-	Page page_menu{ 4, "Меню", new Button * [] {&btn_settings,& btn_new_world,& btn_continue,& btn_close}, new float[] {0, 0, 0, 0} };
+	Page page_menu{ 4, "Меню", new Button * [] {&btn_settings, &btn_new_world, &btn_continue, &btn_close}, new float[] {0, 0, 0, 0} };
 	Page page_settings{ 3, "Настройки", new Button * [] {&btn_render_distance,& btn_day,& btn_back}, new float[] {0, 0, 20} };
-	Page page_render_distance{ 4, "Дальность прорисовки", new Button * [] {&btn_small,& btn_medium,& btn_large,& btn_back}, new float[] {0, 0, 0, 20} };
+	Page page_render_distance{ 5, "Дальность прорисовки", new Button * [] {&btn_small,&btn_medium, &btn_normal, &btn_large,& btn_back}, new float[] {0, 0, 0, 0, 20} };
 	Page page_agree{ 2, "Текущий мир будет удален", new Button * [] {&btn_confirm,& btn_cancel}, new float[] {0,0} };
 	Page page_new_world{ 6, "Параметры нового мира", new Button * [] {&swt_mountains,& swt_plains,& swt_trees,& swt_grass,& btn_create,& btn_back},new float[] {0, 0, 0, 0, 20, 0} };
 };

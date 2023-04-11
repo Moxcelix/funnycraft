@@ -14,7 +14,6 @@ public:
 	~UVData(); // деструктор
 	static float stface[8]; // координаты грани
 	vector<float> UVs; // вектор UV
-	float* ToArray(); // Преобразование в массив
 	void AddFace(); // Добавление стороны блока
 	void AddUV(float coords[], int length); // Добавление UV
 	void AddUV(float x, float y); // Добавление UV
@@ -22,6 +21,5 @@ public:
 	void Clear(); // Очистка карты UV
 	float xUVSize = 0.0625f; // UV масштаб по Х
 	float yUVSize = 0.0625f; // UV масштаб по Y
-	float* result; // массив результата
 };
 
