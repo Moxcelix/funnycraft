@@ -1,8 +1,6 @@
 #pragma once
 #include"World.h"
-/// <summary>
-/// класс луча
-/// </summary>
+
 class Ray
 {
 private:
@@ -12,12 +10,6 @@ private:
 	Vector3 start;		// позиция начала
 	Vector3 direction;	// направление луча
 public:
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="world"></param>
-	/// <param name="start"></param>
-	/// <param name="direction"></param>
 	Ray(World* world, Vector3 start, Vector3 direction) 
 	{
 		this->world = world;

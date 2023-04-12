@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include <vector>
-using std::vector;
 /// <summary>
 /// класс UV данных
 /// </summary>
@@ -13,7 +12,7 @@ public:
 	UVData(); // конструктор
 	~UVData(); // деструктор
 	static float stface[8]; // координаты грани
-	vector<float> UVs; // вектор UV
+	std::vector<float> UVs; // вектор UV
 	void AddFace(); // ƒобавление стороны блока
 	void AddUV(float coords[], int length); // ƒобавление UV
 	void AddUV(float x, float y); // ƒобавление UV

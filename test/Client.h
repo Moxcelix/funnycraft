@@ -1,10 +1,9 @@
 #pragma once
-#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #define _USE_MATH_DEFINES
 #include <iostream>
 #include <functional>
-#include <experimental/filesystem>
-#include <cmath>
+#include <filesystem>
+
 #include "Modifier.h"
 #include "VertexData.h"
 #include "Inventory.h"
@@ -16,17 +15,14 @@
 #include "UI.h"
 #include "KeyConfig.h"
 
-
 struct Modifier;
 
-using namespace std;
-/// <summary>
-/// класс клиента
-/// </summary>
-class Client
-{
+class Client {
 public:
-	struct Page; // заголовок структуры страницы меню 
+	struct Page;
+
+	Client();
+	~Client();
 
 	void Pause(bool active);					// активность меню
 	void ToSettings();							// переход к странице настроек
@@ -80,16 +76,12 @@ public:
 	double mouse_pos_x, mouse_pos_y; // центральное положение курсора
 	unsigned int main_texture; // тексутрный атлас
 
-	struct Button // кнопка в меню
-	{
+	struct Button {
 		string name;				// заголовок кнопки
 		std::function<void()> func; // ссылка на процедуру
 		Button() :name("?"), func([] {}) {}
-		Button(string name, std::function<void()> func) :name(name), func(func)
-		{
-		}
-		virtual void DoFunc() // вызов переданной функции
-		{
+		Button(string name, std::function<void()> func) :name(name), func(func) {}
+		virtual void DoFunc() {
 			func();
 		}
 	};
@@ -104,7 +96,7 @@ public:
 		World::is_day = !World::is_day;
 		world->UpdateWorldLighting();
 	}, };
-	Button btn_back{ "Назад", [&] {ToMenu(); } };					// кнопка перехода в меню
+	Button btn_back{ "Назад", [&]{ToMenu(); } };					// кнопка перехода в меню
 	Button btn_small{ "Маленькая", [&] {SetRenderDistance(3); } };	// кнопка установки маленькой дальности прорисовки
 	Button btn_medium{ "Средняя", [&] {SetRenderDistance(4); } };	// кнопка установки средней дальности прорисовки
 	Button btn_normal{ "Нормальная", [&] {SetRenderDistance(5); } };// кнопка установки большой дальности прорисовки
@@ -113,20 +105,15 @@ public:
 	Button btn_cancel{ "Отменить", [&] {ToMenu(); } };				// кнопка отмены
 	Button btn_create{ "Создать", [&] {ToAgree(); } };				// кнопка создания мира
 
-	struct Switcher : Button // кнопка-переключатель 
-	{
+	struct Switcher : Button {
 		string name;	// заголовок переключателя
 		bool* value;	// ссылка на переключаемое значение
-		/// <summary>
-		/// конструктор
-		/// </summary>
+
 		Switcher(string name, bool* value) :name(name), value(value)
 		{
 			Button::name = name + (*value ? " On" : " Off");
 		}
-		/// <summary>
-		/// переключение значения 
-		/// </summary>
+
 		virtual void DoFunc()
 		{
 			*value = !(*value);
@@ -138,11 +125,8 @@ public:
 	Switcher swt_plains{ "Равнины", &gen_params.params[1] };	// выключатель равнин
 	Switcher swt_trees{ "Деревья", &gen_params.params[2] };		// выключатель деревьев
 	Switcher swt_grass{ "Трава", &gen_params.params[3] };		// выключатель травы
-	/// <summary>
-	/// структура страницы меню
-	/// </summary>
-	struct Page
-	{
+
+	struct Page {
 		int count;			// количество параметров
 		string name;		// заголовок страницы
 		Button** buttons;	// массив кнопок

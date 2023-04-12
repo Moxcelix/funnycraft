@@ -8,8 +8,8 @@
 #include "Player.h"
 #include "Debug.h"
 #include "PosQueue.h"
+#include "Sky.h"
 
-using namespace std;
 class Terrain;
 class Player;
 struct Chunk;
@@ -19,9 +19,6 @@ struct Chunk;
 class World
 {
 public:	
-	/// <summary>
-	/// структура параметров
-	/// </summary>
 	static struct Settings 
 	{
 		const static int count = 4;
@@ -33,9 +30,7 @@ public:
 				params[i] = true;
 		}
 	}settings;
-	/// <summary>
-	/// структура положеиня блока
-	/// </summary>
+
 	struct BlockPos
 	{
 		int x, y, z;
@@ -46,29 +41,33 @@ public:
 	const static int MaxChunksCount = 512 * 8; // максимальное количество чанков
 	const static int WorldHeight = 16; // максимальная высота мира
 
-	PosQueue *RenderQueue; // очередь рпервичного обновления
-	PosQueue *UpdateQueue; // очередь обновления
-	queue<Vector3Int> *GlobalUpdateQueue; // очередь на глобальное обновление
-	PosQueue *CreateQueue; // очерель на создание
+	PosQueue *render_queue; // очередь рпервичного обновления
+	PosQueue *update_queue; // очередь обновления
+	PosQueue *create_queue; // очерель на создание
 	Player* player; // указатель на игрока
-	vector<BlockPos> GlobalBuffer; // глобальный буфер блоков
-	vector<int> toRemove;; // вектора позиций буфера на удаление
 	Chunk* Chunks[MaxChunksCount]; // массив чанков
+	Sky* sky;
+
+	std::queue<Vector3Int> *global_update_queue; // очередь на глобальное обновление
+	std::vector<BlockPos> GlobalBuffer; // глобальный буфер блоков
+	std::vector<int> toRemove;; // вектора позиций буфера на удаление
 
 	inline Chunk* GetChunk(int x, int y, int z); // получить чанк
 
 	static int seed; // зерно генерации
 	static int render_distance; // дальность прорисовки
-	static string name; // имя мира
+	static std::string name; // имя мира
+
 	int chunksUpdateing = 0; // количесвтво обновляющихся чанков 
-	int chunksLoaded = 0; // количество загруженных чанков
+	int chunks_loaded = 0; // количество загруженных чанков
 	 
 	Block* GetBlock(int x, int y, int z); // указатель на блок
 	Block* GetBlock(Vector3 pos); // указатель на блок
 
-	bool CreateChunk(int x, int y, int z); // создание чанка
 	block_id GetBlockID(int x, int y, int z); // ID блока
 	block_id GetBlockID(Vector3 pos); // ID блока
+
+	bool CreateChunk(int x, int y, int z); // создание чанка
 	void UpdateIfExcist(int x, int y, int z); // обновить чанк, если существует
 	void RenderIfExcist(int x, int y, int z); // отрисовать чанк, если существует
 	void AddToRender(int x, int y, int z); // добавить в очередь первичной отрисовки
@@ -95,6 +94,7 @@ public:
 	void AddToUpdateColumn(int x, int y, int z); // добавить в очередь колонну чанков
 	void SetBufferBlock(int x, int y, int z, block_id block); // добавить блок в буффер
 	char GetLight(int x, int y, int z); // значение света по координатами
+
 	World(Player* player); // конструктор
 	~World(); // деструктор
 };

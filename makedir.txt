@@ -1,8 +1,0 @@
-	if (_mkdir("saves"))
-		cout << "directory \"saves\" already exists" << endl;
-	if (_mkdir("saves/worlds"))
-		cout << "directory \"worlds\" already exists" << endl;
-	if (_mkdir((save_folder + World::name + "/").c_str()))
-		cout << "directory \"" << World::name << "\" already exists" << endl;
-
-	cout << "Texture \"" << name << "\" Loaded" << endl; // отчет для отладки

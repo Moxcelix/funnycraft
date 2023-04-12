@@ -153,9 +153,7 @@ Block::BlockLayer Block::GetLayer()
 {
 	return BlockLayer::OTHER;
 }
-/// <summary>
-/// инициализация
-/// </summary>
+
 void Block::Init()
 {
 	int size = BlockList.size(); // размер списка блоков
@@ -170,10 +168,7 @@ void Block::Init()
 
 	BlockList.clear();
 }
-/// <summary>
-/// конструктор блока
-/// </summary>
-/// <param name="id"></param>
+
 /// <param name="name"></param>
 Block::Block(block_id id, string name)
 {

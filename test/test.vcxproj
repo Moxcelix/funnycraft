@@ -121,7 +121,8 @@
       <AdditionalIncludeDirectories>D:\Visual Studio и приколы\test\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -140,7 +141,8 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\Visual Studio и приколы\test\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -152,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="Client.cpp" />
@@ -162,8 +165,8 @@
     <ClCompile Include="Phantom.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RigidBox.cpp" />
+    <ClCompile Include="Sky.cpp" />
     <ClCompile Include="UI.cpp" />
-    <ClCompile Include="glad.c" />
     <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="PerlinNoise.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -177,6 +180,7 @@
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Bound.h" />
     <ClInclude Include="Chunk.h" />
@@ -192,6 +196,7 @@
     <ClInclude Include="Ray.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RigidBox.h" />
+    <ClInclude Include="Sky.h" />
     <ClInclude Include="Typedefs.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Inventory.h" />

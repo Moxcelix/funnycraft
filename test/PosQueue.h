@@ -3,14 +3,10 @@
 #include<mutex>
 #include<iostream>
 
-using namespace std;
-/// <summary>
-/// класс очереди позиций
-/// </summary>
 class PosQueue
 {
 private:
-	mutex mtx;
+	std::mutex mtx;
 	const static int MaxCount = 512; // максиммальное количество элементов в очереди
 	Vector3Int* elements[MaxCount]; // массив указателей на элементы
 	int elementsAdded = 0; // количество добавленных элементов

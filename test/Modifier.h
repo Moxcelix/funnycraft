@@ -1,9 +1,8 @@
 #pragma once
-#include"DeltaTime.h"
-#include"Client.h"
 #include<iostream>
 
-using namespace std;
+#include"DeltaTime.h"
+#include"Client.h"
 
 class Client;
 /// <summary>

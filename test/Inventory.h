@@ -2,10 +2,6 @@
 #include "UI.h"
 #include <iostream>
 
-using namespace std;
-/// <summary>
-/// класс инвентаря
-/// </summary>
 class Inventory
 {
 public:

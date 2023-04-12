@@ -1,7 +1,4 @@
 #pragma once
-/// <summary>
-/// класс трёхмерного вектора
-/// </summary>
 class Vector3
 {
 public:

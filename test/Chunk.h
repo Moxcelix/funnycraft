@@ -12,8 +12,6 @@
 #include<string>
 #include<mutex>
 
-using namespace std;
-
 class Block;
 class World;
 class Terrain;

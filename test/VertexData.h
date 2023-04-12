@@ -9,7 +9,6 @@ constexpr auto DOWN_MULT = 0.5;
 constexpr auto Y_MULT = 0.67;
 constexpr auto X_MULT = 0.83;
 
-using std::vector;
 /// <summary>
 /// свкад цветов
 /// </summary>
@@ -63,8 +62,8 @@ private:
 	const static float face_crossRBLF[24];	// вершины диагональной грани
 
 public:
-	vector<GLfloat> Vertices; // вектор вершин
-	vector<GLfloat> Colors; // вектор цветов
+	std::vector<GLfloat> Vertices; // вектор вершин
+	std::vector<GLfloat> Colors; // вектор цветов
 
 	int face_count = 0; // количество граней
 	VertexData(); // конструктор

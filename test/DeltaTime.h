@@ -1,8 +1,6 @@
 #pragma once
 #include "time.h"
-/// <summary>
-/// класс дельты времени
-/// </summary>
+
 class DeltaTime
 {
 private:
