@@ -114,29 +114,16 @@ void Chunk::Generate()
 	if (!LoadChunk()) // если чанк не имеет сохранени€, генерируем его
 		world->Generate(this);
 }
-/// <summary>
-/// ѕолучение ссылки на экземпл€р блока по его ID
-/// </summary>
-/// <param name="ID"> блока </param>
-/// <returns> ”казатель на экземпл€р блока</returns>
-inline Block* Chunk::GetBlock(block_id ID)
-{
+
+inline Block const* Chunk::GetBlock(block_id ID) {
 	return Block::GetBlock(ID);
 }
-/// <summary>
-/// ‘ормирование данных меша
-/// </summary>
-/// <param name="data"> указатель на объект меша</param>
-/// <param name="uv"> указатель на объект данный UV</param>
-/// <param name="x"> ордината точки</param>
-/// <param name="y"> абсцисса точки</param>
-/// <param name="z"> аппликата точки</param>
-/// <param name="layer"> слой </param>
+
 void Chunk::GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, int layer)
 {
 	//if (InRange(x, y, z)) // если в границах чанка
 	{
-		Block* block = GetBlock(GetBlockID(x, y, z));		// получаем экземпл€р блока
+		auto block = GetBlock(GetBlockID(x, y, z));		// получаем экземпл€р блока
 		if (block->GetRenderLayer() == layer)				// если у блока текущий слой прорисовки
 			block->GetMeshData(data, uv, x, y, z, this);	// добавл€ем в данные меша данные блока
 	}
@@ -148,7 +135,7 @@ void Chunk::GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, int l
 /// <param name="y"> абсцисса точки</param>
 /// <param name="z"> аппликата точки</param>
 /// <returns>Ёкземлп€р блока</returns>
-inline Block* Chunk::GetBlock(int x, int y, int z)
+inline Block const* Chunk::GetBlock(int x, int y, int z)
 {
 	block_id id = GetBlockID(x, y, z); // получение ID блока
 	return Block::GetBlock(id);
@@ -291,7 +278,7 @@ Vector3 Chunk::GetLigthColor(int x, int y, int z)
 	return Vector3(l, l, l); // значение цвета
 }
 
-void Chunk::UpdateMem(){
+void Chunk::UpdateMem() {
 	for (int x = 0; x < 3; x++)
 		for (int y = 0; y < 3; y++)
 			for (int z = 0; z < 3; z++)
@@ -306,7 +293,7 @@ void Chunk::UpdateMem(){
 			}
 }
 
-void Chunk::UpdateLight(){
+void Chunk::UpdateLight() {
 	for (int x = 0; x < ChunkSize * 3; x++)
 		for (int y = 0; y < ChunkSize * 3; y++)
 			for (int z = 0; z < ChunkSize * 3; z++)
@@ -489,7 +476,7 @@ void Chunk::Render(unsigned int texture)
 	glBindTexture(GL_TEXTURE_2D, 0);				// ќтвз€ка текстуры от цели текстурировани€
 
 	if (Debug::bounds) // если включен режим границ чанков
-		Debug::DrawBox({ shift, shift, shift}, { s, s, s }, { .9f, .9f, .9f });
+		Debug::DrawBox({ shift, shift, shift }, { s, s, s }, { .9f, .9f, .9f });
 
 	// дополнительное обновление
 	if (ticks <= timeout && ticks > -1)

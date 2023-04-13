@@ -238,44 +238,20 @@ block_id World::GetBlockID(int x, int y, int z)
 
 	return -1; // ID пустоты
 }
-/// <summary>
-/// ID блока
-/// </summary>
-/// <param name="pos"></param>
-/// <returns></returns>
-block_id World::GetBlockID(Vector3 pos)
-{
+
+block_id World::GetBlockID(Vector3 pos) {
 	return GetBlockID(pos.x, pos.y, pos.z);
 }
-/// <summary>
-/// указатель на блок
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-/// <returns>указатель на блок </returns>
-Block* World::GetBlock(int x, int y, int z)
-{
+
+Block const* World::GetBlock(int x, int y, int z) {
 	return Block::GetBlock(GetBlockID(x, y, z));
 }
-/// <summary>
-/// указатель на блок
-/// </summary>
-/// <param name="pos"></param>
-/// <returns>указатель на блок </returns>
-Block* World::GetBlock(Vector3 pos)
-{
+
+Block const * World::GetBlock(Vector3 pos) {
 	return Block::GetBlock(GetBlockID(pos.x, pos.y, pos.z));
 }
-/// <summary>
-/// получить чанк
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-/// <returns>указатель на чанк</returns>
-Chunk* World::GetChunk(int x, int y, int z)
-{
+
+Chunk* World::GetChunk(int x, int y, int z) {
 	if (z < 0 || z >= WorldHeight * Chunk::ChunkSize)
 		return nullptr;
 

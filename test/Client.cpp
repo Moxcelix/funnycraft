@@ -112,7 +112,7 @@ void Client::DestroyBlock(int x, int y, int z)
 {
 	if (player.looking && !pause) // если не пауза и игрок смотрит на блок
 	{
-		Block* block = world->GetBlock(x, y, z); // получение блока
+		const auto block = world->GetBlock(x, y, z); // получение блока
 		particles.push_back(new Particles(block, world, { (float)x, (float)y, (float)z }, 20));
 		world->SetBlock(x, y, z, 0, true); // установить блок с обновлением мира
 	}

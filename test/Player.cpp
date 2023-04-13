@@ -79,7 +79,7 @@ void Player::MoveUpdate()
 {
 	float time = delta_time.Get();
 
-	speed = (sprint ? run_speed: walk_speed) * (fly ? fly_mult : 1); // скорость
+	speed = (sprint ? run_speed : walk_speed) * (fly ? fly_mult : 1); // скорость
 
 	float mult = 100 * time; // доп. множитель
 
@@ -217,7 +217,7 @@ void Player::Init(float x, float y, float z, float xRot, float zRot)
 	camera.zRot = zRot;
 	// флаги бокса
 	int flags = RB_CHECK_LOAD_STATE | RB_SPLIT_HEIGHT | RB_USE_COLLISION | RB_COLLISION_MAP;
-	body = new RigidBox(world, width, height, 9.8f * 0.05f, {x,y,z}, flags);
+	body = new RigidBox(world, width, height, 9.8f * 0.05f, { x,y,z }, flags);
 
 	GenereateSphere(); // создание сферы прогрузки территории
 }

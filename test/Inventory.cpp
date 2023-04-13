@@ -63,4 +63,6 @@ void Inventory::Init()
 	data[11] = Block::glowstone->id;
 	data[12] = Block::mossy_cobblestone->id;
 	data[13] = Block::bricks->id;
+	data[14] = Block::sandstone->id;
+	data[15] = Block::cactus->id;
 }

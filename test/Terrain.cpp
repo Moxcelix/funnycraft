@@ -108,9 +108,8 @@ float Terrain::linear(float x, float x0, float x1, float y0, float y1) {
 }
 
 void Terrain::SetGround(Chunk* chunk, int x, int y, int z) {
-	Block* block;
 	for (auto i = 0; i < ground_length + GetNoise(x, y, z, 0.03f, 4); i++) {
-		block = chunk->GetBlock(x, y, z - i);
+		const auto block = chunk->GetBlock(x, y, z - i);
 		if (block == Block::stone || block == Block::null) {
 			auto index = i;
 			if (index >= ground_length)

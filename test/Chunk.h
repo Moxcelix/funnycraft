@@ -37,8 +37,8 @@ public:
 	static float brightness;	// яркость
 
 	block_id GetBlockID(int x, int y, int z); // получение ID блока по координатам
-	inline Block* GetBlock(int x, int y, int z); // получение ссылки на блок по координатам
-	inline Block* GetBlock(block_id ID); // получение ссылки на блок по ID
+	inline Block const * GetBlock(int x, int y, int z); // получение ссылки на блок по координатам
+	inline Block const * GetBlock(block_id ID); // получение ссылки на блок по ID
 	inline bool InRange(int x); // проверка на попадание в рамки чанка по одному измерению
 	inline bool InRange(int x, int y, int z); // проверка на попадание в рамки чанка по трём измерениям
 

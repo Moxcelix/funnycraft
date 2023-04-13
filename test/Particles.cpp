@@ -1,6 +1,6 @@
 #include "Particles.h"
 
-Particles::Particles(Block* block, World* world, Vector3 pos, int count) {
+Particles::Particles(Block const * block, World* world, Vector3 pos, int count) {
 	this->world = world;	// указатель на мир
 	this->pos = pos;		// позиция центра
 

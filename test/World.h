@@ -50,7 +50,7 @@ public:
 
 	std::queue<Vector3Int> *global_update_queue; // очередь на глобальное обновление
 	std::vector<BlockPos> GlobalBuffer; // глобальный буфер блоков
-	std::vector<int> toRemove;; // вектора позиций буфера на удаление
+	std::vector<int> toRemove; // вектора позиций буфера на удаление
 
 	inline Chunk* GetChunk(int x, int y, int z); // получить чанк
 
@@ -61,8 +61,8 @@ public:
 	int chunksUpdateing = 0; // количесвтво обновляющихся чанков 
 	int chunks_loaded = 0; // количество загруженных чанков
 	 
-	Block* GetBlock(int x, int y, int z); // указатель на блок
-	Block* GetBlock(Vector3 pos); // указатель на блок
+	Block const* GetBlock(int x, int y, int z); // указатель на блок
+	Block const* GetBlock(Vector3 pos); // указатель на блок
 
 	block_id GetBlockID(int x, int y, int z); // ID блока
 	block_id GetBlockID(Vector3 pos); // ID блока

@@ -20,8 +20,8 @@ public:
 		Vector3 my_pos;
 		Vector3 pos;
 		World* world;
-		Block* block;
 		RigidBox* body;
+		Block const* block;
 
 		float max_time;
 
@@ -42,7 +42,7 @@ public:
 
 		float tx, ty, tdx, tdy;
 
-		Particle(Block* block, float x, float y, float z, float max_time, World* world, Vector3 pos) {
+		Particle(Block const * block, float x, float y, float z, float max_time, World* world, Vector3 pos) {
 			body = new RigidBox(world, size, size, g, { x + pos.x, y + pos.y, z + pos.z }, RB_USE_COLLISION);
 			dx = x * acceleration;
 			dy = y * acceleration;
@@ -116,7 +116,7 @@ public:
 	Vector3 pos;
 	vector<Particle*> particles;
 
-	Particles(Block* block, World* world, Vector3 pos, int count);
+	Particles(Block const * block, World* world, Vector3 pos, int count);
 
 	void Clear();
 	void Render(unsigned int texture);

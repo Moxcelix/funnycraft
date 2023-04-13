@@ -69,24 +69,24 @@ public:
 	VertexData(); // конструктор
 	~VertexData(); // деструктор
 
-	void FaceUp(int x, int y, int z);		// верхн€€ грань
-	void FaceDown(int x, int y, int z);		// нижн€€ грань
-	void FaceRight(int x, int y, int z);	// права€ грань
-	void FaceLeft(int x, int y, int z);		// лева€ грань
-	void FaceFront(int x, int y, int z);	// передн€€ грань
-	void FaceBack(int x, int y, int z);		// задн€€ грань
+	void FaceUp(float x, float y, float z);
+	void FaceDown(float x, float y, float z);
+	void FaceRight(float x, float y, float z);
+	void FaceLeft(float x, float y, float z);
+	void FaceFront(float x, float y, float z);
+	void FaceBack(float x, float y, float z);
 
-	void FaceUp(int x, int y, int z, ColorSquad colors);		// верхн€€ грань
-	void FaceDown(int x, int y, int z, ColorSquad colors);		// нижн€€ грань
-	void FaceRight(int x, int y, int z, ColorSquad colors);		// права€ грань
-	void FaceLeft(int x, int y, int z, ColorSquad colors);		// лева€ грань
-	void FaceFront(int x, int y, int z, ColorSquad colors);		// передн€€ грань
-	void FaceBack(int x, int y, int z, ColorSquad colors);		// задн€€ грань
+	void FaceUp(float x, float y, float z, ColorSquad colors);		// верхн€€ грань
+	void FaceDown(float x, float y, float z, ColorSquad colors);		// нижн€€ грань
+	void FaceRight(float x, float y, float z, ColorSquad colors);		// права€ грань
+	void FaceLeft(float x, float y, float z, ColorSquad colors);		// лева€ грань
+	void FaceFront(float x, float y, float z, ColorSquad colors);		// передн€€ грань
+	void FaceBack(float x, float y, float z, ColorSquad colors);		// задн€€ грань
 
-	void FaceParticle(int x, int y, int z, float scale, ColorSquad colors);		// грань
+	void FaceParticle(float x, float y, float z, float scale, ColorSquad colors);		// грань
 
-	void FaceCrossRFLB(int x, int y, int z, ColorSquad colors); // диагональна€ грань
-	void FaceCrossRBLF(int x, int y, int z, ColorSquad colors); // диагональна€ грань
+	void FaceCrossRFLB(float x, float y, float z, ColorSquad colors); // диагональна€ грань
+	void FaceCrossRBLF(float x, float y, float z, ColorSquad colors); // диагональна€ грань
 
 	void SetLayer(int layer);  // установка сло€
 

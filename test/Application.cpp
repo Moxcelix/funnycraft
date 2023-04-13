@@ -21,7 +21,6 @@ void Application::Run() {
 		LoadIcon();
 		GameInit();
 
-		// главный цикл программы, использующийся все рабочее время
 		while (!glfwWindowShouldClose(window) && !client.close) {
 			RenderWorld();
 			RenderUI();
@@ -35,13 +34,13 @@ void Application::Run() {
 }
 
 void Application::StopWindow() {
-	client.Clear();		// очистка клиента
-	system("cls");		// очистка консоли
-	glfwTerminate();	//завершение работы
+	client.Clear();
+	system("cls");
+	glfwTerminate();
 }
 
 void Application::OpenWindow() {
-	window = glfwCreateWindow(SIZE_X, SIZE_Y, "Multiverse", NULL, NULL);
+	window = glfwCreateWindow(SIZE_X, SIZE_Y, WIN_TITLE, NULL, NULL);
 	client.window = window;
 
 	if (!window) {
@@ -59,94 +58,94 @@ void Application::RenderWorld() {
 }
 
 void Application::TextureInit(unsigned int& texture, const char* name) {
-	int width, height, cnt; // параметры изображения
-	unsigned char* data = stbi_load(name, &width, &height, &cnt, 0); //загрузка текстуры
-	glGenTextures(1, &texture); // ссылка на текстуру
-	glBindTexture(GL_TEXTURE_2D, texture); // цель текстурирования 
-	// параметры текстуры 
+	int width, height, cnt; 
+	unsigned char* data = stbi_load(name, &width, &height, &cnt, 0); 
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-	glBindTexture(GL_TEXTURE_2D, 0);	// отвязка цели текстурирования 
-	stbi_image_free(data);				// освобождение памяти
+	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(data);
 }
 
 void Application::GameInit() {
-	client.Init(); // инициализация клиента
+	client.Init();
 
-	glEnable(GL_ALPHA_TEST);		// Включение отрисовки альфа-канала
-	glAlphaFunc(GL_GREATER, 0.5);	// Утсановка границы Cut-off
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Скрыть курсор
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.5);	
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	glEnable(GL_FOG);                       // Включение тумана 
-	glFogi(GL_FOG_MODE, GL_LINEAR);			// Выбор типа тумана
-	glHint(GL_FOG_HINT, GL_DONT_CARE);      // Вспомогательная установка тумана
+	glEnable(GL_FOG);
+	glFogi(GL_FOG_MODE, GL_LINEAR);
+	glHint(GL_FOG_HINT, GL_DONT_CARE);
 }
 
 void Application::Render() {
 	auto distance = World::render_distance * Chunk::ChunkSize;
 	auto sky_color = client.world->sky->getSkyColor(World::is_day);
-	float fog_color[4] = { sky_color.x, sky_color.y, sky_color.z, 1 }; // цвет неба
+	float fog_color[4] = { sky_color.x, sky_color.y, sky_color.z, 1 };
 
-	Resize(); //корректировка содержимого под размер окна
+	Resize();
 
-	glEnable(GL_DEPTH_TEST);					// Включение глубины отрисовки
-	glFogf(GL_FOG_START, distance * 0.5);		// Глубина, с которой начинается туман
-	glFogf(GL_FOG_END, distance);				// Глубина, где туман заканчивается
-	glFogf(GL_FOG_DENSITY, M_E / distance);		 // Насколько густым будет туман
+	glEnable(GL_DEPTH_TEST);
+	glFogf(GL_FOG_START, distance * 0.5);
+	glFogf(GL_FOG_END, distance);
+	glFogf(GL_FOG_DENSITY, M_E / distance);
 	glClearDepth(2);
-	glClearColor(sky_color.x, sky_color.y, sky_color.z, 1); // Цвет фона (небо)
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Флаги очистки 
-	glEnable(GL_TEXTURE_2D); // Использование 2D текстур
+	glClearColor(sky_color.x, sky_color.y, sky_color.z, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_TEXTURE_2D);
 
-	glFogfv(GL_FOG_COLOR, fog_color);				// Устанавливаем цвет тумана
-	client.CameraUpdate();							// Обновление камеры
-	glEnable(GL_CULL_FACE);							// Куллинг поверхностей вкл
-	glCullFace(GL_FRONT);							// Отключение отрисовки внутренних граней
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);	// Состояние текстурного массива
-	glEnableClientState(GL_VERTEX_ARRAY);			// Состояние массива вершин
-	glEnableClientState(GL_COLOR_ARRAY);			// Состояние массива цветов
+	glFogfv(GL_FOG_COLOR, fog_color);
+	client.CameraUpdate();
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
-	client.Render(); // вызов метода рендеринга в клиенте
+	client.Render();
 
-	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);	// Выход из состояния отрисовки текстур
-	glDisableClientState(GL_VERTEX_ARRAY);			// Отключение состояния массива вершин
-	glDisableClientState(GL_COLOR_ARRAY);			// Отключение состояния массива вершин
-	glDisable(GL_DEPTH_TEST);						// Выключение глубины отрисовки
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisable(GL_DEPTH_TEST);
 }
 
 void Application::Resize(int x, int y) {
 
-	float k = x / static_cast<float>(y);	// Отношение сторон
-	float sz = 0.01f;		// модификатор угла обзора
+	float k = x / static_cast<float>(y);
+	float sz = 0.01f;
 
-	glViewport(0, 0, x, y); // Точка обзора
-	glLoadIdentity();		// замена матрицы на матрицу по умолчанию
-	glFrustum(-k * sz, k * sz, -sz, sz, 0.01, 100); // перспектива
+	glViewport(0, 0, x, y);
+	glLoadIdentity();
+	glFrustum(-k * sz, k * sz, -sz, sz, 0.01, 100);
 }
 
 void Application::Resize() {
-	int width, height; // высота и ширина окна
-	glfwGetWindowSize(window, &width, &height); // получение значений
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
 
-	glViewport(0, 0, width, height); // корректировка точки зрения по полученным размерам окна
+	glViewport(0, 0, width, height);
 
-	float k = width / (float)height; // коэффициент отношения ширины к высоте
-	float sz = 0.015; // модификатор угла обзора
+	float k = width / (float)height;
+	float sz = 0.015;
 
-	glLoadIdentity(); // замена матрицы на матрицу по умолчанию
-	glFrustum(-k * sz, k * sz, -sz, sz, 0.01, 100); // установка перспективы
+	glLoadIdentity();
+	glFrustum(-k * sz, k * sz, -sz, sz, 0.01, 100);
 }
 
 void Application::CalculateFPS() {
-	d_time = delta_time.Get();		// получение значения дельты времени
-	fps = (1.0 / d_time) * 1000;	// кол-во кадров в секунду
+	d_time = delta_time.Get();
+	fps = (1.0 / d_time) * 1000;
 
-	static int counter = 0;		// счётчик тиков
-	counter++;					// инкрементация
+	static int counter = 0;
+	counter++;
 
 	if (counter > 30) {
 		lfps = static_cast<int>(fps);
@@ -156,8 +155,8 @@ void Application::CalculateFPS() {
 }
 
 void Application::Update() {
-	client.Update(d_time);				// обновление клиента
-	client.world->chunksUpdateing = 0;	// сброс кол-ва обновляющихся чанков
+	client.Update(d_time);
+	client.world->chunksUpdateing = 0;
 }
 
 void Application::RenderUI() {
@@ -191,18 +190,18 @@ void Application::LoadIcon() {
 }
 
 void Application::LoadResources() {
-	TextureInit(client.main_texture, "resources/environment/terrain.png");		// Инициализация текстур
-	TextureInit(client.ui.font, "resources/fonts/font.png");					// Инициализация шрифта
-	TextureInit(client.Menu.font, "resources/fonts/font.png");					// Инициализация шрифта
-	TextureInit(client.inventory.ui.font, "resources/fonts/font.png");			// Инициализация шрифта
+	TextureInit(client.main_texture, "resources/environment/terrain.png");
+	TextureInit(client.ui.font, "resources/fonts/font.png");
+	TextureInit(client.Menu.font, "resources/fonts/font.png");
+	TextureInit(client.inventory.ui.font, "resources/fonts/font.png");
 
 }
 
 void Application::SetCallbacks() {
-	glfwMakeContextCurrent(window);								//	установка контекста окна текущим для вызывающего потока
-	glfwSetKeyCallback(window, key_callback);					// включение событий клавиш
-	glfwSetMouseButtonCallback(window, mouse_button_callback);	// события кнопок мыши
-	glfwSetScrollCallback(window, scroll_callback);				// события колеса мыши
+	glfwMakeContextCurrent(window);
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 }
 
 void Application::InputWorldName() {
@@ -231,11 +230,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	if (yoffset > 0) // колесо мыши вверх
-		app.client.ButtonUp();
-
-	if (yoffset < 0) // колесо мыши вниз
-		app.client.ButtonDown();
+	if (yoffset > 0) app.client.ButtonUp();
+	if (yoffset < 0) app.client.ButtonDown();
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
