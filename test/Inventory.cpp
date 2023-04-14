@@ -57,12 +57,13 @@ void Inventory::Init()
 	data[5] = Block::planks->id;
 	data[6] = Block::grass->id;
 	data[7] = Block::sand->id;
-	data[8] = Block::wool->id;
-	data[9] = Block::tnt->id;
-	data[10] = Block::obsidian->id;
-	data[11] = Block::glowstone->id;
-	data[12] = Block::mossy_cobblestone->id;
-	data[13] = Block::bricks->id;
-	data[14] = Block::sandstone->id;
-	data[15] = Block::cactus->id;
+	data[8] = Block::tnt->id;
+	data[9] = Block::obsidian->id;
+	data[10] = Block::glowstone->id;
+	data[11] = Block::mossy_cobblestone->id;
+	data[12] = Block::bricks->id;
+	data[13] = Block::sandstone->id;
+	data[14] = Block::cactus->id;
+	data[15] = Block::wool_white->id;
+	data[16] = Block::wool_black->id;
 }

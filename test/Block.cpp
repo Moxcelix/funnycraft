@@ -463,15 +463,6 @@ public:
 	}
 };
 
-class BlockWool : public Block {
-public:
-	using Block::Block;
-
-	virtual Vector2 TileCoord(Direction direction) const override {
-		return Vector2(0, 11);
-	}
-};
-
 class BlockTNT : public Block {
 public:
 	using Block::Block;
@@ -632,6 +623,23 @@ public:
 	}
 };
 
+class BlockWool : public Block {
+private:
+	Vector3 color;
+public:
+	using Block::Block;
+
+	BlockWool(block_id id, string name, Vector3 color) : Block(id, name), color(color){}
+
+	virtual Vector2 TileCoord(Direction direction) const override {
+		return Vector2(0, 11);
+	}
+
+	virtual Vector3 Color(Direction direction) const override {
+		return this->color;
+	}
+};
+
 const Block* Block::null = new BlockNull(-1, "none");
 const Block* Block::air = new BlockAir(0, "air");
 const Block* Block::stone = new BlockStone(1, "stone");
@@ -647,7 +655,7 @@ const Block* Block::poppy = new BlockPoppy(10, "poppy");
 const Block* Block::dandelion = new BlockDandelion(11, "dandelion");
 const Block* Block::planks = new BlockPlanks(12, "planks");
 const Block* Block::sand = new BlockSand(13, "sand");
-const Block* Block::wool = new BlockWool(14, "wool");
+const Block* Block::cactus = new BlockCactus(14, "cactus");
 const Block* Block::tnt = new BlockTNT(15, "tnt");
 const Block* Block::obsidian = new BlockObsidian(16, "obsidian");
 const Block* Block::glowstone = new BlockGlowstone(17, "glowstone");
@@ -656,4 +664,5 @@ const Block* Block::bedrock = new BlockBedrock(19, "bedrock");
 const Block* Block::mossy_cobblestone = new BlockMossyCobblestone(20, "mossy_cobblestone");
 const Block* Block::bricks = new BlockBricks(21, "bricks");
 const Block* Block::sandstone = new BlockSandstone(22, "sandstone");
-const Block* Block::cactus = new BlockCactus(23, "cactus");
+const Block* Block::wool_white = new BlockWool(23, "wool_white", {1.f, 1.f, 1.f});
+const Block* Block::wool_black = new BlockWool(24, "wool_black", {.1f, .1f, .1f});

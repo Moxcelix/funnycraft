@@ -34,8 +34,7 @@ public:
 	const static Block* poppy;				
 	const static Block* dandelion;			
 	const static Block* planks;				
-	const static Block* sand;					
-	const static Block* wool;					
+	const static Block* sand;										
 	const static Block* tnt;					
 	const static Block* obsidian;				
 	const static Block* glowstone;			
@@ -45,6 +44,8 @@ public:
 	const static Block* bricks;				
 	const static Block* sandstone;				
 	const static Block* cactus;				
+	const static Block* wool_white;				
+	const static Block* wool_black;				
 	const static Block* null;					
 	
 	static Block** blocks;
