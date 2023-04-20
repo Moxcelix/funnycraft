@@ -1,4 +1,5 @@
 #include "Block.h"
+
 struct Chunk;
 vector<Block*> Block::BlockList = vector<Block*>();
 Block** Block::blocks = new Block * ();
@@ -10,71 +11,156 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 {
 	if (chunk->GetBlock(x, y, z + 1)->GetLayer() != GetLayer()
 		&& chunk->GetBlock(x, y, z + 1) != null) {
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z + 1), Color(Direction::Up));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceUpColor(x, y, z, chunk);
+
 		data->FaceUp(x, y, z, squad);
 
-		float i = TileCoord(Direction::Up).x;
-		float j = TileCoord(Direction::Up).y;
+		auto i = TileCoord(Direction::Up).x;
+		auto j = TileCoord(Direction::Up).y;
 
 		uv->AddUV(i, j);
 	}
 
 	if (chunk->GetBlock(x, y, z - 1)->GetLayer() != GetLayer()
 		&& chunk->GetBlock(x, y, z - 1) != null) {
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z - 1), Color(Direction::Down));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceDownColor(x, y, z, chunk);
+
 		data->FaceDown(x, y, z, squad);
 
-		float i = TileCoord(Direction::Down).x;
-		float j = TileCoord(Direction::Down).y;
+		auto i = TileCoord(Direction::Down).x;
+		auto j = TileCoord(Direction::Down).y;
 
 		uv->AddUV(i, j);
 	}
 	if (chunk->GetBlock(x, y + 1, z)->GetLayer() != GetLayer()
 		&& chunk->GetBlock(x, y + 1, z) != null) {
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y + 1, z), Color(Direction::Front));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceFrontColor(x, y, z, chunk);
+
 		data->FaceFront(x, y, z, squad);
 
-		float i = TileCoord(Direction::Front).x;
-		float j = TileCoord(Direction::Front).y;
+		auto i = TileCoord(Direction::Front).x;
+		auto j = TileCoord(Direction::Front).y;
 
 		uv->AddUV(i, j);
 	}
 	if (chunk->GetBlock(x, y - 1, z)->GetLayer() != GetLayer()
 		&& chunk->GetBlock(x, y - 1, z) != null) {
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y - 1, z), Color(Direction::Back));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceBackColor(x, y, z, chunk);
+
 		data->FaceBack(x, y, z, squad);
 
-		float i = TileCoord(Direction::Back).x;
-		float j = TileCoord(Direction::Back).y;
+		auto i = TileCoord(Direction::Back).x;
+		auto j = TileCoord(Direction::Back).y;
 
 		uv->AddUV(i, j);
 	}
 	if (chunk->GetBlock(x + 1, y, z)->GetLayer() != GetLayer()
 		&& chunk->GetBlock(x + 1, y, z) != null) {
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x + 1, y, z), Color(Direction::Right));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceRightColor(x, y, z, chunk);
+
 		data->FaceRight(x, y, z, squad);
 
-		float i = TileCoord(Direction::Right).x;
-		float j = TileCoord(Direction::Right).y;
+		auto i = TileCoord(Direction::Right).x;
+		auto j = TileCoord(Direction::Right).y;
 
 		uv->AddUV(i, j);
 	}
 	if (chunk->GetBlock(x - 1, y, z)->GetLayer() != GetLayer()
 		&& chunk->GetBlock(x - 1, y, z) != null) {
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x - 1, y, z), Color(Direction::Left));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceLeftColor(x, y, z, chunk);
+
 		data->FaceLeft(x, y, z, squad);
 
-		float i = TileCoord(Direction::Left).x;
-		float j = TileCoord(Direction::Left).y;
+		auto i = TileCoord(Direction::Left).x;
+		auto j = TileCoord(Direction::Left).y;
 
 		uv->AddUV(i, j);
 	}
+}
+
+ColorSquad Block::CalculateFaceUpColor(int x, int y, int z, Chunk* chunk) const {
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + i - 1, y + j - 1, z + 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Up)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Up)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Up)),
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Up))
+	};
+}
+ColorSquad Block::CalculateFaceDownColor(int x, int y, int z, Chunk* chunk) const {
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + i - 1, y + j - 1, z - 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Down)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Down)),
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Down)),
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Down)),
+	};
+}
+ColorSquad Block::CalculateFaceFrontColor(int x, int y, int z, Chunk* chunk) const {
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + i - 1, y + 1, z + j - 1);
+		}
+	}
+	return{
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Front)),
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Front)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Front)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Front)),
+	};
+}
+ColorSquad Block::CalculateFaceBackColor(int x, int y, int z, Chunk* chunk) const {
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + i - 1, y - 1, z + j - 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Back)),
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Back)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Back)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Back)),
+	};
+}
+ColorSquad Block::CalculateFaceRightColor(int x, int y, int z, Chunk* chunk) const {
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + 1, y + i - 1, z + j - 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Right)),
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Right)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Right)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Right)),
+	};
+}
+ColorSquad Block::CalculateFaceLeftColor(int x, int y, int z, Chunk* chunk) const {
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x - 1, y + i - 1, z + j - 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Left)),
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Left)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Left)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Left)),
+	};
 }
 
 Bound Block::GetBounds() const {
@@ -237,18 +323,18 @@ public:
 	virtual void GetMeshData(VertexData* data, UVData* uv,
 		int x, int y, int z, Chunk* chunk)  const override {
 		// верхняя грань
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z + 1), Color(Direction::Up));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceUpColor(x, y, z, chunk);
+
 		data->FaceUp(x, y, z, squad); // добавление вершин грани блока
 
-		float i = TileCoord(Direction::Up).x; // получение абсциссы текстуры в атласе
-		float j = TileCoord(Direction::Up).y; // получение ординаты текстуры в атласе
+		auto i = TileCoord(Direction::Up).x; // получение абсциссы текстуры в атласе
+		auto j = TileCoord(Direction::Up).y; // получение ординаты текстуры в атласе
 
 		uv->AddUV(i, j); // добавление UV-координат грани блока
 
 		// нижняя грань
-		color = Vector3::clrm(chunk->GetLigthColor(x, y, z - 1), Color(Direction::Down));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceDownColor(x, y, z, chunk);
+
 		data->FaceDown(x, y, z, squad);
 
 		i = TileCoord(Direction::Down).x;
@@ -257,8 +343,8 @@ public:
 		uv->AddUV(i, j);
 
 		// передняя грань
-		color = Vector3::clrm(chunk->GetLigthColor(x, y + 1, z), Color(Direction::Front));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceFrontColor(x, y, z, chunk);
+
 		data->FaceFront(x, y, z, squad);
 
 		i = TileCoord(Direction::Front).x;
@@ -267,8 +353,8 @@ public:
 		uv->AddUV(i, j);
 
 		// задняя грань
-		color = Vector3::clrm(chunk->GetLigthColor(x, y - 1, z), Color(Direction::Back));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceBackColor(x, y, z, chunk);
+
 		data->FaceBack(x, y, z, squad);
 
 		i = TileCoord(Direction::Back).x;
@@ -277,8 +363,8 @@ public:
 		uv->AddUV(i, j);
 
 		// правая грань
-		color = Vector3::clrm(chunk->GetLigthColor(x + 1, y, z), Color(Direction::Right));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceRightColor(x, y, z, chunk);
+
 		data->FaceRight(x, y, z, squad);
 
 		i = TileCoord(Direction::Right).x;
@@ -287,8 +373,8 @@ public:
 		uv->AddUV(i, j);
 
 		// левая грань
-		color = Vector3::clrm(chunk->GetLigthColor(x - 1, y, z), Color(Direction::Left));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceLeftColor(x, y, z, chunk);
+
 		data->FaceLeft(x, y, z, squad);
 
 		i = TileCoord(Direction::Left).x;
@@ -555,39 +641,39 @@ public:
 		const auto shift = 1.f / 16.f;
 		if (chunk->GetBlock(x, y, z + 1)->GetLayer() != GetLayer()
 			&& chunk->GetBlock(x, y, z + 1) != null) {
-			Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z + 1), Color(Direction::Up));
-			ColorSquad squad{ color };
+			auto squad = CalculateFaceUpColor(x, y, z, chunk);
+
 			data->FaceUp(x, y, z, squad);
 
-			float i = TileCoord(Direction::Up).x;
-			float j = TileCoord(Direction::Up).y;
+			auto i = TileCoord(Direction::Up).x;
+			auto j = TileCoord(Direction::Up).y;
 
 			uv->AddUV(i, j);
 		}
 
 		if (chunk->GetBlock(x, y, z - 1)->GetLayer() != GetLayer()
 			&& chunk->GetBlock(x, y, z - 1) != null) {
-			Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z - 1), Color(Direction::Down));
-			ColorSquad squad{ color };
+			auto squad = CalculateFaceDownColor(x, y, z, chunk);
+
 			data->FaceDown(x, y, z, squad);
 
-			float i = TileCoord(Direction::Down).x;
-			float j = TileCoord(Direction::Down).y;
+			auto i = TileCoord(Direction::Down).x;
+			auto j = TileCoord(Direction::Down).y;
 
 			uv->AddUV(i, j);
 		}
 
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y + 1, z), Color(Direction::Front));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceFrontColor(x, y, z, chunk);
+
 		data->FaceFront(x, y - shift, z, squad);
 
-		float i = TileCoord(Direction::Front).x;
-		float j = TileCoord(Direction::Front).y;
+		auto i = TileCoord(Direction::Front).x;
+		auto j = TileCoord(Direction::Front).y;
 
 		uv->AddUV(i, j);
 
-		color = Vector3::clrm(chunk->GetLigthColor(x, y - 1, z), Color(Direction::Back));
-		squad = color;
+		squad = CalculateFaceBackColor(x, y, z, chunk);
+
 		data->FaceBack(x, y + shift, z, squad);
 
 		i = TileCoord(Direction::Back).x;
@@ -595,8 +681,8 @@ public:
 
 		uv->AddUV(i, j);
 
-		color = Vector3::clrm(chunk->GetLigthColor(x + 1, y, z), Color(Direction::Right));
-		squad = color;
+		squad = CalculateFaceRightColor(x, y, z, chunk);
+
 		data->FaceRight(x - shift, y, z, squad);
 
 		i = TileCoord(Direction::Right).x;
@@ -604,8 +690,8 @@ public:
 
 		uv->AddUV(i, j);
 
-		color = Vector3::clrm(chunk->GetLigthColor(x - 1, y, z), Color(Direction::Left));
-		squad = color;
+		squad = CalculateFaceLeftColor(x, y, z, chunk);
+
 		data->FaceLeft(x + shift, y, z, squad);
 
 		i = TileCoord(Direction::Left).x;

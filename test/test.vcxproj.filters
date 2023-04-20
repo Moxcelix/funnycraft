@@ -182,6 +182,9 @@
     <ClInclude Include="Sky.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="light_utilities.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\Фото\1.png">

@@ -21,6 +21,8 @@ struct KeyConfig
 
 	int pause		= GLFW_KEY_ESCAPE;
 	int enter		= GLFW_KEY_ENTER;
-	int up			= GLFW_KEY_UP;
-	int down		= GLFW_KEY_DOWN;
+	int up_arrow	= GLFW_KEY_UP;
+	int down_arrow	= GLFW_KEY_DOWN;
+	int left_arrow	= GLFW_KEY_LEFT;
+	int right_arrow	= GLFW_KEY_RIGHT;
 };

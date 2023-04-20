@@ -252,8 +252,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			else if (key == app.client.key_config.fly)		app.client.player.SwitchFly();
 		}
 
-		if (key == app.client.key_config.up)			app.client.ButtonUp(); 
-		else if (key == app.client.key_config.down)		app.client.ButtonDown(); 
+		if (key == app.client.key_config.up_arrow)			app.client.ButtonUp(); 
+		else if (key == app.client.key_config.down_arrow)	app.client.ButtonDown(); 
+		else if (key == app.client.key_config.left_arrow)	app.client.ButtonLeft();
+		else if (key == app.client.key_config.right_arrow)	app.client.ButtonRight();
 		else if (key == app.client.key_config.enter)	app.client.enter = true; 
 		else if (key == app.client.key_config.pause)	app.client.Pause(!app.client.pause); 
 		else if (key == GLFW_KEY_F3)					app.wireframe = !app.wireframe;

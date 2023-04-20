@@ -202,23 +202,35 @@ void Client::NewWorld() {
 }
 
 void Client::ButtonUp() {
-	if (pause) // если пауза
-		MenuPos.y -= 1; // позиция меню вниз
-	else // иначе вниз в инвентаре
-		if (inventory.current < inventory.count - 1) 
+	if (pause) {
+		MenuPos.y -= 1;
+	}
+	else {
+		if (inventory.current < inventory.count - 1)
 			inventory.current++;
 		else
 			inventory.current = 0;
+	}
 }
 
 void Client::ButtonDown() {
-	if (pause) // если пауза
-		MenuPos.y += 1; // позиция меню вверх
-	else // иначе вверх в инвентаре
+	if (pause) {
+		MenuPos.y += 1;
+	}
+	else {
 		if (inventory.current > 0)
 			inventory.current--;
 		else
 			inventory.current = inventory.count - 1;
+	}
+}
+
+void Client::ButtonLeft() {
+	MenuPos.x -= 1;
+}
+
+void Client::ButtonRight() {
+	MenuPos.x += 1;
 }
 
 void Client::MoveCamera(double delta_time) {
@@ -337,8 +349,8 @@ void Client::Resize() {
 	int width, height;	// ширина и высота
 	glfwGetWindowSize(window, &width, &height); // Получение данных о размерах окна
 
-	mouse_pos_x = width / 2;	// позиция курсора абсцисса
-	mouse_pos_y = height / 2;	// позиция курсора ордината
+	mouse_pos_x = width / 2.;
+	mouse_pos_y = height / 2.;
 
 	ui.SetSize(width, height);
 	Menu.SetSize(width, height);

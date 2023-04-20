@@ -5,7 +5,7 @@
 class Inventory
 {
 public:
-	const static int count = 18;	// количество элементов
+	const static int count = 17;	// количество элементов
 	int data[count];				// массив элементов
 	UI ui;							// пользовательский интерфейс
 	int current = 0;				// текщуая позиция

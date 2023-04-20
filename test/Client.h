@@ -24,61 +24,63 @@ public:
 	Client();
 	~Client();
 
-	void Pause(bool active);					// активность меню
-	void ToSettings();							// переход к странице настроек
-	void ToMenu();								// переход к главной странице меню
-	void ToAgree();								// переход к странице согласи€
-	void ToNewWorld();							// переход к странице создани€ нового мира
-	void ToRenderDistance();					// переход к настройкам дальности прорисовки
-	void ButtonUp();							// кнопка вверх
-	void ButtonDown();							// кнопка вверх
+	void Pause(bool active);
+	void ToSettings();		
+	void ToMenu();			
+	void ToAgree();			
+	void ToNewWorld();		
+	void ToRenderDistance();
+	void ButtonUp();							
+	void ButtonDown();							
+	void ButtonRight();							
+	void ButtonLeft();							
 	
-	void SetBlock(int x, int y, int z, block_id id);	// установка блока
-	void SetBlock(Vector3 pos, block_id id);			// установка блока
-	void SetBlock();									// установка блока
-	void DestroyBlock(int x, int y, int z);				// разрушение блока
-	void DestroyBlock(Vector3 pos);						// разрушение блока
-	void DestroyBlock();								// разрушение блока
-	void CopyBlock();									// копирование блока
+	void SetBlock(int, int, int, block_id);
+	void SetBlock(Vector3, block_id);		
+	void SetBlock();								
+	void DestroyBlock(int, int, int);			
+	void DestroyBlock(Vector3);					
+	void DestroyBlock();							
+	void CopyBlock();								
 
-	void Resize();									// изменение размеров окна
-	void MoveCamera(double delta_time);				// движение камеры
-	void UpdatePhantomPos();						// обновление позиции фантома
-	void CameraUpdate();							// обновление камеры
-	void NewWorld();								// создание нового мира
-	void SetRenderDistance(int d);					// установка дальности прорисовки
+	void Resize();						
+	void MoveCamera(double);	
+	void UpdatePhantomPos();			
+	void CameraUpdate();				
+	void NewWorld();					
+	void SetRenderDistance(int);		
 
-	void Init();									// инициализаци€
-	void Update(float deltaTime);					// обновление 
-	void Clear();									// очистка
-	void Render();									// рендеринг
-	void RenderUI();								// рендеринг UI
-	void DrawMenu();								// отрисовка меню
+	void Init();					
+	void Update(float);	
+	void Clear();					
+	void Render();					
+	void RenderUI();				
+	void DrawMenu();				
 
-	GLFWwindow* window;			// указатель на экземл€р окна
-	UI ui, Menu, Settings;		// экземпл€ры пользовательского интерфейса
-	Player player;				// экземпл€р игрока
-	World* world;				// указатель на экземпл€р мира
-	Page* page;					// указатель на текущую страницу меню
-	Vector2Int MenuPos;			// позици€ в меню
-	Phantom phantom;			// фантом (рамки)
-	Inventory inventory;		// инвентарь
-	World::Settings gen_params;	// параметры генерации
-	Modifier* modifier;			// модификатор
-	KeyConfig key_config;		// конфигураци€ клавишей
+	GLFWwindow* window;		
+	UI ui, Menu, Settings;	
+	Player player;			
+	World* world;			
+	Page* page;				
+	Vector2Int MenuPos;		
+	Phantom phantom;		
+	Inventory inventory;	
+	World::Settings gen_params;
+	Modifier* modifier;		
+	KeyConfig key_config;	
 
 	vector<Particles*> particles;
 
-	bool pause = false; // флаг паузы
-	bool enter = false; // флаг подтверждени€
-	bool close = false; // флаг закрыти€
+	bool pause = false; 
+	bool enter = false; 
+	bool close = false; 
 
-	double mouse_pos_x, mouse_pos_y; // центральное положение курсора
-	unsigned int main_texture; // тексутрный атлас
+	double mouse_pos_x, mouse_pos_y;
+	unsigned int main_texture; 
 
 	struct Button {
-		string name;				// заголовок кнопки
-		std::function<void()> func; // ссылка на процедуру
+		string name;
+		std::function<void()> func;
 		Button() :name("?"), func([] {}) {}
 		Button(string name, std::function<void()> func) :name(name), func(func) {}
 		virtual void DoFunc() {

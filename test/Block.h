@@ -1,4 +1,7 @@
 #pragma once
+#include<iostream>
+#include<vector>
+
 #include "VertexData.h"
 #include "UVData.h"
 #include "Chunk.h"
@@ -6,8 +9,7 @@
 #include "Vector3.h"
 #include "Bound.h"
 #include "Typedefs.h"
-#include<iostream>
-#include<vector>
+#include "light_utilities.h"
 
 struct Chunk;
 
@@ -92,5 +94,12 @@ public:
 	inline virtual char Luminosity() const;
 	inline virtual bool Solid() const;
 	inline virtual Bound GetBounds() const;
+
+	inline virtual ColorSquad CalculateFaceUpColor(int, int, int, Chunk*) const;
+	inline virtual ColorSquad CalculateFaceDownColor(int, int, int, Chunk*) const;
+	inline virtual ColorSquad CalculateFaceFrontColor(int, int, int, Chunk*) const;
+	inline virtual ColorSquad CalculateFaceBackColor(int, int, int, Chunk*) const;
+	inline virtual ColorSquad CalculateFaceRightColor(int, int, int, Chunk*) const;
+	inline virtual ColorSquad CalculateFaceLeftColor(int, int, int, Chunk*) const;
 };
 

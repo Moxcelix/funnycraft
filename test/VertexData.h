@@ -9,44 +9,38 @@ constexpr auto DOWN_MULT = 0.5;
 constexpr auto Y_MULT = 0.67;
 constexpr auto X_MULT = 0.83;
 
-/// <summary>
-/// свкад цветов
-/// </summary>
 struct ColorSquad
 {
-	Vector3 colors[4]; // массив цветов
-	float alpha[4]{ 1,1,1,1 }; // массив значений альфа-канала
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="color"></param>
+	Vector3 colors[4];
+	float alpha[4]{ 1,1,1,1 };
+
 	ColorSquad(Vector3 color)
 	{
 		for (int i = 0; i < 4; i++)
 			colors[i] = color;
 	}
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="color"></param>
+
 	ColorSquad()
 	{
 		for (int i = 0; i < 4; i++)
 			colors[i] = {0,0,0};
 	}
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="colors"></param>
+
 	ColorSquad(Vector3 colors[4])
 	{
 		for (int i = 0; i < 4; i++)
 			this->colors[i] = colors[i];
 	}
+
+	ColorSquad(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+	{
+		colors[0] = a;
+		colors[1] = b;
+		colors[2] = c;
+		colors[3] = d;
+	}
 };
-/// <summary>
-/// класс данных вершин
-/// </summary>
+
 class VertexData
 {
 private:

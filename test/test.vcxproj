@@ -190,6 +190,7 @@
     <ClInclude Include="font.h" />
     <ClInclude Include="KeyConfig.h" />
     <ClInclude Include="LightMap.h" />
+    <ClInclude Include="light_utilities.h" />
     <ClInclude Include="Modifier.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Phantom.h" />
