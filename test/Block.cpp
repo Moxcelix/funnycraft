@@ -1,4 +1,5 @@
 #include "Block.h"
+#include "Client.h"
 
 struct Chunk;
 vector<Block*> Block::BlockList = vector<Block*>();
@@ -79,6 +80,10 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 }
 
 ColorSquad Block::CalculateFaceUpColor(int x, int y, int z, Chunk* chunk) const {
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x, y, z + 1), Color(Direction::Up));
+	}
+
 	Vector3 colors[3][3];
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -93,6 +98,10 @@ ColorSquad Block::CalculateFaceUpColor(int x, int y, int z, Chunk* chunk) const 
 	};
 }
 ColorSquad Block::CalculateFaceDownColor(int x, int y, int z, Chunk* chunk) const {
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x, y, z - 1), Color(Direction::Down));
+	}
+
 	Vector3 colors[3][3];
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -107,6 +116,10 @@ ColorSquad Block::CalculateFaceDownColor(int x, int y, int z, Chunk* chunk) cons
 	};
 }
 ColorSquad Block::CalculateFaceFrontColor(int x, int y, int z, Chunk* chunk) const {
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x, y + 1, z), Color(Direction::Front));
+	}
+
 	Vector3 colors[3][3];
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -121,6 +134,10 @@ ColorSquad Block::CalculateFaceFrontColor(int x, int y, int z, Chunk* chunk) con
 	};
 }
 ColorSquad Block::CalculateFaceBackColor(int x, int y, int z, Chunk* chunk) const {
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x, y - 1, z), Color(Direction::Back));
+	}
+
 	Vector3 colors[3][3];
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -135,6 +152,10 @@ ColorSquad Block::CalculateFaceBackColor(int x, int y, int z, Chunk* chunk) cons
 	};
 }
 ColorSquad Block::CalculateFaceRightColor(int x, int y, int z, Chunk* chunk) const {
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x + 1, y, z), Color(Direction::Right));
+	}
+
 	Vector3 colors[3][3];
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -149,6 +170,10 @@ ColorSquad Block::CalculateFaceRightColor(int x, int y, int z, Chunk* chunk) con
 	};
 }
 ColorSquad Block::CalculateFaceLeftColor(int x, int y, int z, Chunk* chunk) const {
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x - 1, y, z), Color(Direction::Left));
+	}
+
 	Vector3 colors[3][3];
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -206,7 +231,6 @@ void Block::Init()
 	BlockList.clear();
 }
 
-/// <param name="name"></param>
 Block::Block(block_id id, string name)
 {
 	this->id = id;				// ID блока

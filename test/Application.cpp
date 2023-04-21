@@ -192,7 +192,7 @@ void Application::LoadIcon() {
 void Application::LoadResources() {
 	TextureInit(client.main_texture, "resources/environment/terrain.png");
 	TextureInit(client.ui.font, "resources/fonts/font.png");
-	TextureInit(client.Menu.font, "resources/fonts/font.png");
+	TextureInit(client.menu.font, "resources/fonts/font.png");
 	TextureInit(client.inventory.ui.font, "resources/fonts/font.png");
 
 }

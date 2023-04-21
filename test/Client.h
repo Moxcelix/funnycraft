@@ -20,6 +20,9 @@ struct Modifier;
 class Client {
 public:
 	struct Page;
+	static struct Settings {
+		bool smooth_lighting = false;
+	} settings;
 
 	Client();
 	~Client();
@@ -48,7 +51,8 @@ public:
 	void UpdatePhantomPos();			
 	void CameraUpdate();				
 	void NewWorld();					
-	void SetRenderDistance(int);		
+	void SetRenderDistance(int);
+	void ReloadChunks();
 
 	void Init();					
 	void Update(float);	
@@ -58,7 +62,7 @@ public:
 	void DrawMenu();				
 
 	GLFWwindow* window;		
-	UI ui, Menu, Settings;	
+	UI ui, menu;	
 	Player player;			
 	World* world;			
 	Page* page;				
@@ -111,7 +115,7 @@ public:
 		string name;	// заголовок переключателя
 		bool* value;	// ссылка на переключаемое значение
 
-		Switcher(string name, bool* value) :name(name), value(value)
+		Switcher(string name, bool* value) :Button{}, name(name), value(value)
 		{
 			Button::name = name + (*value ? " On" : " Off");
 		}
@@ -123,10 +127,28 @@ public:
 		}
 	};
 
+	struct LamdaSwitcher : Switcher {
+
+		LamdaSwitcher(string name, bool* value, std::function<void()> func) :
+			Switcher(name, value) {
+
+			this->func = func;
+		}
+
+		virtual void DoFunc() override
+		{
+			*value = !(*value);
+			Button::name = name + (*value ? " On" : " Off");
+			func();
+		}
+	};
+
 	Switcher swt_mountains{ "Горы", &gen_params.params[0] };	// выключатель гор
 	Switcher swt_plains{ "Равнины", &gen_params.params[1] };	// выключатель равнин
 	Switcher swt_trees{ "Деревья", &gen_params.params[2] };		// выключатель деревьев
 	Switcher swt_grass{ "Трава", &gen_params.params[3] };		// выключатель травы
+
+	LamdaSwitcher swt_smooth_lighting{ "Плавное освещение", &settings.smooth_lighting, [&] {ReloadChunks(); } };
 
 	struct Page {
 		int count;			// количество параметров
@@ -136,7 +158,7 @@ public:
 	};
 	// страницы меню
 	Page page_menu{ 4, "Меню", new Button * [] {&btn_settings, &btn_new_world, &btn_continue, &btn_close}, new float[] {0, 0, 0, 0} };
-	Page page_settings{ 3, "Настройки", new Button * [] {&btn_render_distance,& btn_day,& btn_back}, new float[] {0, 0, 20} };
+	Page page_settings{ 4, "Настройки", new Button * [] {&btn_render_distance,& btn_day, &swt_smooth_lighting, & btn_back}, new float[] {0, 0, 0, 20} };
 	Page page_render_distance{ 5, "Дальность прорисовки", new Button * [] {&btn_small,&btn_medium, &btn_normal, &btn_large,& btn_back}, new float[] {0, 0, 0, 0, 20} };
 	Page page_agree{ 2, "Текущий мир будет удален", new Button * [] {&btn_confirm,& btn_cancel}, new float[] {0,0} };
 	Page page_new_world{ 6, "Параметры нового мира", new Button * [] {&swt_mountains,& swt_plains,& swt_trees,& swt_grass,& btn_create,& btn_back},new float[] {0, 0, 0, 0, 20, 0} };

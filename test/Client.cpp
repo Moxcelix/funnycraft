@@ -1,9 +1,10 @@
 #include "Client.h"
 #include <filesystem>
 
+Client::Settings Client::settings = Client::Settings();
+
 Client::Client()
 {
-	//Block::Init();					// инициализация массива блоков
 	modifier = new Modifier(this);
 }
 
@@ -15,7 +16,7 @@ void Client::Init()
 	player = Player();				// инициализация персонажа
 
 	ui.SetFlags(UI_DRAW_CROSS);
-	Menu.SetFlags(UI_DRAW_BACK_GROUND);
+	menu.SetFlags(UI_DRAW_BACK_GROUND);
 
 	// цвета меню
 	Vector3 gray = Vector3(0.2, 0.2, 0.2);
@@ -23,7 +24,7 @@ void Client::Init()
 	Vector3 colors[4]{ gray, gray, gray2, gray2 };
 	ColorSquad squad{ colors };
 
-	Menu.AddStaticPlane(UI::Corner::middle, 1, 0, 0, 480, 360, squad); // задний фон меню 
+	menu.AddStaticPlane(UI::Corner::middle, 1, 0, 0, 480, 360, squad); // задний фон меню 
 
 	MenuPos = Vector2Int(0, 0);		// позиция в меню
 	world = new World(&player);		// инициализация мира
@@ -259,9 +260,13 @@ void Client::MoveCamera(double delta_time) {
 }
 
 void Client::SetRenderDistance(int d) {
-	world->Clear(); // очистка старых чанков
-	World::render_distance = d; // обновление дальности прорисовки
-	player.GenereateSphere(); // генерация сферы видимости
+	world->Clear();
+	World::render_distance = d;
+	player.GenereateSphere();
+}
+
+void Client::ReloadChunks() {
+	world->Clear();
 }
 
 void Client::DrawMenu() {
@@ -273,7 +278,7 @@ void Client::DrawMenu() {
 
 	float indent = 0; // отступ
 
-	Menu.PrintText(UI::Corner::middle, 3, 0, 120, page->name, 1, 1, 0); // вывод на экран заголовка
+	menu.PrintText(UI::Corner::middle, 3, 0, 120, page->name, 1, 1, 0); // вывод на экран заголовка
 	for (int i = 0; i < page->count; i++) {
 		float r = 1, g = 1, b = 1;				// каналы цветов
 		string btn = page->buttons[i]->name;	// имя кнопки
@@ -286,7 +291,7 @@ void Client::DrawMenu() {
 			b = 0;
 		}
 		// вывод строки
-		Menu.PrintText(UI::Corner::middle, 3, 0,
+		menu.PrintText(UI::Corner::middle, 3, 0,
 			(page->count - i - 1 - page->count / 2) * 30 - indent,
 			btn, r, g, b);
 	}
@@ -296,7 +301,7 @@ void Client::DrawMenu() {
 		page->buttons[MenuPos.y]->DoFunc();
 	}
 
-	Menu.Render(); 
+	menu.Render(); 
 }
 
 void Client::UpdatePhantomPos() {
@@ -353,7 +358,7 @@ void Client::Resize() {
 	mouse_pos_y = height / 2.;
 
 	ui.SetSize(width, height);
-	Menu.SetSize(width, height);
+	menu.SetSize(width, height);
 	inventory.ui.SetSize(width, height);
 }
 
@@ -373,7 +378,7 @@ void Client::Clear() {
 	close = false;
 
 	ui.Clear();
-	Menu.Clear();
+	menu.Clear();
 	inventory.ui.Clear();
 
 	delete world;
