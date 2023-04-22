@@ -169,18 +169,18 @@ void Terrain::Generate(Chunk* chunk) {
 		}
 	}
 
-	for (int i = 0; i < world->GlobalBuffer.size(); i++) {
+	for (int i = 0; i < world->global_buffer.size(); i++) {
 		const auto pos = Vector3Int(
-			world->GlobalBuffer[i].x, 
-			world->GlobalBuffer[i].y,
-			world->GlobalBuffer[i].z) - chunk->pos;
+			world->global_buffer[i].x, 
+			world->global_buffer[i].y,
+			world->global_buffer[i].z) - chunk->pos;
 
 		if (chunk->InRange(pos.x, pos.y, pos.z)) {
 			if (!chunk->GetBlockID(pos.x, pos.y, pos.z)) {
-				chunk->SetBlock(pos.x, pos.y, pos.z, world->GlobalBuffer[i].block);
+				chunk->SetBlock(pos.x, pos.y, pos.z, world->global_buffer[i].block);
 			}
 
-			world->toRemove.push_back(i);
+			world->to_remove.push_back(i);
 		}
 	}
 }

@@ -1,5 +1,7 @@
 ﻿#include "Application.h"
 #include <stb_image.h>
+
+#include "LightMap.h"
 //💀
 void Application::Run() {
 	setlocale(LC_ALL, "Russian");
@@ -164,7 +166,7 @@ void Application::RenderUI() {
 	client.ui.PrintDebug("Позиция: " + to_string((int)client.player.pos.x) + " " +
 		std::to_string((int)client.player.pos.y) + " " + to_string((int)client.player.pos.z), 1, 1, 1);
 	client.ui.PrintDebug("Обновляется чанков: " + to_string(client.world->chunksUpdateing), 1, 1, 1);
-	client.ui.PrintDebug("Блоков в буфере: " + to_string(client.world->GlobalBuffer.size()), 1, 1, 1);
+	client.ui.PrintDebug("Блоков в буфере: " + to_string(client.world->global_buffer.size()), 1, 1, 1);
 	client.ui.PrintDebug("Зерно генерации: " + to_string(World::seed), 1, 1, 1);
 	client.ui.PrintDebug("Количество частиц " + to_string(client.particles.size()), 1, 1, 1);
 	client.ui.PrintDebug("Рабочий каталог: " + World::name, 1, 1, 1);

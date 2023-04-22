@@ -80,6 +80,10 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 }
 
 ColorSquad Block::CalculateFaceUpColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Up);
+	}
+
 	if (!Client::settings.smooth_lighting) {
 		return Vector3::clrm(chunk->GetLigthColor(x, y, z + 1), Color(Direction::Up));
 	}
@@ -98,6 +102,10 @@ ColorSquad Block::CalculateFaceUpColor(int x, int y, int z, Chunk* chunk) const 
 	};
 }
 ColorSquad Block::CalculateFaceDownColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Down);
+	}
+
 	if (!Client::settings.smooth_lighting) {
 		return Vector3::clrm(chunk->GetLigthColor(x, y, z - 1), Color(Direction::Down));
 	}
@@ -116,6 +124,10 @@ ColorSquad Block::CalculateFaceDownColor(int x, int y, int z, Chunk* chunk) cons
 	};
 }
 ColorSquad Block::CalculateFaceFrontColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Front);
+	}
+
 	if (!Client::settings.smooth_lighting) {
 		return Vector3::clrm(chunk->GetLigthColor(x, y + 1, z), Color(Direction::Front));
 	}
@@ -134,6 +146,10 @@ ColorSquad Block::CalculateFaceFrontColor(int x, int y, int z, Chunk* chunk) con
 	};
 }
 ColorSquad Block::CalculateFaceBackColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Back);
+	}
+
 	if (!Client::settings.smooth_lighting) {
 		return Vector3::clrm(chunk->GetLigthColor(x, y - 1, z), Color(Direction::Back));
 	}
@@ -152,6 +168,10 @@ ColorSquad Block::CalculateFaceBackColor(int x, int y, int z, Chunk* chunk) cons
 	};
 }
 ColorSquad Block::CalculateFaceRightColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Right);
+	}
+
 	if (!Client::settings.smooth_lighting) {
 		return Vector3::clrm(chunk->GetLigthColor(x + 1, y, z), Color(Direction::Right));
 	}
@@ -170,6 +190,10 @@ ColorSquad Block::CalculateFaceRightColor(int x, int y, int z, Chunk* chunk) con
 	};
 }
 ColorSquad Block::CalculateFaceLeftColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Left);
+	}
+
 	if (!Client::settings.smooth_lighting) {
 		return Vector3::clrm(chunk->GetLigthColor(x - 1, y, z), Color(Direction::Left));
 	}
@@ -464,6 +488,10 @@ public:
 	virtual bool Solid() const override {
 		return false;
 	}
+
+	virtual bool Transparent() const override {
+		return true;
+	}
 };
 
 class BlockBirch : public Block {
@@ -625,7 +653,7 @@ public:
 	}
 
 	virtual char Luminosity() const override {
-		return Chunk::MaxLight;
+		return LightMap::max_light;
 	}
 };
 

@@ -95,13 +95,12 @@ public:
 			beta = atan2(b.y, b.x);
 			gamma = atan2(c.y, c.x);
 
-			float l = world->GetLight(floor(my_pos.x + .5f), floor(my_pos.y + .5f), floor(my_pos.z + .5f));
+			auto l = world->GetLight(floor(my_pos.x + .5f), floor(my_pos.y + .5f), floor(my_pos.z + .5f));
 
-			if(l == 0) l = world->GetLight(floor(pos.x + .5f), floor(pos.y + .5f), floor(pos.z + .5f));
+			if(l.block == 0 || l.sky == 0) l = world->GetLight(floor(pos.x + .5f), floor(pos.y + .5f), floor(pos.z + .5f));
 
-			l = (l / float(Chunk::MaxLight)) * (1 - Chunk::brightness) + Chunk::brightness;
-
-			squad = ColorSquad(block->Color(tdir) * l);
+			squad = ColorSquad(Vector3::clrm(block->Color(tdir),
+				LightMap::instance().get_color(l, world->time.get_time_normal())));
 
 			vd->FaceParticle(0, 0, 0, 0.18f, squad);
 			ud->AddUV(tx + tdx, ty - tdy, .25f, .25f);

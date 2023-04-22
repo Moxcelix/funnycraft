@@ -27,7 +27,7 @@ void World::Create()
 	//SetConsoleCP(1251);
 	//SetConsoleOutputCP(1251);
 
-	srand(time(NULL));	// инициализация датчика случайных чисел
+	//srand(time(NULL));	// инициализация датчика случайных чисел
 	ifstream istream;	// поток чтения
 	istream.open(save_folder + name + "/world.bin"); // открытие потока
 
@@ -71,7 +71,7 @@ World::~World()
 			stream << settings.params[i] << endl; // сохранение параметра i
 		stream.close(); // закрытие потока
 	}
-	GlobalBuffer.clear(); // очистка глобального буфера
+	global_buffer.clear(); // очистка глобального буфера
 	// удаление очередей
 	delete render_queue;
 	delete create_queue;
@@ -81,7 +81,7 @@ World::~World()
 
 	// удаление чанков
 	for (int i = 0; i < chunks_loaded; i++)
-		delete Chunks[i];
+		delete chunks[i];
 }
 
 /// <summary>
@@ -94,7 +94,7 @@ void World::UpdateWorldLighting()
 	for (int j = 0; j < 2; j++)
 		for (int i = 0; i < chunks_loaded; i++)
 		{
-			Chunk* chunk = Chunks[i];
+			Chunk* chunk = chunks[i];
 			if (!chunk || GetChunk(chunk->pos.x, chunk->pos.y, chunk->pos.z + Chunk::ChunkSize))
 				continue;
 
@@ -114,11 +114,11 @@ void World::UpdateWorldLighting()
 /// </summary>
 void World::Clear()
 {
-	GlobalBuffer.clear();
+	global_buffer.clear();
 	render_queue->clear();
 	create_queue->clear();
 	for (int i = 0; i < chunks_loaded; i++)
-		delete Chunks[i];
+		delete chunks[i];
 	chunks_loaded = 0;
 }
 /// <summary>
@@ -175,11 +175,11 @@ bool World::CreateChunk(int x, int y, int z)
 	if (d > render_distance * Chunk::ChunkSize)
 		return false;
 
-	Chunks[chunks_loaded] = new Chunk(x, y, z, this);
-	Chunks[chunks_loaded]->UpdateMem();
-	Chunks[chunks_loaded]->Generate();
-	Chunks[chunks_loaded]->Update();
-	Chunks[chunks_loaded]->UpdateMesh();
+	chunks[chunks_loaded] = new Chunk(x, y, z, this);
+	chunks[chunks_loaded]->UpdateMem();
+	chunks[chunks_loaded]->Generate();
+	chunks[chunks_loaded]->Update();
+	chunks[chunks_loaded]->UpdateMesh();
 
 	for (int i = -1; i <= 1; i++)
 		for (int j = -1; j <= 1; j++)
@@ -206,12 +206,12 @@ void World::Render(unsigned int texture)
 {
 	for (int i = 0; i < chunks_loaded; i++)
 	{
-		if (!Chunks[i]) // если чанка нет, пропустить
+		if (!chunks[i]) // если чанка нет, пропустить
 			continue;
 
-		Vector3Int pos = Chunks[i]->pos; // позиция i-того чанка
+		Vector3Int pos = chunks[i]->pos; // позиция i-того чанка
 		glTranslatef(pos.x, pos.y, pos.z); // перемещение отрисовки на координаты
-		Chunks[i]->Render(texture); // рендер чанка
+		chunks[i]->Render(texture); // рендер чанка
 		glTranslatef(-pos.x, -pos.y, -pos.z); // обраное перемещение 
 	}
 }
@@ -261,7 +261,7 @@ Chunk* World::GetChunk(int x, int y, int z) {
 
 	for (int i = 0; i < chunks_loaded; i++)
 	{
-		Chunk* c = Chunks[i];
+		Chunk* c = chunks[i];
 
 		if (c->pos.x == x && c->pos.y == y && c->pos.z == z)
 		{
@@ -437,34 +437,20 @@ void World::AddToUpdate(Chunk* chunk)
 {
 	AddToUpdate(chunk->pos.x, chunk->pos.y, chunk->pos.z);
 }
-/// <summary>
-/// значение света
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-/// <returns>значение света</returns>
-char World::GetLight(int x, int y, int z)
-{
+
+Light World::GetLight(int x, int y, int z) {
 	Chunk* chunk = GetChunk(x, y, z);
 
 	if (chunk)
 		return chunk->GetLight(x - chunk->pos.x, y - chunk->pos.y, z - chunk->pos.z);
 
-	return 0;
+	return World::is_day ? Light{7, 0} : Light{0, 0};
 }
-/// <summary>
-/// добавить в очередь колонну чанков
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-void World::AddToUpdateColumn(int x, int y, int z)
-{
+
+void World::AddToUpdateColumn(int x, int y, int z) {
 	z = (z / Chunk::ChunkSize) * Chunk::ChunkSize;
 
-	for (int k = z + Chunk::ChunkSize; k >= 0; k -= Chunk::ChunkSize)
-	{
+	for (int k = z + Chunk::ChunkSize; k >= 0; k -= Chunk::ChunkSize) {
 		Chunk* chunk = GetChunk(x, y, k);
 
 		if (!chunk)
@@ -486,7 +472,7 @@ void World::Update()
 	// удаление чанков
 	for (int i = 0; i < chunks_loaded; i++)
 	{
-		float d = Vector3Int::Distance(player->IntPosition, Chunks[i]->pos);
+		float d = Vector3Int::Distance(player->IntPosition, chunks[i]->pos);
 
 		if (d > render_distance * Chunk::ChunkSize)
 		{
@@ -568,30 +554,30 @@ void World::Update()
 /// <param name="index"></param>
 void World::DeleteChunk(int index)
 {
-	float d = Vector3Int::Distance(player->IntPosition, Chunks[index]->pos);
+	float d = Vector3Int::Distance(player->IntPosition, chunks[index]->pos);
 
 	if (d <= render_distance * Chunk::ChunkSize) // если чанк всё еще подлежит удалению
 		return;
 
-	int x = Chunks[index]->pos.x;
-	int y = Chunks[index]->pos.y;
-	int z = Chunks[index]->pos.z;
+	int x = chunks[index]->pos.x;
+	int y = chunks[index]->pos.y;
+	int z = chunks[index]->pos.z;
 
 	if (Debug::active)
 		Debug::log << "chunk {" << x << ", " << y << ", " << z << "} deleted" << endl;
 
-	delete Chunks[index]; // вызов деструктора
-	Chunks[index] = nullptr; // обнуление указателя
+	delete chunks[index]; // вызов деструктора
+	chunks[index] = nullptr; // обнуление указателя
 	chunks_loaded--; // уменьшение количества загруженных чанков
 
 	if (chunks_loaded > 0) // сдвиг чанков в массиве
 	{
 		for (int i = index; i < chunks_loaded; i++)
 		{
-			Chunks[i] = Chunks[i + 1];
+			chunks[i] = chunks[i + 1];
 		}
 
-		Chunks[chunks_loaded] = nullptr;
+		chunks[chunks_loaded] = nullptr;
 	}
 	// обновление мемефикаций чанков
 	for (int i = -1; i <= 1; i++)
@@ -637,24 +623,24 @@ void World::UpdateIfEqual(int value1, int value2, int x, int y, int z)
 /// </summary>
 void World::RemoveCash()
 {
-	int l = GlobalBuffer.size();
-	sort(toRemove.begin(), toRemove.end(), greater<int>());
-	for (int i = 0; i < toRemove.size(); i++)
+	int l = global_buffer.size();
+	sort(to_remove.begin(), to_remove.end(), greater<int>());
+	for (int i = 0; i < to_remove.size(); i++)
 	{
-		if (toRemove[i] < l)
-			GlobalBuffer.erase(GlobalBuffer.begin() + toRemove[i]);
+		if (to_remove[i] < l)
+			global_buffer.erase(global_buffer.begin() + to_remove[i]);
 	}
-	toRemove.clear();
+	to_remove.clear();
 }
 /// <summary>
 /// рационализация буфера блоков
 /// </summary>
 void World::RationalizeBuffer()
 {
-	for (int i = 0; i < GlobalBuffer.size(); i++)
-		if (player->GetDistance(GlobalBuffer[i].x, GlobalBuffer[i].y, GlobalBuffer[i].z) > (render_distance + 1.1) * Chunk::ChunkSize)
+	for (int i = 0; i < global_buffer.size(); i++)
+		if (player->GetDistance(global_buffer[i].x, global_buffer[i].y, global_buffer[i].z) > (render_distance + 1.1) * Chunk::ChunkSize)
 		{
-			toRemove.push_back(i);
+			to_remove.push_back(i);
 		}
 }
 /// <summary>
@@ -725,7 +711,7 @@ void World::SetBufferBlock(int x, int y, int z, block_id block)
 	BlockPos block_pos = { x ,y, z, block };
 	BlockPos* finded = nullptr;
 
-	if (find_if(GlobalBuffer.begin(), GlobalBuffer.end(),
+	if (find_if(global_buffer.begin(), global_buffer.end(),
 		[&](BlockPos p) -> bool
 		{
 			if (p.x == block_pos.x && p.y == block_pos.y && p.z == block_pos.z)
@@ -734,9 +720,9 @@ void World::SetBufferBlock(int x, int y, int z, block_id block)
 				return true;
 			}
 			return false;
-		}) == GlobalBuffer.end())
+		}) == global_buffer.end())
 	{
-		GlobalBuffer.push_back(block_pos);
+		global_buffer.push_back(block_pos);
 	}
 	else
 	{

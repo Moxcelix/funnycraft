@@ -160,6 +160,7 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DeltaTime.cpp" />
+    <ClCompile Include="LightMap.cpp" />
     <ClCompile Include="Modifier.cpp" />
     <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Phantom.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Vector3.cpp" />
     <ClCompile Include="VertexData.cpp" />
     <ClCompile Include="World.cpp" />
+    <ClCompile Include="WorldTime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -212,6 +214,7 @@
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="VertexData.h" />
     <ClInclude Include="World.h" />
+    <ClInclude Include="WorldTime.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\Фото\1.png" />

@@ -5,6 +5,7 @@
 #include "World.h"
 #include "Vector3.h"
 #include "Typedefs.h"
+#include "LightMap.h"
 
 #include <GLFW/glfw3.h>
 #include<iostream>
@@ -15,61 +16,61 @@
 class Block;
 class World;
 class Terrain;
-/// <summary>
-/// структура чанка
-/// </summary>
-struct Chunk
-{
+
+struct Chunk {
 public:
-	Chunk(); // конструктор чанка
-	~Chunk(); // деструктор чанка
-	Chunk(int x, int y, int z, World* world); // конструктор чанка
+	Chunk();
+	~Chunk();
+	Chunk(int x, int y, int z, World* world);
 
-	const static int ChunkSize = 16; // размер чанка
-	const static int MaxLight = 7;	// максимальное значение света
+	const static int ChunkSize = 16;
 
-	Vector3Int pos;				// позиция чанка
-	World* world;				// ссылка на мир
-	Chunk* chunks[27];			// массив соседних чанков
+	Vector3Int pos;
+	World* world;
+	Chunk* chunks[27];
 
-	bool modified = false;		// флаг модификации чанка
-	bool is_solid = false;		// флаг чанка поверхности (для света)
-	static float brightness;	// яркость
+	bool modified = false;
+	bool is_solid = false;
+	static float brightness;
 
-	block_id GetBlockID(int x, int y, int z); // получение ID блока по координатам
-	inline Block const * GetBlock(int x, int y, int z); // получение ссылки на блок по координатам
-	inline Block const * GetBlock(block_id ID); // получение ссылки на блок по ID
-	inline bool InRange(int x); // проверка на попадание в рамки чанка по одному измерению
-	inline bool InRange(int x, int y, int z); // проверка на попадание в рамки чанка по трём измерениям
+	block_id GetBlockID(int x, int y, int z);
+	inline Block const * GetBlock(int x, int y, int z);
+	inline Block const * GetBlock(block_id ID);
+	inline bool InRange(int x);
+	inline bool InRange(int x, int y, int z);
 
-	bool InLightRange(int x, int y, int z); // проверка на попадание в рамки чанка по трём измерениям для света
-	void Generate(); // генерация чанка
-	void GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, int layer = 0); // формирование данных меша
-	void Render(unsigned int texture); // рендеринг чанка
-	void UpdateMesh(); // обновление меша
-	void Update(); // обновление
-	void UpdateMem(); // обновление мемофикаций
-	void Init(); // инициализация чанка
-	void SetBlock(int x, int y, int z, block_id block);	// установка блока по координатам и ID
-	void SetBlock(int x, int y, int z, Block* block);	// установка блока по координатам и ссылке
-	void Modify(); // изменение чанка
-	void SaveChunk(); // сохранение чанка
-	bool LoadChunk();  // загрузка чанка
-	inline void SetLight(int x, int y, int z, char l); // установка света 
-	void UpdateLight(); // обновление карты света
-	inline char GetLight(int x, int y, int z); // значение света по координатами
-	inline int CheckLight(int x, int y, int z); // проверка значения света по координатами
-	Vector3 GetLigthColor(int x, int y, int z); // цвет света по координатам
+	bool InLightRange(int x, int y, int z); 
+	void Generate();
+	void GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, int layer = 0);
+	void Render(unsigned int texture); 
+	void UpdateMesh(); 
+	void Update();
+	void UpdateMem();
+	void Init(); 
+	void SetBlock(int x, int y, int z, block_id block);
+	void SetBlock(int x, int y, int z, Block* block);
+	void Modify();
+	void SaveChunk();
+	bool LoadChunk();
+	inline void SetSkyLight(int x, int y, int z, unsigned char l);
+	inline void SetBlockLight(int x, int y, int z, unsigned char l);
+	void UpdateLight();
+	inline Light GetLight(int x, int y, int z);
+	inline Light CheckLight(int x, int y, int z);
+	Vector3 GetLigthColor(int x, int y, int z);
 
 	
 private:
 	VertexData data;	// данные вершин
 	UVData uv_data;		// данные UV-карты
 
-	block_id blocks[ChunkSize][ChunkSize][ChunkSize];				// трёхмерный массив-карта блоков
-	bool sky_light[ChunkSize][ChunkSize];							// двумерный массив-карта небесного света
-	char light_map[ChunkSize * 3][ChunkSize * 3][ChunkSize * 3];	// карта значений света
-	char buffer_light_map[ChunkSize][ChunkSize][ChunkSize];			// буффер значений света соседних чанков
+	block_id blocks[ChunkSize][ChunkSize][ChunkSize];
+	bool sky_light[ChunkSize][ChunkSize];			
+	Light light_map
+		[ChunkSize + LightMap::light_sampling * 2]
+		[ChunkSize + LightMap::light_sampling * 2]
+		[ChunkSize + LightMap::light_sampling * 2];	
+	Light buffer_light_map[ChunkSize][ChunkSize][ChunkSize];
 	
 	int ticks = 0;		// тики
 	int timeout = 4;	// таймаут повторного обновления
