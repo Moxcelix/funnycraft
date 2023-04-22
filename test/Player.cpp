@@ -2,86 +2,63 @@
 #include "Player.h"
 #include <cmath>
 
-/// <summary>
-/// конструктор персонажа
-/// </summary>
-Player::Player()
-{
-
+Player::Player(){
 }
-/// <summary>
-/// конструктор персонажа
-/// </summary>
-Player::Player(World* world)
-{
+
+Player::Player(World* world){
 	this->world = world;
 }
-/// <summary>
-/// генерация сферы видимости
-/// </summary>
-void Player::GenereateSphere()
-{
-	sphere.clear(); // очистка предыдущих значений
-	int render_distance = World::render_distance - 1; // дальность прорисовки
 
-	for (int i = -render_distance; i <= render_distance; i++)
-		for (int j = -render_distance; j <= render_distance; j++)
-			for (int k = -render_distance; k <= render_distance; k++)
-			{
-				if (i * i + j * j + k * k < render_distance * render_distance) // если точка внутри сферы
-				{
-					sphere.push_back(new Vector3Int(i, j, k)); // добавляем координаты в вектор
+void Player::GenereateSphere() {
+	sphere.clear(); 
+	int render_distance = World::render_distance - 1;
+
+	for (int i = -render_distance; i <= render_distance; i++) {
+		for (int j = -render_distance; j <= render_distance; j++) {
+			for (int k = -render_distance; k <= render_distance; k++) {
+				if (i * i + j * j + k * k < render_distance * render_distance) {
+					sphere.push_back(new Vector3Int(i, j, k)); 
 				}
 			}
-	for (int i = 0; i < sphere.size(); i++) // сортировка координат сферы по отдаленности от центра
-		for (int j = 0; j < sphere.size() - 1; j++)
-			if (*sphere[j] > *sphere[j + 1])
-				swap(sphere[j], sphere[j + 1]);
+		}
+	}
+	for (int i = 0; i < sphere.size(); i++) {
+		for (int j = 0; j < sphere.size() - 1; j++) {
+			if (*sphere[j] > *sphere[j + 1]) {
+				std::swap(sphere[j], sphere[j + 1]);
+			}
+		}
+	}
 
 	length = sphere.size();
 }
-/// <summary>
-/// загрузка территории 
-/// </summary>
-/// <param name="world"></param>
-void Player::LoadTerrain(World* world)
-{
-	if (world->chunks_loaded < World::MaxChunksCount - 1) // если количество загруженных чанков меньше максимального 
-		for (const Vector3Int* i : sphere) // обработка вектора сферы
-		{
-			// перевод координат в масштабы чанков
+
+void Player::LoadTerrain(World* world) {
+	if (world->chunks_loaded < World::MaxChunksCount - 1) {
+		for (const Vector3Int* i : sphere) {
 			int x = this->pos.x + i->x * Chunk::ChunkSize;
 			int y = this->pos.y + i->y * Chunk::ChunkSize;
 			int z = this->pos.z + i->z * Chunk::ChunkSize;
 
-			world->AddToCreate(x, y, z); // постановка координат в очередь создания чанков 
+			world->AddToCreate(x, y, z);
 		}
+	}
 }
-/// <summary>
-/// получение расстояния до игрока
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-/// <returns></returns>
-float Player::GetDistance(float x, float y, float z)
-{
+
+float Player::GetDistance(float x, float y, float z) {
 	x -= this->pos.x;
 	y -= this->pos.y;
 	z -= this->pos.z;
 
 	return sqrtf(x * x + y * y + z * z);
 }
-/// <summary>
-/// обновление движения
-/// </summary>
-void Player::MoveUpdate()
-{
+
+void Player::MoveUpdate() {
 	float time = delta_time.Get();
 
-	speed = (sprint ? run_speed : walk_speed) * (fly ? fly_mult : 1); // скорость
+	speed = (sprint ? run_speed : walk_speed) * (fly ? fly_mult : 1);
 
-	float mult = 100 * time; // доп. множитель
+	float mult = 100 * time;
 
 	forward.Move(acceleration * time, speed);
 	back.Move(acceleration * time, speed);
@@ -97,20 +74,19 @@ void Player::MoveUpdate()
 	float _up = up.GetVelocity();
 	float _down = down.GetVelocity();
 
-	// расчет вектора горизонтального движения
 	Vector2 xvel = Vector2((_right - _left) * sin(rot + M_PI_2), (_right - _left) * cos(rot + M_PI_2));
 	Vector2 yvel = Vector2((_forward - _back) * sin(rot), (_forward - _back) * cos(rot));
 	Vector2 direction = xvel + yvel;
 
 	float module = direction.Module();
 
-	if (module > speed) // нормализация вектора движения
+	if (module > speed)
 		direction = direction * (speed / module);
 
-	phasa += direction.Module() * time; // расчет фазы
+	phasa += direction.Module() * time;
 
 	velocity = Vector3(direction.x, direction.y, _up - _down).Module(); // вектор полной скорости
-	// приращение координат
+
 	static float dx = direction.x * time;
 	static float dy = direction.y * time;
 	static float dz = 0;
@@ -120,13 +96,11 @@ void Player::MoveUpdate()
 	dx = direction.x * time;
 	dy = direction.y * time;
 
-	if (fly)
-	{
+	if (fly) {
 		hv = 0;
 		dz = (_up - _down) * time;
 	}
-	else
-	{
+	else {
 		dz = 0;
 
 		if (body->grounded)
@@ -141,25 +115,16 @@ void Player::MoveUpdate()
 	body->Move(dx, dy, dz + hv * time);
 	pos = body->pos;
 }
-/// <summary>
-/// получение скорости
-/// </summary>
-/// <returns></returns>
-float Player::GetVelocity()
-{
+
+float Player::GetVelocity() {
 	return velocity;
 }
-/// <summary>
-/// обновление 
-/// </summary>
-void Player::Update()
-{
-	// целочисленные координаты игрока 
+
+void Player::Update() {
 	IntPosition.x = pos.x;
 	IntPosition.y = pos.y;
 	IntPosition.z = pos.z;
 
-	// расчет позиции в масштабе чанков
 	int X = pos.x, Y = pos.y, Z = pos.z;
 
 	if (X < 0)
@@ -177,13 +142,8 @@ void Player::Update()
 	ChunkPosition.y = Y;
 	ChunkPosition.z = Z;
 }
-/// <summary>
-/// Поворот камеры
-/// </summary>
-/// <param name="alpha"></param>
-/// <param name="beta"></param>
-void Player::RotateCamera(float alpha, float beta)
-{
+
+void Player::RotateCamera(float alpha, float beta) {
 	camera.zRot += beta;
 
 	if (camera.zRot < 0)
@@ -198,41 +158,27 @@ void Player::RotateCamera(float alpha, float beta)
 	if (camera.xRot > 180)
 		camera.xRot = 180;
 }
-/// <summary>
-/// Инициализация
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-/// <param name="xRot"></param>
-/// <param name="zRot"></param>
-void Player::Init(float x, float y, float z, float xRot, float zRot)
-{
-	// координаты
+
+void Player::Init(float x, float y, float z, float xRot, float zRot) {
 	this->pos.x = x;
 	this->pos.y = y;
 	this->pos.z = z;
-	// углы поворота камеры
+
 	camera.xRot = xRot;
 	camera.zRot = zRot;
-	// флаги бокса
+
 	int flags = RB_CHECK_LOAD_STATE | RB_SPLIT_HEIGHT | RB_USE_COLLISION | RB_COLLISION_MAP;
 	body = new RigidBox(world, width, height, 9.8f * 0.05f, { x,y,z }, flags);
 
-	GenereateSphere(); // создание сферы прогрузки территории
+	GenereateSphere();
 }
-/// <summary>
-/// Сохранение
-/// </summary>
-/// <param name="stream"></param>
-void Player::Save(ofstream& stream)
-{
-	// запись в поток данных
-	stream << pos.x << endl;
-	stream << pos.y << endl;
-	stream << pos.z << endl;
-	stream << camera.xRot << endl;
-	stream << camera.zRot << endl;
+
+void Player::Save(std::ofstream& stream) {
+	stream << pos.x << std::endl;
+	stream << pos.y << std::endl;
+	stream << pos.z << std::endl;
+	stream << camera.xRot << std::endl;
+	stream << camera.zRot << std::endl;
 }
 
 void Player::SwitchFly() {

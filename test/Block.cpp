@@ -2,7 +2,7 @@
 #include "Client.h"
 
 struct Chunk;
-vector<Block*> Block::BlockList = vector<Block*>();
+std::vector<Block*> Block::BlockList = std::vector<Block*>();
 Block** Block::blocks = new Block * ();
 
 Block::Block() {}
@@ -14,7 +14,10 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 		&& chunk->GetBlock(x, y, z + 1) != null) {
 		auto squad = CalculateFaceUpColor(x, y, z, chunk);
 
-		data->FaceUp(x, y, z, squad);
+		data->FaceUp(
+			static_cast<float>(x),
+			static_cast<float>(y), 
+			static_cast<float>(z), squad);
 
 		auto i = TileCoord(Direction::Up).x;
 		auto j = TileCoord(Direction::Up).y;
@@ -26,7 +29,10 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 		&& chunk->GetBlock(x, y, z - 1) != null) {
 		auto squad = CalculateFaceDownColor(x, y, z, chunk);
 
-		data->FaceDown(x, y, z, squad);
+		data->FaceDown(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
 
 		auto i = TileCoord(Direction::Down).x;
 		auto j = TileCoord(Direction::Down).y;
@@ -37,7 +43,10 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 		&& chunk->GetBlock(x, y + 1, z) != null) {
 		auto squad = CalculateFaceFrontColor(x, y, z, chunk);
 
-		data->FaceFront(x, y, z, squad);
+		data->FaceFront(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
 
 		auto i = TileCoord(Direction::Front).x;
 		auto j = TileCoord(Direction::Front).y;
@@ -48,7 +57,10 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 		&& chunk->GetBlock(x, y - 1, z) != null) {
 		auto squad = CalculateFaceBackColor(x, y, z, chunk);
 
-		data->FaceBack(x, y, z, squad);
+		data->FaceBack(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
 
 		auto i = TileCoord(Direction::Back).x;
 		auto j = TileCoord(Direction::Back).y;
@@ -59,7 +71,10 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 		&& chunk->GetBlock(x + 1, y, z) != null) {
 		auto squad = CalculateFaceRightColor(x, y, z, chunk);
 
-		data->FaceRight(x, y, z, squad);
+		data->FaceRight(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
 
 		auto i = TileCoord(Direction::Right).x;
 		auto j = TileCoord(Direction::Right).y;
@@ -70,7 +85,10 @@ void Block::GetMeshData(VertexData* data, UVData* uv,
 		&& chunk->GetBlock(x - 1, y, z) != null) {
 		auto squad = CalculateFaceLeftColor(x, y, z, chunk);
 
-		data->FaceLeft(x, y, z, squad);
+		data->FaceLeft(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
 
 		auto i = TileCoord(Direction::Left).x;
 		auto j = TileCoord(Direction::Left).y;
@@ -255,7 +273,7 @@ void Block::Init()
 	BlockList.clear();
 }
 
-Block::Block(block_id id, string name)
+Block::Block(block_id id, std::string name)
 {
 	this->id = id;				// ID блока
 	this->name = name;			// имя блока
@@ -767,7 +785,7 @@ private:
 public:
 	using Block::Block;
 
-	BlockWool(block_id id, string name, Vector3 color) : Block(id, name), color(color){}
+	BlockWool(block_id id, std::string name, Vector3 color) : Block(id, name), color(color){}
 
 	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(0, 11);

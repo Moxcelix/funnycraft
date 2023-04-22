@@ -89,15 +89,17 @@ void Application::GameInit() {
 
 void Application::Render() {
 	auto distance = World::render_distance * Chunk::ChunkSize;
-	auto sky_color = client.world->sky->getSkyColor(World::is_day);
+	auto sky_color = client.world->sky->get_sky_color(
+		client.world->time.get_time_normal() +
+		client.world->time.get_accumulator_value());
 	float fog_color[4] = { sky_color.x, sky_color.y, sky_color.z, 1 };
 
 	Resize();
 
 	glEnable(GL_DEPTH_TEST);
-	glFogf(GL_FOG_START, distance * 0.5);
-	glFogf(GL_FOG_END, distance);
-	glFogf(GL_FOG_DENSITY, M_E / distance);
+	glFogf(GL_FOG_START, static_cast<GLfloat>(distance * 0.5f));
+	glFogf(GL_FOG_END, static_cast<GLfloat>(distance));
+	glFogf(GL_FOG_DENSITY, static_cast<GLfloat>(M_E / distance));
 	glClearDepth(2);
 	glClearColor(sky_color.x, sky_color.y, sky_color.z, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -136,7 +138,7 @@ void Application::Resize() {
 	glViewport(0, 0, width, height);
 
 	float k = width / (float)height;
-	float sz = 0.015;
+	float sz = 0.015f;
 
 	glLoadIdentity();
 	glFrustum(-k * sz, k * sz, -sz, sz, 0.01, 100);
@@ -158,19 +160,20 @@ void Application::CalculateFPS() {
 
 void Application::Update() {
 	client.Update(d_time);
-	client.world->chunksUpdateing = 0;
+	client.world->chunks_updating = 0;
 }
 
 void Application::RenderUI() {
-	client.ui.PrintDebug("FPS: " + to_string(lfps) + " (" + to_string(ms) + " ms)", 1, 0, 0);
-	client.ui.PrintDebug("Позиция: " + to_string((int)client.player.pos.x) + " " +
-		std::to_string((int)client.player.pos.y) + " " + to_string((int)client.player.pos.z), 1, 1, 1);
-	client.ui.PrintDebug("Обновляется чанков: " + to_string(client.world->chunksUpdateing), 1, 1, 1);
-	client.ui.PrintDebug("Блоков в буфере: " + to_string(client.world->global_buffer.size()), 1, 1, 1);
-	client.ui.PrintDebug("Зерно генерации: " + to_string(World::seed), 1, 1, 1);
-	client.ui.PrintDebug("Количество частиц " + to_string(client.particles.size()), 1, 1, 1);
+	client.ui.PrintDebug("FPS: " + std::to_string(lfps) + " (" + std::to_string(ms) + " ms)", 1, 0, 0);
+	client.ui.PrintDebug("Позиция: " + std::to_string((int)client.player.pos.x) + " " +
+		std::to_string((int)client.player.pos.y) + " " + std::to_string((int)client.player.pos.z), 1, 1, 1);
+	client.ui.PrintDebug("Обновляется чанков: " + std::to_string(client.world->chunks_updating), 1, 1, 1);
+	client.ui.PrintDebug("Блоков в буфере: " + std::to_string(client.world->global_buffer.size()), 1, 1, 1);
+	client.ui.PrintDebug("Зерно генерации: " + std::to_string(World::seed), 1, 1, 1);
+	client.ui.PrintDebug("Количество частиц " + std::to_string(client.particles.size()), 1, 1, 1);
 	client.ui.PrintDebug("Рабочий каталог: " + World::name, 1, 1, 1);
-	client.ui.PrintDebug("ID блока: " + to_string(client.world->GetBlockID(client.player.look_pos)), 1, 1, 1);
+	client.ui.PrintDebug("ID блока: " + std::to_string(client.world->GetBlockID(client.player.look_pos)), 1, 1, 1);
+	client.ui.PrintDebug("Время: " + std::to_string(client.world->time.get_time()), 1, 1, 1);
 	client.ui.PrintDebug("[Esc] - Пауза", 0, 1, 1);
 
 	client.RenderUI();

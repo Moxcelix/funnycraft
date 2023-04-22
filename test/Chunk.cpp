@@ -106,13 +106,7 @@ bool Chunk::InLightRange(int x, int y, int z) {
 		(z >= 0 && z < ChunkSize + LightMap::light_sampling * 2);
 }
 
-void Chunk::UpdateMesh() // обновление меша
-{
-	UpdateLight();
-
-	ticks = 0;
-	world->chunksUpdateing++;
-
+void Chunk::UpdateMesh() {
 	ClearCash();
 
 	for (int x = 0; x < ChunkSize; x++) {
@@ -124,7 +118,16 @@ void Chunk::UpdateMesh() // обновление меша
 	}
 }
 
-void Chunk::Update() {
+void Chunk::Update()
+{
+	UpdateLight();
+	UpdateMesh();
+
+	ticks = 0;
+	world->chunks_updating++;
+}
+
+void Chunk::RecalculateSkyLightSolidity() {
 	auto b_count = 0;
 
 	for (int x = 0; x < ChunkSize; x++) {
@@ -158,8 +161,11 @@ void Chunk::SaveChunk()
 {
 	if (!modified) return;
 
-	ofstream stream;
-	stream.open(save_folder + World::name + "/" + to_string(pos.x) + " " + to_string(pos.y) + " " + to_string(pos.z) + ".dat");
+	std::ofstream stream;
+	stream.open(save_folder + World::name + "/" +
+		std::to_string(pos.x) + " " +
+		std::to_string(pos.y) + " " +
+		std::to_string(pos.z) + ".dat");
 
 	for (int x = 0; x < Chunk::ChunkSize; x++) {
 		for (int y = 0; y < Chunk::ChunkSize; y++) {
@@ -173,8 +179,11 @@ void Chunk::SaveChunk()
 }
 
 bool Chunk::LoadChunk() {
-	ifstream stream;
-	stream.open(save_folder + World::name + "/" + to_string(pos.x) + " " + to_string(pos.y) + " " + to_string(pos.z) + ".dat");
+	std::ifstream stream;
+	stream.open(save_folder + World::name + "/" +
+		std::to_string(pos.x) + " " + 
+		std::to_string(pos.y) + " " + 
+		std::to_string(pos.z) + ".dat");
 
 	if (stream.is_open())
 	{
@@ -435,7 +444,7 @@ void Chunk::Render(unsigned int texture) {
 
 	if (ticks > timeout) {
 		UpdateMem();
-		UpdateMesh();
+		Update();
 		ticks = -1;
 	}
 }

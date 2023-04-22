@@ -66,7 +66,7 @@ public:
 			delete body;
 		}
 
-		void Move(double deltaTime) {
+		void Move(float deltaTime) {
 			time += deltaTime * 0.001f;
 			is_dead = time >= max_time;
 
@@ -95,9 +95,15 @@ public:
 			beta = atan2(b.y, b.x);
 			gamma = atan2(c.y, c.x);
 
-			auto l = world->GetLight(floor(my_pos.x + .5f), floor(my_pos.y + .5f), floor(my_pos.z + .5f));
+			auto l = world->GetLight(
+				static_cast<int>(floor(my_pos.x + .5f)), 
+				static_cast<int>(floor(my_pos.y + .5f)),
+				static_cast<int>(floor(my_pos.z + .5f)));
 
-			if(l.block == 0 || l.sky == 0) l = world->GetLight(floor(pos.x + .5f), floor(pos.y + .5f), floor(pos.z + .5f));
+			if(l.block == 0 || l.sky == 0) l = world->GetLight(
+				static_cast<int>(floor(pos.x + .5f)),
+				static_cast<int>(floor(pos.y + .5f)),
+				static_cast<int>(floor(pos.z + .5f)));
 
 			squad = ColorSquad(Vector3::clrm(block->Color(tdir),
 				LightMap::instance().get_color(l, world->time.get_time_normal())));
@@ -113,12 +119,12 @@ public:
 	VertexData vertexData;
 	UVData uvData;
 	Vector3 pos;
-	vector<Particle*> particles;
+	std::vector<Particle*> particles;
 
 	Particles(Block const * block, World* world, Vector3 pos, int count);
 
 	void Clear();
 	void Render(unsigned int texture);
-	void Update(double deltaTime);
+	void Update(float deltaTime);
 };
 

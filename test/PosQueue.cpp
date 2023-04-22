@@ -1,99 +1,61 @@
 #include "PosQueue.h"
 #include<iostream>
-/// <summary>
-/// добавление элемента в очередь
-/// </summary>
-/// <param name="element"></param>
-void PosQueue::add(Vector3Int* element)
-{
+
+void PosQueue::add(Vector3Int element) {
 	std::lock_guard guard(mtx);
 
-	if (elementsAdded < MaxCount) // если элементов меньше максимального значения
-	{
-		elements[elementsAdded] = element; // добавление элемента
-		elementsAdded++;	// инкрементация кол-ва добавленных элементов
+	if (elementsAdded < MaxCount) {
+		elements[elementsAdded] = element; 
+		elementsAdded++;
 	}
-	else
-		delete element; // удалить указатель
 }
-/// <summary>
-/// проверка на наличие элемента в очереди
-/// </summary>
-/// <param name="element"></param>
-/// <returns>индекс элемента + 1</returns>
-int PosQueue::contains(Vector3Int* element)
-{
+
+int PosQueue::contains(Vector3Int& element) {
 	for (int i = 0; i < elementsAdded; i++)
 	{
-		if (*elements[i] == *element) // если i-тый элемент равен элементу
-			return i + 1; // вернуть индекс + 1
+		if (elements[i] == element)
+			return i + 1;
 	}
 	return 0;
 }
-/// <summary>
-/// очистка очереди
-/// </summary>
-void PosQueue::clear()
-{
+
+void PosQueue::clear() {
 	std::lock_guard guard(mtx);
 
-	for (int i = 0; i < elementsAdded; i++)
-		delete elements[i]; // удалить i-тый элемент
-	elementsAdded = 0;		// кол-во добавленных элементов равно нулю
+	elementsAdded = 0;
 }
-/// <summary>
-/// удаления последнего элемента
-/// </summary>
-void PosQueue::pop_back()
-{
+
+void PosQueue::pop_back() {
 	std::lock_guard guard(mtx);
 
-	if (elementsAdded == 0) // если кол-во равно 0
-		return;				// вернуть
+	if (elementsAdded == 0)
+		return;
 
-	elementsAdded--;				// декриментация кол-ва 
-	delete elements[elementsAdded];	// удаление элемента
+	elementsAdded--;
 }
-/// <summary>
-/// удаление первого элемента
-/// </summary>
-void PosQueue::pop_front()
-{
+
+void PosQueue::pop_front() {
 	std::lock_guard guard(mtx);
 
-	if (elementsAdded == 0) // если кол-во равно 0
-		return;				// вернуть
+	if (elementsAdded == 0)
+		return;	
 
-	delete elements[0];		// удалить первый
-	// смещение элементов
 	for (int i = 1; i < elementsAdded; i++)
 	{
 		elements[i - 1] = elements[i];
 	}
 
-	elementsAdded--; // декриментация кол-ва
+	elementsAdded--;
 }
-/// <summary>
-/// последний элемент
-/// </summary>
-/// <returns>последний элемент</returns>
-Vector3Int* PosQueue::back()
-{
+
+Vector3Int& PosQueue::back() {
 	return elements[elementsAdded - 1];
 }
-/// <summary>
-/// первый элемент
-/// </summary>
-/// <returns>первый элемент</returns>
-Vector3Int* PosQueue::front()
-{
+
+Vector3Int& PosQueue::front() {
 	return elements[0];
 }
-/// <summary>
-/// размер очереди
-/// </summary>
-/// <returns>количество элементов</returns>
-int PosQueue::size()
-{
-	return elementsAdded; // вернуть кол-во элементов
+
+int PosQueue::size() {
+	return elementsAdded;
 }

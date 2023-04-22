@@ -1,6 +1,6 @@
 #include "Debug.h"
 std::ofstream Debug::log = std::ofstream();
-bool Debug::active = true;
+bool Debug::active = false;
 bool Debug::bounds = false;
 /// <summary>
 /// вывод сообщения в файл

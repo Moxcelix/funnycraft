@@ -43,9 +43,10 @@ public:
 	void Generate();
 	void GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, int layer = 0);
 	void Render(unsigned int texture); 
-	void UpdateMesh(); 
-	void Update();
+	void Update(); 
+	void RecalculateSkyLightSolidity();
 	void UpdateMem();
+	void UpdateMesh();
 	void Init(); 
 	void SetBlock(int x, int y, int z, block_id block);
 	void SetBlock(int x, int y, int z, Block* block);

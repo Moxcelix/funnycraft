@@ -1,6 +1,5 @@
 #include "UI.h"
-void UI::PrintText(Text t)
-{
+void UI::PrintText(Text t) {
 	int l = t.text.length();
 	t.ID = IDCounter;
 	t.vertices = new float[l * 12];
@@ -54,12 +53,8 @@ void UI::PrintText(Text t)
 	IDCounter++;
 	texts.push_back(t);
 }
-/// <summary>
-/// Вывод на экран панели
-/// </summary>
-/// <param name="p"></param>
-void UI::PrintPlane(Plane p)
-{
+
+void UI::PrintPlane(Plane p) {
 	float q = winHeight / float(winWidth);
 
 	p.vertices = new float[12];
@@ -86,35 +81,17 @@ void UI::PrintPlane(Plane p)
 	}
 	planes.push_back(p);
 }
-/// <summary>
-/// Вывод текста на экран
-/// </summary>
-/// <param name="corner"></param>
-/// <param name="size"></param>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="str"></param>
-/// <param name="r"></param>
-/// <param name="g"></param>
-/// <param name="b"></param>
-void UI::PrintText(Corner corner, float size, int x, int y, string str, float r, float g, float b)
-{
+
+void UI::PrintText(Corner corner, float size, int x, int y,
+	std::string str, float r, float g, float b) {
 	Text t{ x, -y, size, r, g, b, str, corner };
 	PrintText(t);
 	IDCounter++;
 }
 
-/// <summary>
-/// Угол привязки 
-/// </summary>
-/// <param name="corner"></param>
-/// <param name="width"></param>
-/// <param name="height"></param>
-/// <param name="xShift"></param>
-/// <param name="yShift"></param>
-/// <returns>положение относительно угла привязки</returns>
-Vector2 UI::GetCorner(Corner corner, float width, float height, int xShift, int yShift)
-{
+
+Vector2 UI::GetCorner(Corner corner, float width,
+	float height, int xShift, int yShift) {
 	float xs = 2 * xShift / float(winWidth);
 	float ys = 2 * yShift / float(winHeight);
 	height *= 2 / float(winHeight);
@@ -142,43 +119,29 @@ Vector2 UI::GetCorner(Corner corner, float width, float height, int xShift, int 
 		return Vector2(1 - xs - width, -1 + ys);
 	}
 }
-/// <summary>
-/// Вывод на экран отладочного текста
-/// </summary>
-/// <param name="str"></param>
-/// <param name="r"></param>
-/// <param name="g"></param>
-/// <param name="b"></param>
-void UI::PrintDebug(string str, float r, float g, float b)
-{
+
+void UI::PrintDebug(std::string str, float r, float g, float b) {
 	const int step = 20;
 	PrintText(Corner::left_up, 2, 0, -step * debug_line_counter, str, r, g, b);
 	debug_line_counter++;
 }
-/// <summary>
-/// Рендеринг элементов
-/// </summary>
-void UI::Render()
-{
+
+void UI::Render() {
 	PrintStatic();
 	glPushMatrix();
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	// рендеринг панелей
-	for (int i = 0; i < planes.size(); i++)
-	{
+	for (int i = 0; i < planes.size(); i++) {
 		glVertexPointer(3, GL_FLOAT, 0, planes[i].vertices);
 		glColorPointer(3, GL_FLOAT, 0, planes[i].colors);
 
 		glDrawArrays(GL_QUADS, 0, planes.size() * 4);
 	}
 
-	// рендеринг букв
 	glBindTexture(GL_TEXTURE_2D, font);
-	for (int i = 0; i < texts.size(); i++)
-	{
+	for (int i = 0; i < texts.size(); i++) {
 		glTexCoordPointer(2, GL_FLOAT, 0, texts[i].uvs);
 		glVertexPointer(3, GL_FLOAT, 0, texts[i].vertices);
 		glColorPointer(3, GL_FLOAT, 0, texts[i].colors);
@@ -215,77 +178,44 @@ void UI::Render()
 
 	debug_line_counter = 0;
 }
-/// <summary>
-/// Печать статичного текста
-/// </summary>
-void UI::PrintStatic()
-{
+
+void UI::PrintStatic() {
 	float q = winHeight / float(winWidth);
-	for (const Plane& p : static_planes)
-	{
+	for (const Plane& p : static_planes) {
 		PrintPlane(p);
 	}
-	for (const Text& t : static_texts)
-	{
+	for (const Text& t : static_texts) {
 		PrintText(t);
 	}
 }
-/// <summary>
-/// Добавление статичного текста
-/// </summary>
-/// <param name="corner"></param>
-/// <param name="size"></param>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="str"></param>
-/// <param name="r"></param>
-/// <param name="g"></param>
-/// <param name="b"></param>
-/// <returns>объект текста</returns>
-Text UI::AddStaticText(Corner corner, float size, int x, int y, string str, float r, float g, float b)
-{
+
+Text UI::AddStaticText(Corner corner, float size, int x, int y, 
+	std::string str, float r, float g, float b) {
 	Text t{ x, -y, size, r, g, b, str , corner };
 	t.ID = IDCounter;
 	static_texts.push_back(t);
 	IDCounter++;
 	return t;
 }
-/// <summary>
-/// Удаление статичных текстов
-/// </summary>
-void UI::RemoveStaticText()
-{
+
+void UI::RemoveStaticText() {
 	static_texts.clear();
 }
-/// <summary>
-/// Удаление статичного тектса
-/// </summary>
-/// <param name="t"></param>
-void UI::RemoveStaticText(Text t)
-{
+
+void UI::RemoveStaticText(Text t) {
 	int j = -1;
-	for (int i = 0; i < static_texts.size(); i++)
-		if (t == static_texts[i])
-		{
+	for (int i = 0; i < static_texts.size(); i++) {
+		if (t == static_texts[i]) {
 			j = i;
 			break;
 		}
+	}
 	if (j >= 0)
 		static_texts.erase(static_texts.begin() + j);
 }
-/// <summary>
-/// Добавление статичной панели
-/// </summary>
-/// <param name="corner"></param>
-/// <param name="size"></param>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="w"></param>
-/// <param name="h"></param>
-/// <param name="colors"></param>
-/// <returns>объект панели</returns>
-Plane UI::AddStaticPlane(Corner corner, float size, int x, int y, int w, int h, ColorSquad colors)
-{
+
+Plane UI::AddStaticPlane(Corner corner, float size,
+	int x, int y, int w, int h, ColorSquad colors) {
 	Plane p{ x, y, w, h, size, colors , corner };
 	p.ID = IDCounter;
 	static_planes.push_back(p);
@@ -293,31 +223,18 @@ Plane UI::AddStaticPlane(Corner corner, float size, int x, int y, int w, int h, 
 	return p;
 }
 
-/// <summary>
-/// Установка размеров окна
-/// </summary>
-/// <param name="w"></param>
-/// <param name="h"></param>
-void UI::SetSize(int w, int h)
-{
+void UI::SetSize(int w, int h) {
 	winHeight = h;
 	winWidth = w;
 }
-/// <summary>
-/// утсановка флагов
-/// </summary>
-/// <param name="flags"></param>
-void UI::SetFlags(int flags)
-{
+
+void UI::SetFlags(int flags) {
 	this->flags = flags;
 }
-/// <summary>
-/// Очистка
-/// </summary>
-void UI::Clear()
-{
-	texts.clear();				// вектор текстов
-	static_texts.clear();		// вектор статичных текстов
-	static_planes.clear();		// вектор статичных панелей
-	planes.clear();				// вектор панелей
+
+void UI::Clear() {
+	texts.clear();		
+	static_texts.clear();
+	static_planes.clear();
+	planes.clear();		
 }

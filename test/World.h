@@ -17,10 +17,10 @@ class Player;
 struct Chunk;
 
 class World {
-public:	
+public:
 	static struct Settings {
 		const static int count = 4;
-		bool params[count]{true, true, true, true};
+		bool params[count]{ true, true, true, true };
 
 		void Clear() {
 			for (int i = 0; i < count; i++)
@@ -33,20 +33,20 @@ public:
 		block_id block;
 	};
 
-	static bool is_day;
 	constexpr static int MaxChunksCount = 512 * 8;
 	constexpr static int WorldHeight = 16;
 
-	PosQueue *render_queue;
-	PosQueue *update_queue;
-	PosQueue *create_queue;
+	PosQueue* render_queue;
+	PosQueue* update_queue;
+	PosQueue* create_queue;
+	PosQueue* global_update_queue;
+
 	Player* player;
-	Chunk* chunks[MaxChunksCount]; 
+	Chunk* chunks[MaxChunksCount];
 	Sky* sky;
 
 	WorldTime time;
 
-	std::queue<Vector3Int> *global_update_queue;
 	std::vector<BlockPos> global_buffer;
 	std::vector<int> to_remove;
 
@@ -56,9 +56,9 @@ public:
 	static int render_distance;
 	static std::string name;
 
-	int chunksUpdateing = 0; 
+	int chunks_updating = 0;
 	int chunks_loaded = 0;
-	 
+
 	Block const* GetBlock(int x, int y, int z);
 	Block const* GetBlock(Vector3 pos);
 
@@ -75,8 +75,8 @@ public:
 	void AddToUpdate(Chunk* chunk);
 	void Update();
 	void UpdateWorldLighting();
-	void Generate(Chunk* chunk); 
-	void SetBlock(int x, int y, int z, block_id block, bool update = false); 
+	void Generate(Chunk* chunk);
+	void SetBlock(int x, int y, int z, block_id block, bool update = false);
 	void SetBlock(Vector3 pos, block_id block, bool update = false);
 	void Render(unsigned int texture);
 	void Clear();
@@ -91,8 +91,17 @@ public:
 	void Explode(Vector3 pos);
 	void AddToUpdateColumn(int x, int y, int z);
 	void SetBufferBlock(int x, int y, int z, block_id block);
+	void UpdateSkyLightIfNeed();
+	void DoDeleteChunksCycle();
+	void DoRenderChunksCycle();
+	void DoCreateChunksCycle();
+	void DoUpdateChunksCycle();
+	void DoGlobalUpdateChunksCycle();
 	Light GetLight(int x, int y, int z);
 
 	World(Player* player);
 	~World();
+
+private:
+	double prev_time_value{};
 };

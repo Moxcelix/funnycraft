@@ -9,8 +9,6 @@
 #define RB_SPLIT_HEIGHT			0b0100	// разделение по высоте бокса
 #define RB_COLLISION_MAP		0b1000	// рассчёт карты коллизий
 
-using namespace std;
-
 class World;
 class Player;
 /// <summary>
@@ -19,7 +17,7 @@ class Player;
 class RigidBox
 {
 private:
-	static vector<Vector3Int> positions; // вектор позиций карты коллизий
+	static std::vector<Vector3Int> positions; // вектор позиций карты коллизий
 
 	float eps = 0.01f;
 	float w = 0;				// половина ширины

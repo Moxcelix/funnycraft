@@ -21,11 +21,11 @@ class Client {
 public:
 	struct Page;
 	static struct Settings {
-		bool smooth_lighting = false;
+		bool smooth_lighting = true;
 	} settings;
 
 	Client();
-	~Client();
+	~Client() = default;
 
 	void Pause(bool active);
 	void ToSettings();
@@ -33,6 +33,7 @@ public:
 	void ToAgree();
 	void ToNewWorld();
 	void ToRenderDistance();
+	void ToTimeSet();
 	void ButtonUp();
 	void ButtonDown();
 	void ButtonRight();
@@ -61,32 +62,33 @@ public:
 	void RenderUI();
 	void DrawMenu();
 
-	GLFWwindow* window;
+	GLFWwindow* window{};
+	World* world{};
+	Page* page{};
+	Modifier* modifier{};
+
 	UI ui, menu;
 	Player player;
-	World* world;
-	Page* page;
 	Vector2Int MenuPos;
 	Phantom phantom;
 	Inventory inventory;
 	World::Settings gen_params;
-	Modifier* modifier;
 	KeyConfig key_config;
 
-	vector<Particles*> particles;
+	std::vector<Particles*> particles;
 
 	bool pause = false;
 	bool enter = false;
 	bool close = false;
 
-	double mouse_pos_x, mouse_pos_y;
-	unsigned int main_texture;
+	double mouse_pos_x = 0, mouse_pos_y = 0;
+	unsigned int main_texture = 0;
 
 	struct Button {
-		string name;
+		std::string name;
 		std::function<void()> func;
 		Button() :name("?"), func([] {}) {}
-		Button(string name, std::function<void()> func) :name(name), func(func) {}
+		Button(std::string name, std::function<void()> func) :name(name), func(func) {}
 		virtual void DoFunc() {
 			func();
 		}
@@ -97,11 +99,7 @@ public:
 	Button btn_continue{ "Продолжить игру", [&] {Pause(false); } };		// кнопка продолжения игры
 	Button btn_close{ "Выйти из игры", [&] {close = true; } };			// кнопка выхода из игры
 	Button btn_render_distance{ "Дальность прорисовки", [&] {ToRenderDistance(); } }; // кнопка дальности прорисовки
-	Button btn_day{ "Сменить время суток", [&]()						// кнопка смены времени суток
-	{
-		World::is_day = !World::is_day;
-		world->UpdateWorldLighting();
-	}, };
+	Button btn_time{ "Установить время", [&] {ToTimeSet(); } };
 	Button btn_back{ "Назад", [&] {ToMenu(); } };					// кнопка перехода в меню
 	Button btn_small{ "Маленькая", [&] {SetRenderDistance(3); } };	// кнопка установки маленькой дальности прорисовки
 	Button btn_medium{ "Средняя", [&] {SetRenderDistance(4); } };	// кнопка установки средней дальности прорисовки
@@ -111,11 +109,16 @@ public:
 	Button btn_cancel{ "Отменить", [&] {ToMenu(); } };				// кнопка отмены
 	Button btn_create{ "Создать", [&] {ToAgree(); } };				// кнопка создания мира
 
+	Button btn_day{ "День", [&]{world->time.set(0);} };
+	Button btn_sunrise{ "Вечер", [&]{world->time.set(1000);} };
+	Button btn_night{ "Ночь", [&]{world->time.set(1200);} };
+	Button btn_sunset{ "Рассвет", [&]{world->time.set(2200);} };
+
 	struct Switcher : Button {
-		string name;
+		std::string name;
 		bool* value;
 
-		Switcher(string name, bool* value) :Button{}, name(name), value(value) {
+		Switcher(std::string name, bool* value) :Button{}, name(name), value(value) {
 			Button::name = name + (*value ? " On" : " Off");
 		}
 
@@ -127,7 +130,7 @@ public:
 
 	struct LamdaSwitcher : Switcher {
 
-		LamdaSwitcher(string name, bool* value, std::function<void()> func) :
+		LamdaSwitcher(std::string name, bool* value, std::function<void()> func) :
 			Switcher(name, value) {
 			this->func = func;
 		}
@@ -147,15 +150,16 @@ public:
 	LamdaSwitcher swt_smooth_lighting{ "Плавное освещение", &settings.smooth_lighting, [&] {world->UpdateWorldLighting(); } };
 
 	struct Page {
-		int count;			// количество параметров
-		string name;		// заголовок страницы
-		Button** buttons;	// массив кнопок
-		float* indents;		// массив разметки по вертикали 
+		int count;		
+		std::string name;
+		Button** buttons;
+		float* indents;	 
 	};
 	// страницы меню
 	Page page_menu{ 4, "Меню", new Button * [] {&btn_settings,& btn_new_world,& btn_continue,& btn_close}, new float[] {0, 0, 0, 0} };
-	Page page_settings{ 4, "Настройки", new Button * [] {&btn_render_distance,& btn_day,& swt_smooth_lighting,& btn_back}, new float[] {0, 0, 0, 20} };
+	Page page_settings{ 4, "Настройки", new Button * [] {&btn_render_distance,& btn_time,& swt_smooth_lighting,& btn_back}, new float[] {0, 0, 0, 20} };
 	Page page_render_distance{ 5, "Дальность прорисовки", new Button * [] {&btn_small,& btn_medium,& btn_normal,& btn_large,& btn_back}, new float[] {0, 0, 0, 0, 20} };
 	Page page_agree{ 2, "Текущий мир будет удален", new Button * [] {&btn_confirm,& btn_cancel}, new float[] {0,0} };
 	Page page_new_world{ 6, "Параметры нового мира", new Button * [] {&swt_mountains,& swt_plains,& swt_trees,& swt_grass,& btn_create,& btn_back},new float[] {0, 0, 0, 0, 20, 0} };
+	Page page_time{5, "Установить время", new Button*[]{&btn_day, &btn_sunrise, &btn_night, &btn_sunset, &btn_back},new float[] {0, 0, 0, 0, 20} };
 };

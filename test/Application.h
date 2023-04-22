@@ -15,7 +15,7 @@ public:
 	const int SIZE_Y = 720;
 	const char* const WIN_TITLE = "Funnycraft";
 
-	GLFWwindow* window;
+	GLFWwindow* window{};
 	DeltaTime delta_time{};
 	Client client;
 
