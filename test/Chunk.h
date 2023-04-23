@@ -2,6 +2,7 @@
 #include "VertexData.h"
 #include "UVData.h"
 #include "Block.h"
+#include "Direction.h"
 #include "World.h"
 #include "Vector3.h"
 #include "Typedefs.h"
@@ -19,62 +20,71 @@ class Terrain;
 
 struct Chunk {
 public:
+	constexpr static int size = 16;
+
 	Chunk();
-	~Chunk();
 	Chunk(int x, int y, int z, World* world);
+	~Chunk();
 
-	const static int ChunkSize = 16;
+	inline auto get_solidity() const -> bool { return is_solid; }
+	inline auto get_pos() const -> Vector3Int { return pos; }
 
-	Vector3Int pos;
-	World* world;
-	Chunk* chunks[27];
-
-	bool modified = false;
-	bool is_solid = false;
-	static float brightness;
-
-	block_id GetBlockID(int x, int y, int z);
 	inline Block const * GetBlock(int x, int y, int z);
 	inline Block const * GetBlock(block_id ID);
 	inline bool InRange(int x);
 	inline bool InRange(int x, int y, int z);
+	inline Light GetLight(int x, int y, int z);
+	inline Light CheckLight(int x, int y, int z);
+	inline block_id GetBlockID(int x, int y, int z);
+	Vector3 GetLigthColor(int x, int y, int z);
 
-	bool InLightRange(int x, int y, int z); 
 	void Generate();
-	void GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, int layer = 0);
 	void Render(unsigned int texture); 
 	void Update(); 
 	void RecalculateSkyLightSolidity();
 	void UpdateMem();
 	void UpdateMesh();
-	void Init(); 
 	void SetBlock(int x, int y, int z, block_id block);
 	void SetBlock(int x, int y, int z, Block* block);
 	void Modify();
 	void SaveChunk();
 	bool LoadChunk();
-	inline void SetSkyLight(int x, int y, int z, unsigned char l);
-	inline void SetBlockLight(int x, int y, int z, unsigned char l);
 	void UpdateLight();
-	inline Light GetLight(int x, int y, int z);
-	inline Light CheckLight(int x, int y, int z);
-	Vector3 GetLigthColor(int x, int y, int z);
 
+	void Recursive_SetBlockLight(Direction, int, int, int, unsigned char);
+	void Recursive_SetBlockLight(int, int, int, unsigned char);
+	void Recursive_SetSkyLight(Direction, int, int, int, unsigned char);
+	void Recursive_SetSkyLight(int, int, int, unsigned char);
 	
 private:
-	VertexData data;	// данные вершин
-	UVData uv_data;		// данные UV-карты
+	constexpr static int timeout = 4;
+	static float brightness;
 
-	block_id blocks[ChunkSize][ChunkSize][ChunkSize];
-	bool sky_light[ChunkSize][ChunkSize];			
+	bool modified = false;
+	bool is_solid = false;
+	int ticks = 0;
+
+	VertexData data;
+	UVData uv_data;
+	Vector3Int pos;
+
+	Chunk* chunks[27];
+	World* world;
+
+	bool sky_light[size][size];			
+	block_id blocks[size][size][size];
 	Light light_map
-		[ChunkSize + LightMap::light_sampling * 2]
-		[ChunkSize + LightMap::light_sampling * 2]
-		[ChunkSize + LightMap::light_sampling * 2];	
-	Light buffer_light_map[ChunkSize][ChunkSize][ChunkSize];
-	
-	int ticks = 0;		// тики
-	int timeout = 4;	// таймаут повторного обновления
+		[size + LightMap::light_sampling * 2]
+		[size + LightMap::light_sampling * 2]
+		[size + LightMap::light_sampling * 2];	
+	Light buffer_light_map[size][size][size];
 
-	void ClearCash();	// очистка данных
+	bool InLightRange(int x, int y, int z);
+
+	void ClearCash();
+	void Initialize();
+	void GetMeshData(VertexData*, UVData*, int, int, int, int = 0);
+
+	constexpr void SetSkyLight(int x, int y, int z, unsigned char l);
+	constexpr void SetBlockLight(int x, int y, int z, unsigned char l);
 };

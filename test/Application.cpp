@@ -88,7 +88,7 @@ void Application::GameInit() {
 }
 
 void Application::Render() {
-	auto distance = World::render_distance * Chunk::ChunkSize;
+	auto distance = World::render_distance * Chunk::size;
 	auto sky_color = client.world->sky->get_sky_color(
 		client.world->time.get_time_normal() +
 		client.world->time.get_accumulator_value());

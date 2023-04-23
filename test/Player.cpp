@@ -3,9 +3,16 @@
 #include <cmath>
 
 Player::Player(){
+	body = nullptr;
 }
 
-Player::Player(World* world){
+Player::~Player() {
+	if (body) {
+		delete body;
+	}
+}
+
+Player::Player(World* world) : Player() {
 	this->world = world;
 }
 
@@ -17,14 +24,14 @@ void Player::GenereateSphere() {
 		for (int j = -render_distance; j <= render_distance; j++) {
 			for (int k = -render_distance; k <= render_distance; k++) {
 				if (i * i + j * j + k * k < render_distance * render_distance) {
-					sphere.push_back(new Vector3Int(i, j, k)); 
+					sphere.push_back({ i, j, k });
 				}
 			}
 		}
 	}
 	for (int i = 0; i < sphere.size(); i++) {
 		for (int j = 0; j < sphere.size() - 1; j++) {
-			if (*sphere[j] > *sphere[j + 1]) {
+			if (sphere[j] > sphere[j + 1]) {
 				std::swap(sphere[j], sphere[j + 1]);
 			}
 		}
@@ -35,10 +42,10 @@ void Player::GenereateSphere() {
 
 void Player::LoadTerrain(World* world) {
 	if (world->chunks_loaded < World::MaxChunksCount - 1) {
-		for (const Vector3Int* i : sphere) {
-			int x = this->pos.x + i->x * Chunk::ChunkSize;
-			int y = this->pos.y + i->y * Chunk::ChunkSize;
-			int z = this->pos.z + i->z * Chunk::ChunkSize;
+		for (const auto i : sphere) {
+			int x = this->pos.x + i.x * Chunk::size;
+			int y = this->pos.y + i.y * Chunk::size;
+			int z = this->pos.z + i.z * Chunk::size;
 
 			world->AddToCreate(x, y, z);
 		}
@@ -121,26 +128,13 @@ float Player::GetVelocity() {
 }
 
 void Player::Update() {
-	IntPosition.x = pos.x;
-	IntPosition.y = pos.y;
-	IntPosition.z = pos.z;
+	int_position.x = pos.x;
+	int_position.y = pos.y;
+	int_position.z = pos.z;
 
-	int X = pos.x, Y = pos.y, Z = pos.z;
-
-	if (X < 0)
-		X -= Chunk::ChunkSize - 1;
-	if (Y < 0)
-		Y -= Chunk::ChunkSize - 1;
-	if (Z < 0)
-		Z -= Chunk::ChunkSize - 1;
-
-	X = (X / Chunk::ChunkSize) * Chunk::ChunkSize;
-	Y = (Y / Chunk::ChunkSize) * Chunk::ChunkSize;
-	Z = (Z / Chunk::ChunkSize) * Chunk::ChunkSize;
-
-	ChunkPosition.x = X;
-	ChunkPosition.y = Y;
-	ChunkPosition.z = Z;
+	chunk_position.x = static_cast<int>(floor(pos.x / static_cast<double>(Chunk::size))) * Chunk::size;
+	chunk_position.y = static_cast<int>(floor(pos.y / static_cast<double>(Chunk::size))) * Chunk::size;
+	chunk_position.z = static_cast<int>(floor(pos.z / static_cast<double>(Chunk::size))) * Chunk::size;
 }
 
 void Player::RotateCamera(float alpha, float beta) {
@@ -160,15 +154,17 @@ void Player::RotateCamera(float alpha, float beta) {
 }
 
 void Player::Init(float x, float y, float z, float xRot, float zRot) {
-	this->pos.x = x;
-	this->pos.y = y;
-	this->pos.z = z;
+	this->pos = { x, y, z };
 
 	camera.xRot = xRot;
 	camera.zRot = zRot;
 
-	int flags = RB_CHECK_LOAD_STATE | RB_SPLIT_HEIGHT | RB_USE_COLLISION | RB_COLLISION_MAP;
-	body = new RigidBox(world, width, height, 9.8f * 0.05f, { x,y,z }, flags);
+	int flags = RB_CHECK_LOAD_STATE
+		| RB_SPLIT_HEIGHT
+		| RB_USE_COLLISION
+		| RB_COLLISION_MAP;
+
+	body = new RigidBox{ world, width, height, 9.8f * 0.05f, this->pos, flags };
 
 	GenereateSphere();
 }

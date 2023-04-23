@@ -22,6 +22,7 @@ public:
 	struct Page;
 	static struct Settings {
 		bool smooth_lighting = true;
+		bool recursive_lighting = false;
 	} settings;
 
 	Client();
@@ -148,6 +149,7 @@ public:
 	Switcher swt_grass{ "Трава", &gen_params.params[3] };		// выключатель травы
 
 	LamdaSwitcher swt_smooth_lighting{ "Плавное освещение", &settings.smooth_lighting, [&] {world->UpdateWorldLighting(); } };
+	LamdaSwitcher swt_recursive_lighting{ "Рекурсивное освещение", &settings.recursive_lighting, [&] {world->UpdateWorldLighting(); } };
 
 	struct Page {
 		int count;		
@@ -157,7 +159,7 @@ public:
 	};
 	// страницы меню
 	Page page_menu{ 4, "Меню", new Button * [] {&btn_settings,& btn_new_world,& btn_continue,& btn_close}, new float[] {0, 0, 0, 0} };
-	Page page_settings{ 4, "Настройки", new Button * [] {&btn_render_distance,& btn_time,& swt_smooth_lighting,& btn_back}, new float[] {0, 0, 0, 20} };
+	Page page_settings{ 5, "Настройки", new Button * [] {&btn_render_distance,& btn_time,& swt_smooth_lighting, & swt_recursive_lighting,& btn_back}, new float[] {0, 0, 0, 0, 20} };
 	Page page_render_distance{ 5, "Дальность прорисовки", new Button * [] {&btn_small,& btn_medium,& btn_normal,& btn_large,& btn_back}, new float[] {0, 0, 0, 0, 20} };
 	Page page_agree{ 2, "Текущий мир будет удален", new Button * [] {&btn_confirm,& btn_cancel}, new float[] {0,0} };
 	Page page_new_world{ 6, "Параметры нового мира", new Button * [] {&swt_mountains,& swt_plains,& swt_trees,& swt_grass,& btn_create,& btn_back},new float[] {0, 0, 0, 0, 20, 0} };

@@ -1,12 +1,13 @@
 #include "Chunk.h"
 #include "LightMap.h"
+#include "Client.h"
 
 float Chunk::brightness = 0.1f;
 
 Chunk::Chunk() {
 	pos = { 0, 0, 0 };
 
-	Init();
+	Initialize();
 }
 
 Chunk::~Chunk() {
@@ -20,33 +21,37 @@ Chunk::Chunk(int x, int y, int z, World* world) {
 	pos = Vector3Int(x, y, z);
 	this->world = world;
 
-	Init();
+	Initialize();
 }
 
-block_id Chunk::GetBlockID(int x, int y, int z) {
+inline block_id Chunk::GetBlockID(int x, int y, int z) {
 	if (InRange(x, y, z)) return blocks[x][y][z];
 
-	if (z + pos.z < 0 || z + pos.z >= ChunkSize * world->WorldHeight)
+	if (z + pos.z < 0 || z + pos.z >= size * world->WorldHeight)
 		return 0;
 
-	if (InLightRange(LightMap::light_sampling + x, 
+	if (InLightRange(LightMap::light_sampling + x,
 		LightMap::light_sampling + y, LightMap::light_sampling + z)) {
-		int _x = (ChunkSize + x) / ChunkSize;
-		int _y = (ChunkSize + y) / ChunkSize;
-		int _z = (ChunkSize + z) / ChunkSize;
+		const auto chunk_x = (size + x) / size;
+		const auto chunk_y = (size + y) / size;
+		const auto chunk_z = (size + z) / size;
 
-		Chunk* chunk = chunks[_x + _y * 3 + _z * 9];
+		const auto chunk = chunks[chunk_x + chunk_y * 3 + chunk_z * 9];
 
 		if (chunk) {
-			_x = pos.x - chunk->pos.x + x;
-			_y = pos.y - chunk->pos.y + y;
-			_z = pos.z - chunk->pos.z + z;
+			const auto block_x = pos.x - chunk->pos.x + x;
+			const auto block_y = pos.y - chunk->pos.y + y;
+			const auto block_z = pos.z - chunk->pos.z + z;
 
-			if (InRange(_x, _y, _z))
-				return chunk->blocks[_x][_y][_z];
+			if (InRange(block_x, block_y, block_z)) {
+				return chunk->blocks[block_x][block_y][block_z];
+			}
+			else {
+				int i = 2;
+			}
 		}
 
-		return -1;
+		return Block::null->id;
 	}
 	else {
 		return world->GetBlockID(x + pos.x, y + pos.y, z + pos.z);
@@ -58,10 +63,10 @@ void Chunk::ClearCash() {
 	uv_data.Clear();
 }
 
-void Chunk::Init() {
-	for (int i = 0; i < ChunkSize; i++) {
-		for (int j = 0; j < ChunkSize; j++) {
-			for (int k = 0; k < ChunkSize; k++) {
+void Chunk::Initialize() {
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			for (int k = 0; k < size; k++) {
 				blocks[i][j][k] = Block::air->id;
 			}
 		}
@@ -81,19 +86,19 @@ inline Block const* Chunk::GetBlock(block_id ID) {
 }
 
 void Chunk::GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, int layer) {
-	auto block = GetBlock(GetBlockID(x, y, z));
+	const auto block = GetBlock(GetBlockID(x, y, z));
 
 	if (block->GetRenderLayer() == layer)
 		block->GetMeshData(data, uv, x, y, z, this);
 }
 
 inline Block const* Chunk::GetBlock(int x, int y, int z) {
-	block_id id = GetBlockID(x, y, z);
+	const auto id = GetBlockID(x, y, z);
 	return Block::GetBlock(id);
 }
 
 inline bool Chunk::InRange(int x) {
-	return x >= 0 && x < ChunkSize;
+	return x >= 0 && x < size;
 }
 
 inline bool Chunk::InRange(int x, int y, int z) {
@@ -101,17 +106,17 @@ inline bool Chunk::InRange(int x, int y, int z) {
 }
 
 bool Chunk::InLightRange(int x, int y, int z) {
-	return (x >= 0 && x < ChunkSize + LightMap::light_sampling * 2) &&
-		(y >= 0 && y < ChunkSize + LightMap::light_sampling * 2) &&
-		(z >= 0 && z < ChunkSize + LightMap::light_sampling * 2);
+	return (x >= 0 && x < size + LightMap::light_sampling * 2) &&
+		(y >= 0 && y < size + LightMap::light_sampling * 2) &&
+		(z >= 0 && z < size + LightMap::light_sampling * 2);
 }
 
 void Chunk::UpdateMesh() {
 	ClearCash();
 
-	for (int x = 0; x < ChunkSize; x++) {
-		for (int y = 0; y < ChunkSize; y++) {
-			for (int z = 0; z < ChunkSize; z++) {
+	for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++) {
+			for (int z = 0; z < size; z++) {
 				GetMeshData(&data, &uv_data, x, y, z, 0);
 			}
 		}
@@ -130,10 +135,10 @@ void Chunk::Update()
 void Chunk::RecalculateSkyLightSolidity() {
 	auto b_count = 0;
 
-	for (int x = 0; x < ChunkSize; x++) {
-		for (int y = 0; y < ChunkSize; y++) {
+	for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++) {
 			bool detected = false;
-			for (int z = 0; z < ChunkSize; z++) {
+			for (int z = 0; z < size; z++) {
 				if (!detected) {
 					if (!GetBlock(x, y, z)->Transparent()) {
 						detected = true;
@@ -145,7 +150,7 @@ void Chunk::RecalculateSkyLightSolidity() {
 		}
 	}
 
-	is_solid = b_count >= ChunkSize * ChunkSize;
+	is_solid = b_count >= size * size;
 }
 
 inline void Chunk::SetBlock(int x, int y, int z, block_id block) {
@@ -167,9 +172,9 @@ void Chunk::SaveChunk()
 		std::to_string(pos.y) + " " +
 		std::to_string(pos.z) + ".dat");
 
-	for (int x = 0; x < Chunk::ChunkSize; x++) {
-		for (int y = 0; y < Chunk::ChunkSize; y++) {
-			for (int z = 0; z < Chunk::ChunkSize; z++) {
+	for (int x = 0; x < Chunk::size; x++) {
+		for (int y = 0; y < Chunk::size; y++) {
+			for (int z = 0; z < Chunk::size; z++) {
 				stream << blocks[x][y][z];
 			}
 		}
@@ -181,15 +186,15 @@ void Chunk::SaveChunk()
 bool Chunk::LoadChunk() {
 	std::ifstream stream;
 	stream.open(save_folder + World::name + "/" +
-		std::to_string(pos.x) + " " + 
-		std::to_string(pos.y) + " " + 
+		std::to_string(pos.x) + " " +
+		std::to_string(pos.y) + " " +
 		std::to_string(pos.z) + ".dat");
 
 	if (stream.is_open())
 	{
-		for (int x = 0; x < Chunk::ChunkSize; x++) {
-			for (int y = 0; y < Chunk::ChunkSize; y++) {
-				for (int z = 0; z < Chunk::ChunkSize; z++) {
+		for (int x = 0; x < Chunk::size; x++) {
+			for (int y = 0; y < Chunk::size; y++) {
+				for (int z = 0; z < Chunk::size; z++) {
 					blocks[x][y][z] = stream.get();
 				}
 			}
@@ -214,53 +219,65 @@ void Chunk::UpdateMem() {
 	for (int x = 0; x < 3; x++) {
 		for (int y = 0; y < 3; y++) {
 			for (int z = 0; z < 3; z++) {
-				int X = (x - 1) * ChunkSize;
-				int Y = (y - 1) * ChunkSize;
-				int Z = (z - 1) * ChunkSize;
+				const auto shift_x = (x - 1) * size;
+				const auto shift_y = (y - 1) * size;
+				const auto shift_z = (z - 1) * size;
 
 				chunks[x + y * 3 + z * 9] =
-					world->GetChunk(pos.x + X, pos.y + Y, pos.z + Z);
+					world->GetChunk(
+						pos.x + shift_x,
+						pos.y + shift_y,
+						pos.z + shift_z);
 			}
 		}
 	}
 }
 
 void Chunk::UpdateLight() {
-	for (int x = 0; x < ChunkSize + LightMap::light_sampling * 2; x++) {
-		for (int y = 0; y < ChunkSize + LightMap::light_sampling * 2; y++) {
-			for (int z = 0; z < ChunkSize + LightMap::light_sampling * 2; z++) {
+	for (int x = 0; x < size + LightMap::light_sampling * 2; x++) {
+		for (int y = 0; y < size + LightMap::light_sampling * 2; y++) {
+			for (int z = 0; z < size + LightMap::light_sampling * 2; z++) {
 				light_map[x][y][z] = { 0, 0 };
 			}
 		}
 	}
 
-	for (int x = 0; x < ChunkSize; x++) {
-		for (int y = 0; y < ChunkSize; y++) {
-			for (int z = 0; z < ChunkSize; z++)
+	for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++) {
+			for (int z = 0; z < size; z++)
 			{
 				buffer_light_map[x][y][z] = { 0, 0 };
 
-				auto light = GetBlock(x, y, z)->Luminosity();
+				if (const auto light = GetBlock(x, y, z)->Luminosity()) {
 
-				if (light) {
-					light_map[x + LightMap::light_sampling]
-						[y + LightMap::light_sampling]
-					[z + LightMap::light_sampling].block = light;
+					if (Client::settings.recursive_lighting) {
+						Recursive_SetBlockLight(x, y, z, light);
+					}
+					else {
+						light_map[x + LightMap::light_sampling]
+							[y + LightMap::light_sampling]
+						[z + LightMap::light_sampling].block = light;
+					}
 				}
 			}
 		}
 	}
 
-	Chunk* chunk = chunks[22]; // верхний чанк
+	const auto chunk = chunks[22]; // верхний чанк
 
-	for (int x = 0; x < ChunkSize; x++) {
-		for (int y = 0; y < ChunkSize; y++) {
+	for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++) {
 			sky_light[x][y] = true;
-			for (int z = ChunkSize - 1; z >= 0; z--) {
+			for (int z = size - 1; z >= 0; z--) {
 				if ((!chunk || chunk->sky_light[x][y]) && GetBlock(x, y, z)->Transparent()) {
-					light_map[x + LightMap::light_sampling]
-						[y + LightMap::light_sampling]
+					if (Client::settings.recursive_lighting) {
+						Recursive_SetSkyLight(x, y, z, LightMap::max_light);
+					}
+					else {
+						light_map[x + LightMap::light_sampling]
+							[y + LightMap::light_sampling]
 						[z + LightMap::light_sampling].sky = LightMap::max_light;
+					}
 				}
 				else {
 					sky_light[x][y] = false;
@@ -275,19 +292,19 @@ void Chunk::UpdateLight() {
 			continue;
 
 		if (chunks[i]) {
-			auto sx = pos.x - chunks[i]->pos.x;
-			auto sy = pos.y - chunks[i]->pos.y;
-			auto sz = pos.z - chunks[i]->pos.z;
+			const auto sx = pos.x - chunks[i]->pos.x;
+			const auto sy = pos.y - chunks[i]->pos.y;
+			const auto sz = pos.z - chunks[i]->pos.z;
 
-			for (int x = 0; x < ChunkSize; x++) {
-				for (int y = 0; y < ChunkSize; y++) {
-					for (int z = 0; z < ChunkSize; z++) {
+			for (int x = 0; x < size; x++) {
+				for (int y = 0; y < size; y++) {
+					for (int z = 0; z < size; z++) {
 						if (!InLightRange(x + sx + LightMap::light_sampling,
 							y + sy + LightMap::light_sampling,
 							z + sz + LightMap::light_sampling)) continue;
 
 						// значение света в соседнем чанке в области этого чанка
-						auto l = chunks[i]->CheckLight(x + sx, y + sy, z + sz);
+						const auto l = chunks[i]->CheckLight(x + sx, y + sy, z + sz);
 
 						if (l.sky > buffer_light_map[x][y][z].sky)
 							buffer_light_map[x][y][z].sky = l.sky;
@@ -300,10 +317,12 @@ void Chunk::UpdateLight() {
 		}
 	}
 
+	if (Client::settings.recursive_lighting) return;
+
 	for (unsigned char l = LightMap::max_light; l > 0; l--) {
-		for (int x = 0; x < ChunkSize + LightMap::light_sampling * 2; x++) {
-			for (int y = 0; y < ChunkSize + LightMap::light_sampling * 2; y++) {
-				for (int z = 0; z < ChunkSize + LightMap::light_sampling * 2; z++) {
+		for (int x = 0; x < size + LightMap::light_sampling * 2; x++) {
+			for (int y = 0; y < size + LightMap::light_sampling * 2; y++) {
+				for (int z = 0; z < size + LightMap::light_sampling * 2; z++) {
 					if (light_map[x][y][z].sky == l) {
 						SetSkyLight(x + 1 - LightMap::light_sampling, y - LightMap::light_sampling, z - LightMap::light_sampling, light_map[x][y][z].sky - 1);
 						SetSkyLight(x - 1 - LightMap::light_sampling, y - LightMap::light_sampling, z - LightMap::light_sampling, light_map[x][y][z].sky - 1);
@@ -327,7 +346,123 @@ void Chunk::UpdateLight() {
 	}
 }
 
-inline void Chunk::SetSkyLight(int x, int y, int z, unsigned char l) {
+void Chunk::Recursive_SetBlockLight(Direction direction,
+	int x, int y, int z, unsigned char l) {
+	if (light_map
+		[x + LightMap::light_sampling]
+	[y + LightMap::light_sampling]
+	[z + LightMap::light_sampling].block >= l) {
+		return;
+	}
+
+	light_map
+		[x + LightMap::light_sampling]
+	[y + LightMap::light_sampling]
+	[z + LightMap::light_sampling].block = l;
+
+	if (l == 1) return;
+
+	if (direction != Direction::Left && GetBlock(x + 1, y, z)->Transparent())
+		Recursive_SetBlockLight(Direction::Right, x + 1, y, z, l - 1);
+	if (direction != Direction::Right && GetBlock(x - 1, y, z)->Transparent())
+		Recursive_SetBlockLight(Direction::Left, x - 1, y, z, l - 1);
+	if (direction != Direction::Back && GetBlock(x, y + 1, z)->Transparent())
+		Recursive_SetBlockLight(Direction::Front, x, y + 1, z, l - 1);
+	if (direction != Direction::Front && GetBlock(x, y - 1, z)->Transparent())
+		Recursive_SetBlockLight(Direction::Back, x, y - 1, z, l - 1);
+	if (direction != Direction::Down && GetBlock(x, y, z + 1)->Transparent())
+		Recursive_SetBlockLight(Direction::Up, x, y, z + 1, l - 1);
+	if (direction != Direction::Up && GetBlock(x, y, z - 1)->Transparent())
+		Recursive_SetBlockLight(Direction::Down, x, y, z - 1, l - 1);
+}
+
+void Chunk::Recursive_SetSkyLight(Direction direction,
+	int x, int y, int z, unsigned char l) {
+	if (light_map
+		[x + LightMap::light_sampling]
+	[y + LightMap::light_sampling]
+	[z + LightMap::light_sampling].sky >= l) {
+		return;
+	}
+
+	light_map
+		[x + LightMap::light_sampling]
+	[y + LightMap::light_sampling]
+	[z + LightMap::light_sampling].sky = l;
+
+	if (l == 1) return;
+
+	if (direction != Direction::Left && GetBlock(x + 1, y, z)->Transparent())
+		Recursive_SetSkyLight(Direction::Right, x + 1, y, z, l - 1);
+	if (direction != Direction::Right && GetBlock(x - 1, y, z)->Transparent())
+		Recursive_SetSkyLight(Direction::Left, x - 1, y, z, l - 1);
+	if (direction != Direction::Back && GetBlock(x, y + 1, z)->Transparent())
+		Recursive_SetSkyLight(Direction::Front, x, y + 1, z, l - 1);
+	if (direction != Direction::Front && GetBlock(x, y - 1, z)->Transparent())
+		Recursive_SetSkyLight(Direction::Back, x, y - 1, z, l - 1);
+	if (direction != Direction::Down && GetBlock(x, y, z + 1)->Transparent())
+		Recursive_SetSkyLight(Direction::Up, x, y, z + 1, l - 1);
+	if (direction != Direction::Up && GetBlock(x, y, z - 1)->Transparent())
+		Recursive_SetSkyLight(Direction::Down, x, y, z - 1, l - 1);
+}
+
+void Chunk::Recursive_SetBlockLight(int x, int y, int z, unsigned char l) {
+	if (l <= 0) return;
+
+	if (GetBlock(x + 1, y, z)->Transparent()) {
+		Recursive_SetBlockLight(Direction::Right, x + 1, y, z, l - 1);
+	}
+
+	if (GetBlock(x - 1, y, z)->Transparent()) {
+		Recursive_SetBlockLight(Direction::Left, x - 1, y, z, l - 1);
+	}
+
+	if (GetBlock(x, y + 1, z)->Transparent()) {
+		Recursive_SetBlockLight(Direction::Front, x, y + 1, z, l - 1);
+	}
+
+	if (GetBlock(x, y - 1, z)->Transparent()) {
+		Recursive_SetBlockLight(Direction::Back, x, y - 1, z, l - 1);
+	}
+
+	if (GetBlock(x, y, z + 1)->Transparent()) {
+		Recursive_SetBlockLight(Direction::Up, x, y, z + 1, l - 1);
+	}
+
+	if (GetBlock(x, y, z - 1)->Transparent()) {
+		Recursive_SetBlockLight(Direction::Down, x, y - 1, z, l - 1);
+	}
+}
+
+void Chunk::Recursive_SetSkyLight(int x, int y, int z, unsigned char l) {
+	if (l <= 0) return;
+
+	if (GetBlock(x + 1, y, z)->Transparent()) {
+		Recursive_SetSkyLight(Direction::Right, x + 1, y, z, l - 1);
+	}
+
+	if (GetBlock(x - 1, y, z)->Transparent()) {
+		Recursive_SetSkyLight(Direction::Left, x - 1, y, z, l - 1);
+	}
+
+	if (GetBlock(x, y + 1, z)->Transparent()) {
+		Recursive_SetSkyLight(Direction::Front, x, y + 1, z, l - 1);
+	}
+
+	if (GetBlock(x, y - 1, z)->Transparent()) {
+		Recursive_SetSkyLight(Direction::Back, x, y - 1, z, l - 1);
+	}
+
+	if (GetBlock(x, y, z + 1)->Transparent()) {
+		Recursive_SetSkyLight(Direction::Up, x, y, z + 1, l - 1);
+	}
+
+	if (GetBlock(x, y, z - 1)->Transparent()) {
+		Recursive_SetSkyLight(Direction::Down, x, y - 1, z, l - 1);
+	}
+}
+
+constexpr void Chunk::SetSkyLight(int x, int y, int z, unsigned char l) {
 	if (!GetBlock(x, y, z)->Transparent()) return;
 
 	if (light_map[x + LightMap::light_sampling][y + LightMap::light_sampling][z + LightMap::light_sampling].sky < l) {
@@ -335,7 +470,7 @@ inline void Chunk::SetSkyLight(int x, int y, int z, unsigned char l) {
 	}
 }
 
-inline void Chunk::SetBlockLight(int x, int y, int z, unsigned char l) {
+constexpr void Chunk::SetBlockLight(int x, int y, int z, unsigned char l) {
 	if (!GetBlock(x, y, z)->Transparent()) return;
 
 	if (light_map[x + LightMap::light_sampling][y + LightMap::light_sampling][z + LightMap::light_sampling].block < l) {
@@ -354,20 +489,17 @@ inline Light Chunk::GetLight(int x, int y, int z) {
 	}
 	// for z-bounds
 	if (InRange(x) && InRange(y)) {
-		if (pos.z + z < 0 || pos.z + z >= world->WorldHeight * ChunkSize) {
+		if (pos.z + z < 0 || pos.z + z >= world->WorldHeight * size) {
 			auto light = light_map[x + LightMap::light_sampling]
 				[y + LightMap::light_sampling][z + LightMap::light_sampling];
 
 			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++)
-				{
+				for (int j = 0; j < 3; j++) {
 					if (i == 1 && j == 1) continue;
 
-					Chunk* chunk = chunks[i + j * 3 + 9];
-
-					if (chunk) {
-						const auto _x = x + (2 - i) * ChunkSize;
-						const auto _y = y + (2 - j) * ChunkSize;
+					if (const auto chunk = chunks[i + j * 3 + 9]) {
+						const auto _x = x + (2 - i) * size;
+						const auto _y = y + (2 - j) * size;
 						const auto _z = z + LightMap::light_sampling;
 
 						if (!InLightRange(_x, _y, _z)) break;
@@ -415,18 +547,18 @@ void Chunk::Modify() {
 void Chunk::Render(unsigned int texture) {
 	if (data.face_count == 0) return;
 
-	static float s = Chunk::ChunkSize * 0.5f;
-	static float shift = Chunk::ChunkSize * 0.5f - 0.5f;
+	const auto s = Chunk::size * 0.5f;
+	const auto shift = Chunk::size * 0.5f - 0.5f;
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	GLfloat* UVs = &uv_data.UVs[0];
-	GLfloat* Vertices = &data.Vertices[0];
-	GLfloat* Colors = &data.Colors[0];
+	const auto uvs = &uv_data.UVs[0];
+	const auto vertices = &data.Vertices[0];
+	const auto colors = &data.Colors[0];
 
-	glTexCoordPointer(2, GL_FLOAT, 0, UVs);
-	glVertexPointer(3, GL_FLOAT, 0, Vertices);
-	glColorPointer(3, GL_FLOAT, 0, Colors);
+	glTexCoordPointer(2, GL_FLOAT, 0, uvs);
+	glVertexPointer(3, GL_FLOAT, 0, vertices);
+	glColorPointer(3, GL_FLOAT, 0, colors);
 	//17 404
 	glDrawArrays(GL_QUADS, 0, data.face_count * 4);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -444,7 +576,7 @@ void Chunk::Render(unsigned int texture) {
 
 	if (ticks > timeout) {
 		UpdateMem();
-		Update();
+		UpdateMesh();
 		ticks = -1;
 	}
 }

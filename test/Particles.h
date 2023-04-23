@@ -38,7 +38,7 @@ public:
 		float g = 9.8f * 0.03f;
 
 		ColorSquad squad;
-		Block::Direction tdir;
+		Direction tdir;
 
 		float tx, ty, tdx, tdy;
 
@@ -52,7 +52,7 @@ public:
 			this->block = block;
 			this->pos = pos;
 			this->max_time = max_time;
-			tdir = Block::Direction((rand() % 3) * 2);
+			tdir = Direction((rand() % 3) * 2);
 			squad = ColorSquad(block->Color(tdir));
 
 			tx = block->TileCoord(tdir).x;

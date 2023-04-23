@@ -127,20 +127,21 @@ void Terrain::Generate(Chunk* chunk) {
 	const auto bedrock = Block::bedrock->id;
 	const auto stone = Block::stone->id;
 
-	srand(seed + chunk->pos.GetHashCode());
+	srand(seed + chunk->get_pos().GetHashCode());
 
-	for (int x = 0; x < Chunk::ChunkSize; x++) {
-		for (int y = 0; y < Chunk::ChunkSize; y++)
+	for (int x = 0; x < Chunk::size; x++) {
+		for (int y = 0; y < Chunk::size; y++)
 		{
 			auto noise0 = -1;
 			auto noise1 = -1;
 
-			for (auto z = 0; z < Chunk::ChunkSize; z++) {
-				const auto X = x + chunk->pos.x;
-				const auto Y = y + chunk->pos.y;
-				const auto Z = z + chunk->pos.z;
+			for (int z = 0; z < Chunk::size; z++) {
+				const auto pos = chunk->get_pos();
+				const auto global_x = x + pos.x;
+				const auto global_y = y + pos.y;
+				const auto global_z = z + pos.z;
 
-				if (Z == 0) {
+				if (global_z == 0) {
 					SetBlock(chunk, x, y, z, bedrock);
 
 					continue;
@@ -149,17 +150,17 @@ void Terrain::Generate(Chunk* chunk) {
 				if (noise1 >= 0) {
 					noise0 = noise1;
 				} else {
-					noise0 = GetTerrainNoise(X, Y, Z);
+					noise0 = GetTerrainNoise(global_x, global_y, global_z);
 				}
 
-				noise1 = GetTerrainNoise(X, Y, Z + 1); 
+				noise1 = GetTerrainNoise(global_x, global_y, global_z + 1); 
 
-				if (Z < noise0) {
+				if (global_z < noise0) {
 					if (chunk->GetBlockID(x, y, z) == 0) {
 						SetBlock(chunk, x, y, z, stone);
 					}
 
-					if (Z + 1 >= noise1) {
+					if (global_z + 1 >= noise1) {
 						SetGround(chunk, x, y, z);
 						if (world->settings.params[2]) SetRandomTree(chunk, x, y, z);
 						if (world->settings.params[3]) SetRandomPlant(chunk, x, y, z + 1);
@@ -173,7 +174,7 @@ void Terrain::Generate(Chunk* chunk) {
 		const auto pos = Vector3Int(
 			world->global_buffer[i].x, 
 			world->global_buffer[i].y,
-			world->global_buffer[i].z) - chunk->pos;
+			world->global_buffer[i].z) - chunk->get_pos();
 
 		if (chunk->InRange(pos.x, pos.y, pos.z)) {
 			if (!chunk->GetBlockID(pos.x, pos.y, pos.z)) {
@@ -208,7 +209,7 @@ void Terrain::SetRandomPlant(Chunk* chunk, int x, int y, int z) {
 }
 
 void Terrain::SetBlock(Chunk* chunk, int x, int y, int z, block_id block) {
-	if (z < 0 || z >= world->WorldHeight * Chunk::ChunkSize)
+	if (z < 0 || z >= world->WorldHeight * Chunk::size)
 		return;
 
 	if (chunk->InRange(x, y, z)) {
@@ -218,7 +219,7 @@ void Terrain::SetBlock(Chunk* chunk, int x, int y, int z, block_id block) {
 			chunk->SetBlock(x, y, z, block);
 		}
 	} else {
-		Vector3Int p = chunk->pos;
+		Vector3Int p = chunk->get_pos();
 		world->SetBufferBlock(x + p.x, y + p.y, z + p.z, block);
 	}
 }

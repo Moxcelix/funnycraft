@@ -63,7 +63,7 @@ void Client::SetBlock(Vector3 pos, block_id id) {
 }
 
 void Client::SetBlock() {
-	auto id = inventory.current_block;
+	const auto id = inventory.current_block;
 
 	if (id && RigidBox::IsLocked(player.add_pos))
 		return;
@@ -73,8 +73,7 @@ void Client::SetBlock() {
 }
 
 void Client::DestroyBlock(int x, int y, int z) {
-	if (player.looking && !pause)
-	{
+	if (player.looking && !pause) {
 		const auto block = world->GetBlock(x, y, z);
 		particles.push_back(new Particles(block, world, {
 			static_cast<float>(x), 
@@ -219,7 +218,7 @@ void Client::MoveCamera(double delta_time) {
 		glfwSetCursorPos(window, mouse_pos_x, mouse_pos_y); 
 	}
 
-	float rotation = static_cast<float>(-player.camera.zRot / 180 * M_PI);
+	const auto rotation = static_cast<float>(-player.camera.zRot / 180 * M_PI);
 	player.rot = rotation;
 
 	player.camera.x = player.pos.x;
@@ -275,12 +274,12 @@ void Client::UpdatePhantomPos() {
 	Vector3 hit;
 	Vector3 ref;
 
-	auto cosA = static_cast<float>(cos((player.camera.xRot - 90) / 180. * M_PI));
-	auto cosB = static_cast<float>(cos((player.camera.zRot + 90) / 180. * M_PI));
-	auto sinA = static_cast<float>(sin((player.camera.xRot - 90) / 180. * M_PI));
-	auto sinB = static_cast<float>(sin((player.camera.zRot + 90) / 180. * M_PI));
+	const auto cosA = static_cast<float>(cos((player.camera.xRot - 90) / 180. * M_PI));
+	const auto cosB = static_cast<float>(cos((player.camera.zRot + 90) / 180. * M_PI));
+	const auto sinA = static_cast<float>(sin((player.camera.xRot - 90) / 180. * M_PI));
+	const auto sinB = static_cast<float>(sin((player.camera.zRot + 90) / 180. * M_PI));
 
-	Vector3 dir = Vector3(cosA * cosB, cosA * sinB, sinA); // вектор луча по полярным координатам
+	const auto dir = Vector3(cosA * cosB, cosA * sinB, sinA); // вектор луча по полярным координатам
 
 	Ray ray(world, Vector3(player.camera.x, player.camera.y, player.camera.z), dir); // создание луча
 	if (player.looking = ray.Trace(7, length, hit, ref)) {

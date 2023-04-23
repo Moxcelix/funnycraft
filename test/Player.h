@@ -1,11 +1,11 @@
 #pragma once
 
+#include"RigidBox.h"
 #include "Vector2.h"
 #include "Vector3.h"
 #include"Settings.h"
 #include"World.h"
 #include"Chunk.h"
-#include"RigidBox.h"
 #include"DeltaTime.h"
 
 #include<vector>
@@ -29,7 +29,6 @@ public:
 		float x, y, z;
 		float xRot, zRot;
 	} camera = { 0, 0, head_height, 0, 0 };
-
 
 	struct MovementDirection {
 	private:
@@ -64,6 +63,7 @@ public:
 
 	Player(World* world);
 	Player();
+	~Player();
 
 	RigidBox* body;	
 	DeltaTime delta_time;
@@ -95,7 +95,7 @@ public:
 	float current_friction = 1.f;
 	float acceleration = 0.0001f;
 
-	double angle = 0; // угол
+	double angle = 0;
 
 	void RotateCamera(float alpha, float beta);
 	void MoveUpdate();
@@ -110,9 +110,9 @@ public:
 	float GetDistance(float x, float y, float z);
 
 	Vector3 start_pos = { 0, 0, 64 };
-	std::vector<Vector3Int*>sphere;	
-	Vector3Int IntPosition;			
-	Vector3Int ChunkPosition;		
+	std::vector<Vector3Int>sphere;	
+	Vector3Int int_position;			
+	Vector3Int chunk_position;		
 	World* world;					
 	Vector2 vel = Vector2(0, 0);	
 };
