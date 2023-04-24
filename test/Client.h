@@ -14,6 +14,7 @@
 #include "Particles.h"
 #include "UI.h"
 #include "KeyConfig.h"
+#include "ChunkLoader.h"
 
 struct Modifier;
 
@@ -25,8 +26,43 @@ public:
 		bool recursive_lighting = false;
 	} settings;
 
+	GLFWwindow* window{};
+	World* world{};
+	Page* page{};
+	Modifier* modifier{};
+
+	UI ui, menu;
+	Vector2Int MenuPos;
+
+	Player player;
+	Inventory inventory;
+	Phantom phantom;
+
+	ChunkLoader chunk_loader;
+	World::Settings gen_params;
+	KeyConfig key_config;
+
+	std::vector<Particles*> particles;
+
+	bool pause = false;
+	bool enter = false;
+	bool close = false;
+
+	double mouse_pos_x = 0, mouse_pos_y = 0;
+	unsigned int main_texture = 0;
+
 	Client();
 	~Client() = default;
+
+	[[nodiscard]] static auto instance() -> Client& {
+		static Client client;
+		return client;
+	}
+
+	Client(Client const&) noexcept = delete;
+	Client(Client const&&) noexcept = delete;
+	Client& operator=(Client const&) noexcept = delete;
+	Client& operator=(Client&&) noexcept = delete;
 
 	void Pause(bool active);
 	void ToSettings();
@@ -62,28 +98,6 @@ public:
 	void Render();
 	void RenderUI();
 	void DrawMenu();
-
-	GLFWwindow* window{};
-	World* world{};
-	Page* page{};
-	Modifier* modifier{};
-
-	UI ui, menu;
-	Player player;
-	Vector2Int MenuPos;
-	Phantom phantom;
-	Inventory inventory;
-	World::Settings gen_params;
-	KeyConfig key_config;
-
-	std::vector<Particles*> particles;
-
-	bool pause = false;
-	bool enter = false;
-	bool close = false;
-
-	double mouse_pos_x = 0, mouse_pos_y = 0;
-	unsigned int main_texture = 0;
 
 	struct Button {
 		std::string name;

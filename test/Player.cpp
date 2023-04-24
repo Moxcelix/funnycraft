@@ -16,42 +16,6 @@ Player::Player(World* world) : Player() {
 	this->world = world;
 }
 
-void Player::GenereateSphere() {
-	sphere.clear(); 
-	int render_distance = World::render_distance - 1;
-
-	for (int i = -render_distance; i <= render_distance; i++) {
-		for (int j = -render_distance; j <= render_distance; j++) {
-			for (int k = -render_distance; k <= render_distance; k++) {
-				if (i * i + j * j + k * k < render_distance * render_distance) {
-					sphere.push_back({ i, j, k });
-				}
-			}
-		}
-	}
-	for (int i = 0; i < sphere.size(); i++) {
-		for (int j = 0; j < sphere.size() - 1; j++) {
-			if (sphere[j] > sphere[j + 1]) {
-				std::swap(sphere[j], sphere[j + 1]);
-			}
-		}
-	}
-
-	length = sphere.size();
-}
-
-void Player::LoadTerrain(World* world) {
-	if (world->chunks_loaded < World::MaxChunksCount - 1) {
-		for (const auto i : sphere) {
-			int x = this->pos.x + i.x * Chunk::size;
-			int y = this->pos.y + i.y * Chunk::size;
-			int z = this->pos.z + i.z * Chunk::size;
-
-			world->AddToCreate(x, y, z);
-		}
-	}
-}
-
 float Player::GetDistance(float x, float y, float z) {
 	x -= this->pos.x;
 	y -= this->pos.y;
@@ -128,13 +92,13 @@ float Player::GetVelocity() {
 }
 
 void Player::Update() {
-	int_position.x = pos.x;
+	/*int_position.x = pos.x;
 	int_position.y = pos.y;
 	int_position.z = pos.z;
 
 	chunk_position.x = static_cast<int>(floor(pos.x / static_cast<double>(Chunk::size))) * Chunk::size;
 	chunk_position.y = static_cast<int>(floor(pos.y / static_cast<double>(Chunk::size))) * Chunk::size;
-	chunk_position.z = static_cast<int>(floor(pos.z / static_cast<double>(Chunk::size))) * Chunk::size;
+	chunk_position.z = static_cast<int>(floor(pos.z / static_cast<double>(Chunk::size))) * Chunk::size;*/
 }
 
 void Player::RotateCamera(float alpha, float beta) {
@@ -165,8 +129,6 @@ void Player::Init(float x, float y, float z, float xRot, float zRot) {
 		| RB_COLLISION_MAP;
 
 	body = new RigidBox{ world, width, height, 9.8f * 0.05f, this->pos, flags };
-
-	GenereateSphere();
 }
 
 void Player::Save(std::ofstream& stream) {

@@ -25,7 +25,9 @@ void Client::Init() {
 
 	MenuPos = Vector2Int(0, 0);
 	world = new World(&player);
-	page = &page_menu;		
+	page = &page_menu;	
+
+	chunk_loader = ChunkLoader(world, &player);
 
 	Resize();
 }
@@ -94,7 +96,7 @@ void Client::DestroyBlock() {
 void Client::Update(float deltaTime) {
 	player.Update();				
 	world->Update();				
-	player.LoadTerrain(world);	
+	chunk_loader.Update();	
 	inventory.Update();				
 	modifier->Update();		
 	world->time.Shift(deltaTime);
@@ -230,8 +232,8 @@ void Client::MoveCamera(double delta_time) {
 
 void Client::SetRenderDistance(int d) {
 	world->Clear();
-	World::render_distance = d;
-	player.GenereateSphere();
+	ChunkLoader::render_distance = d;
+	chunk_loader.GenereateSphere();
 }
 
 void Client::ReloadChunks() {

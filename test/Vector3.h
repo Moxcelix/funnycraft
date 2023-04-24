@@ -7,7 +7,7 @@ public:
 	Vector3 operator+ (Vector3);
 	Vector3 operator- (Vector3);
 	Vector3 operator* (float);
-	bool operator== (Vector3);
+	bool operator== (const Vector3&) const;
 	bool operator< (Vector3);
 	bool operator> (Vector3);
 	bool operator<= (Vector3);
@@ -38,7 +38,7 @@ public:
 	bool operator> (Vector3Int);
 	bool operator<= (Vector3Int);
 	bool operator>= (Vector3Int);
-	bool operator== (Vector3Int);
+	bool operator== (const Vector3Int&) const;
 	static float Distance(Vector3Int a, Vector3Int b);
 	float Module();
 };

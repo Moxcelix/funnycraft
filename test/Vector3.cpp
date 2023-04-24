@@ -45,7 +45,7 @@ Vector3 Vector3::operator* (float val) {
 	return Vector3(x * val, y * val, z * val);
 }
 
-bool Vector3::operator== (Vector3 val) {
+bool Vector3::operator== (const Vector3& val) const {
 	return x == val.x && y == val.y && z == val.z;
 }
 
@@ -58,7 +58,7 @@ Vector3 Vector3::lerp(Vector3 a, Vector3 b, double t) {
 		return y0 + (y1 - y0) / (x1 - x0) * (x - x0);
 	};
 
-	return { 
+	return {
 		linear(t, 0.f, a.x, 1.f, b.x),
 		linear(t, 0.f, a.y, 1.f, b.y),
 		linear(t, 0.f, a.z, 1.f, b.z)
@@ -89,7 +89,7 @@ Vector3Int Vector3Int::operator* (float val) {
 	return Vector3Int(x * val, y * val, z * val);
 }
 
-bool Vector3Int::operator== (Vector3Int val) {
+bool Vector3Int::operator== (const Vector3Int& val) const {
 	return x == val.x && y == val.y && z == val.z;
 }
 

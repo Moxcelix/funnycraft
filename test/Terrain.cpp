@@ -209,7 +209,7 @@ void Terrain::SetRandomPlant(Chunk* chunk, int x, int y, int z) {
 }
 
 void Terrain::SetBlock(Chunk* chunk, int x, int y, int z, block_id block) {
-	if (z < 0 || z >= world->WorldHeight * Chunk::size)
+	if (z < 0 || z >= world->world_height * Chunk::size)
 		return;
 
 	if (chunk->InRange(x, y, z)) {

@@ -104,7 +104,7 @@ void RigidBox::AddPos(Vector3Int pos) {
 bool RigidBox::Readiness(int x, int y, int z) {
 	if (world) {
 		Chunk* c = world->GetChunk(x, y, z); 
-		return c || z < 0 || z >= Chunk::size * World::WorldHeight;
+		return c || z < 0 || z >= Chunk::size * World::world_height;
 	}
 	return false;
 }

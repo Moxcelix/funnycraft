@@ -17,8 +17,6 @@ class RigidBox;
 class Player
 {
 private:
-	int length;
-
 	float walk_speed = 0.005f;
 	float run_speed = 0.01f;
 	float lift_speed = 0.01f;
@@ -100,8 +98,6 @@ public:
 	void RotateCamera(float alpha, float beta);
 	void MoveUpdate();
 	void Update();
-	void LoadTerrain(World* world);
-	void GenereateSphere();
 	void Save(std::ofstream& stream);
 	void Init(float x, float y, float z, float xRot, float zRot); 
 	void SwitchFly();
@@ -109,10 +105,8 @@ public:
 	float GetVelocity();
 	float GetDistance(float x, float y, float z);
 
-	Vector3 start_pos = { 0, 0, 64 };
-	std::vector<Vector3Int>sphere;	
-	Vector3Int int_position;			
-	Vector3Int chunk_position;		
+	Vector3 start_pos = { 0, 0, 64 };	
+	//Vector3Int chunk_position;		
 	World* world;					
 	Vector2 vel = Vector2(0, 0);	
 };

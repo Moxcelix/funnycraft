@@ -13,15 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\utilitarian">
+      <UniqueIdentifier>{dcded170-0f69-40c5-9ed3-72ca8c376a76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\utilitarian\headers">
+      <UniqueIdentifier>{98bf9d58-2e86-4036-ba0c-744c4d7a1107}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\utilitarian\sources">
+      <UniqueIdentifier>{e3edc230-9ffc-472a-88cd-1292adf80f80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector2.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="VertexData.cpp">
@@ -42,16 +48,10 @@
     <ClCompile Include="UVData.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Vector3.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="PerlinNoise.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="Terrain.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="PosQueue.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="UI.cpp">
@@ -93,12 +93,21 @@
     <ClCompile Include="WorldTime.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Vector2.cpp">
+      <Filter>Исходные файлы\utilitarian\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector3.cpp">
+      <Filter>Исходные файлы\utilitarian\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkLoader.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Chat.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector2.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="VertexData.h">
@@ -119,9 +128,6 @@
     <ClInclude Include="UVData.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Vector3.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="Settings.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
@@ -129,9 +135,6 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Terrain.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="PosQueue.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="font.h">
@@ -195,6 +198,24 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Direction.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="static_queue.h">
+      <Filter>Исходные файлы\utilitarian\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkUpdateTask.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3.h">
+      <Filter>Исходные файлы\utilitarian\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>Исходные файлы\utilitarian\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkLoader.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Chat.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

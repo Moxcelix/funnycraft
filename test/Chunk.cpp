@@ -24,10 +24,18 @@ Chunk::Chunk(int x, int y, int z, World* world) {
 	Initialize();
 }
 
+Chunk::Chunk(Vector3Int pos, World* world) {
+	this->pos = pos;
+	this->world = world;
+
+	Initialize();
+}
+
+
 inline block_id Chunk::GetBlockID(int x, int y, int z) {
 	if (InRange(x, y, z)) return blocks[x][y][z];
 
-	if (z + pos.z < 0 || z + pos.z >= size * world->WorldHeight)
+	if (z + pos.z < 0 || z + pos.z >= size * world->world_height)
 		return 0;
 
 	if (InLightRange(LightMap::light_sampling + x,
@@ -123,12 +131,24 @@ void Chunk::UpdateMesh() {
 	}
 }
 
-void Chunk::Update()
+void Chunk::Update(ChunkUpdateTask task)
 {
-	UpdateLight();
-	UpdateMesh();
+	switch (task)
+	{
+	case ChunkUpdateTask::FULL_UPDATE:
+		UpdateLight();
+		[[fall_through]]
+	case ChunkUpdateTask::BUFF_UPDATE:
+		UpdateBufferLight();
+		[[fall_through]]
+	case ChunkUpdateTask::MESH_UPDATE:
+		UpdateMesh();
+	}
 
-	ticks = 0;
+	if (task == ChunkUpdateTask::FULL_UPDATE) {
+		ticks = 0;
+	}
+
 	world->chunks_updating++;
 }
 
@@ -244,10 +264,7 @@ void Chunk::UpdateLight() {
 
 	for (int x = 0; x < size; x++) {
 		for (int y = 0; y < size; y++) {
-			for (int z = 0; z < size; z++)
-			{
-				buffer_light_map[x][y][z] = { 0, 0 };
-
+			for (int z = 0; z < size; z++) {
 				if (const auto light = GetBlock(x, y, z)->Luminosity()) {
 
 					if (Client::settings.recursive_lighting) {
@@ -286,36 +303,6 @@ void Chunk::UpdateLight() {
 			}
 		}
 	}
-	// alien light
-	for (int i = 0; i < 27; i++) {
-		if (i == 13) // skip current chunk
-			continue;
-
-		if (chunks[i]) {
-			const auto sx = pos.x - chunks[i]->pos.x;
-			const auto sy = pos.y - chunks[i]->pos.y;
-			const auto sz = pos.z - chunks[i]->pos.z;
-
-			for (int x = 0; x < size; x++) {
-				for (int y = 0; y < size; y++) {
-					for (int z = 0; z < size; z++) {
-						if (!InLightRange(x + sx + LightMap::light_sampling,
-							y + sy + LightMap::light_sampling,
-							z + sz + LightMap::light_sampling)) continue;
-
-						// значение света в соседнем чанке в области этого чанка
-						const auto l = chunks[i]->CheckLight(x + sx, y + sy, z + sz);
-
-						if (l.sky > buffer_light_map[x][y][z].sky)
-							buffer_light_map[x][y][z].sky = l.sky;
-
-						if (l.block > buffer_light_map[x][y][z].block)
-							buffer_light_map[x][y][z].block = l.block;
-					}
-				}
-			}
-		}
-	}
 
 	if (Client::settings.recursive_lighting) return;
 
@@ -339,6 +326,46 @@ void Chunk::UpdateLight() {
 						SetBlockLight(x - LightMap::light_sampling, y - 1 - LightMap::light_sampling, z - LightMap::light_sampling, light_map[x][y][z].block - 1);
 						SetBlockLight(x - LightMap::light_sampling, y - LightMap::light_sampling, z + 1 - LightMap::light_sampling, light_map[x][y][z].block - 1);
 						SetBlockLight(x - LightMap::light_sampling, y - LightMap::light_sampling, z - 1 - LightMap::light_sampling, light_map[x][y][z].block - 1);
+					}
+				}
+			}
+		}
+	}
+}
+
+void Chunk::UpdateBufferLight() {
+	for (int x = 0; x < size; x++) {
+		for (int y = 0; y < size; y++) {
+			for (int z = 0; z < size; z++) {
+				buffer_light_map[x][y][z] = { 0, 0 };
+			}
+		}
+	}
+
+	for (int i = 0; i < 27; i++) {
+		if (i == 13) 
+			continue;
+
+		if (chunks[i]) {
+			const auto sx = pos.x - chunks[i]->pos.x;
+			const auto sy = pos.y - chunks[i]->pos.y;
+			const auto sz = pos.z - chunks[i]->pos.z;
+
+			for (int x = 0; x < size; x++) {
+				for (int y = 0; y < size; y++) {
+					for (int z = 0; z < size; z++) {
+						if (!InLightRange(
+							x + sx + LightMap::light_sampling,
+							y + sy + LightMap::light_sampling,
+							z + sz + LightMap::light_sampling)) continue;
+
+						const auto l = chunks[i]->CheckLight(x + sx, y + sy, z + sz);
+
+						if (l.sky > buffer_light_map[x][y][z].sky)
+							buffer_light_map[x][y][z].sky = l.sky;
+
+						if (l.block > buffer_light_map[x][y][z].block)
+							buffer_light_map[x][y][z].block = l.block;
 					}
 				}
 			}
@@ -489,7 +516,7 @@ inline Light Chunk::GetLight(int x, int y, int z) {
 	}
 	// for z-bounds
 	if (InRange(x) && InRange(y)) {
-		if (pos.z + z < 0 || pos.z + z >= world->WorldHeight * size) {
+		if (pos.z + z < 0 || pos.z + z >= world->world_height * size) {
 			auto light = light_map[x + LightMap::light_sampling]
 				[y + LightMap::light_sampling][z + LightMap::light_sampling];
 

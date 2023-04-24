@@ -1,8 +1,6 @@
 #pragma once
 #include<GLFW/glfw3.h>
-/// <summary>
-/// структруа конфигурации клавиш
-/// </summary>
+
 struct KeyConfig
 {
 	int forward		= GLFW_KEY_W;

@@ -17,7 +17,6 @@ public:
 
 	GLFWwindow* window{};
 	DeltaTime delta_time{};
-	Client client;
 
 	float d_time{};
 	double fps{};
@@ -47,4 +46,5 @@ public:
 void mouse_button_callback(GLFWwindow*, int, int, int);
 void key_callback(GLFWwindow*, int, int, int, int);
 void scroll_callback(GLFWwindow*, double, double);
+void character_callback(GLFWwindow*, unsigned int );
 

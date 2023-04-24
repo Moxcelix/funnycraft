@@ -7,6 +7,7 @@
 #include "Vector3.h"
 #include "Typedefs.h"
 #include "LightMap.h"
+#include "ChunkUpdateTask.h"
 
 #include <GLFW/glfw3.h>
 #include<iostream>
@@ -20,9 +21,11 @@ class Terrain;
 
 struct Chunk {
 public:
+
 	constexpr static int size = 16;
 
 	Chunk();
+	Chunk(Vector3Int pos, World* world);
 	Chunk(int x, int y, int z, World* world);
 	~Chunk();
 
@@ -40,7 +43,7 @@ public:
 
 	void Generate();
 	void Render(unsigned int texture); 
-	void Update(); 
+	void Update(ChunkUpdateTask = ChunkUpdateTask::FULL_UPDATE); 
 	void RecalculateSkyLightSolidity();
 	void UpdateMem();
 	void UpdateMesh();
@@ -50,6 +53,7 @@ public:
 	void SaveChunk();
 	bool LoadChunk();
 	void UpdateLight();
+	void UpdateBufferLight();
 
 	void Recursive_SetBlockLight(Direction, int, int, int, unsigned char);
 	void Recursive_SetBlockLight(int, int, int, unsigned char);
