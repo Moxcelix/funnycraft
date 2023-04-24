@@ -195,6 +195,7 @@
     <ClInclude Include="DeltaTime.h" />
     <ClInclude Include="Direction.h" />
     <ClInclude Include="font.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="KeyConfig.h" />
     <ClInclude Include="LightMap.h" />
     <ClInclude Include="light_utilities.h" />

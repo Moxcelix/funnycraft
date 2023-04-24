@@ -137,7 +137,7 @@ void UI::Render() {
 		glVertexPointer(3, GL_FLOAT, 0, planes[i].vertices);
 		glColorPointer(3, GL_FLOAT, 0, planes[i].colors);
 
-		glDrawArrays(GL_QUADS, 0, planes.size() * 4);
+		glDrawArrays(GL_QUADS, 0, 4);
 	}
 
 	glBindTexture(GL_TEXTURE_2D, font);

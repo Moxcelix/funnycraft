@@ -198,7 +198,7 @@ void Application::LoadResources() {
 	TextureInit(Client::instance().ui.font, "resources/fonts/font.png");
 	TextureInit(Client::instance().menu.font, "resources/fonts/font.png");
 	TextureInit(Client::instance().inventory.ui.font, "resources/fonts/font.png");
-
+	TextureInit(Client::instance().chat.ui.font, "resources/fonts/font.png");
 }
 
 void Application::SetCallbacks() {
@@ -261,8 +261,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		else if (key == Client::instance().key_config.down_arrow)	Client::instance().ButtonDown();
 		else if (key == Client::instance().key_config.left_arrow)	Client::instance().ButtonLeft();
 		else if (key == Client::instance().key_config.right_arrow)	Client::instance().ButtonRight();
-		else if (key == Client::instance().key_config.enter)	Client::instance().enter = true;
-		else if (key == Client::instance().key_config.pause)	Client::instance().Pause(!Client::instance().pause);
+		else if (key == Client::instance().key_config.enter)		Client::instance().enter = true;
+		else if (key == Client::instance().key_config.pause)		Client::instance().Escape();
+		else if (key == Client::instance().key_config.chat)			Client::instance().OpenChat();
 		else if (key == GLFW_KEY_F3)					app.wireframe = !app.wireframe;
 		else if (key == GLFW_KEY_F4)					Debug::bounds = !Debug::bounds;
 	}
@@ -275,9 +276,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		else if (key == Client::instance().key_config.jump)		Client::instance().player.up.Move(false);
 		else if (key == Client::instance().key_config.sprint)	Client::instance().player.sprint = false;
 	}
+
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+		if (key == GLFW_KEY_BACKSPACE)		Client::instance().chat.Backspace();
+		else if (key == GLFW_KEY_DELETE)	Client::instance().chat.Delete();
+		else if (key == GLFW_KEY_LEFT)		Client::instance().chat.Move(false);
+		else if (key == GLFW_KEY_RIGHT)		Client::instance().chat.Move(true);
+	}
 }
 
 void character_callback(GLFWwindow* window, unsigned int codepoint)
 {
-	std::cout << static_cast<char>(codepoint) << std::endl;
+	Client::instance().chat.TraceKey(codepoint);
 }

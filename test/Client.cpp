@@ -5,9 +5,11 @@ Client::Settings Client::settings = Client::Settings();
 
 Client::Client() {
 	modifier = new Modifier(this);
+	chat.active = false;
 }
 
 void Client::Init() {
+	chat.active = false;
 	inventory.Init();
 	World::settings.Clear();
 
@@ -23,9 +25,9 @@ void Client::Init() {
 
 	menu.AddStaticPlane(UI::Corner::middle, 1, 0, 0, 480, 360, squad);
 
-	MenuPos = Vector2Int(0, 0);
+	menu_pos = Vector2Int(0, 0);
 	world = new World(&player);
-	page = &page_menu;	
+	page = &page_menu;
 
 	chunk_loader = ChunkLoader(world, &player);
 
@@ -39,18 +41,17 @@ void Client::Pause(bool active) {
 	}
 	else {
 		int width, height;
-		glfwGetWindowSize(window, &width, &height);					
+		glfwGetWindowSize(window, &width, &height);
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		glfwSetCursorPos(window, width / 2., height / 2.);			
+		glfwSetCursorPos(window, width / 2., height / 2.);
 	}
-	pause = active; 
 }
 
 void Client::SetBlock(int x, int y, int z, block_id id) {
 	if (id && RigidBox::IsLocked(Vector3Int{ x,y,z }))
 		return;
 
-	if (player.looking && !pause) {
+	if (player.looking && game_state == GameState::PLAY) {
 		world->SetBlock(x, y, z, id, true);
 	}
 }
@@ -59,7 +60,7 @@ void Client::SetBlock(Vector3 pos, block_id id) {
 	if (id && RigidBox::IsLocked(Vector3Int(pos.x, pos.y, pos.z)))
 		return;
 
-	if (player.looking && !pause) {
+	if (player.looking && game_state == GameState::PLAY) {
 		world->SetBlock(pos.x, pos.y, pos.z, id, true);
 	}
 }
@@ -70,16 +71,16 @@ void Client::SetBlock() {
 	if (id && RigidBox::IsLocked(player.add_pos))
 		return;
 
-	if (player.looking && !pause)
+	if (player.looking && game_state == GameState::PLAY)
 		world->SetBlock(player.add_pos, id, true);
 }
 
 void Client::DestroyBlock(int x, int y, int z) {
-	if (player.looking && !pause) {
+	if (player.looking && game_state == GameState::PLAY) {
 		const auto block = world->GetBlock(x, y, z);
 		particles.push_back(new Particles(block, world, {
-			static_cast<float>(x), 
-			static_cast<float>(y), 
+			static_cast<float>(x),
+			static_cast<float>(y),
 			static_cast<float>(z) }, 20));
 		world->SetBlock(x, y, z, 0, true);
 	}
@@ -94,11 +95,11 @@ void Client::DestroyBlock() {
 }
 
 void Client::Update(float deltaTime) {
-	player.Update();				
-	world->Update();				
-	chunk_loader.Update();	
-	inventory.Update();				
-	modifier->Update();		
+	player.Update();
+	world->Update();
+	chunk_loader.Update();
+	inventory.Update();
+	modifier->Update();
 	world->time.Shift(deltaTime);
 
 	std::vector<int> ToRemove;
@@ -123,32 +124,32 @@ void Client::Update(float deltaTime) {
 
 void Client::ToSettings() {
 	page = &page_settings;
-	MenuPos = Vector2Int(0, 0);
+	menu_pos = Vector2Int(0, 0);
 }
 
 void Client::ToMenu() {
 	page = &page_menu;
-	MenuPos = Vector2Int(0, 0);
+	menu_pos = Vector2Int(0, 0);
 }
 
 void Client::ToTimeSet() {
 	page = &page_time;
-	MenuPos = Vector2Int(0, 0);	
+	menu_pos = Vector2Int(0, 0);
 }
 
 void Client::ToAgree() {
 	page = &page_agree;
-	MenuPos = Vector2Int(0, 0);
+	menu_pos = Vector2Int(0, 0);
 }
 
 void Client::ToNewWorld() {
 	page = &page_new_world;
-	MenuPos = Vector2Int(0, 0);
+	menu_pos = Vector2Int(0, 0);
 }
 
 void Client::ToRenderDistance() {
 	page = &page_render_distance;
-	MenuPos = Vector2Int(0, 0);
+	menu_pos = Vector2Int(0, 0);
 }
 
 void Client::NewWorld() {
@@ -172,8 +173,8 @@ void Client::NewWorld() {
 }
 
 void Client::ButtonUp() {
-	if (pause) {
-		MenuPos.y -= 1;
+	if (game_state != GameState::PLAY) {
+		menu_pos.y -= 1;
 	}
 	else {
 		if (inventory.current < inventory.count - 1)
@@ -184,8 +185,8 @@ void Client::ButtonUp() {
 }
 
 void Client::ButtonDown() {
-	if (pause) {
-		MenuPos.y += 1;
+	if (game_state != GameState::PLAY) {
+		menu_pos.y += 1;
 	}
 	else {
 		if (inventory.current > 0)
@@ -196,11 +197,11 @@ void Client::ButtonDown() {
 }
 
 void Client::ButtonLeft() {
-	MenuPos.x -= 1;
+	menu_pos.x -= 1;
 }
 
 void Client::ButtonRight() {
-	MenuPos.x += 1;
+	menu_pos.x += 1;
 }
 
 void Client::MoveCamera(double delta_time) {
@@ -210,14 +211,14 @@ void Client::MoveCamera(double delta_time) {
 	if (delta_time > 500)
 		return;
 
-	player.can_move = !pause;
+	player.can_move = game_state == GameState::PLAY;
 
-	if (!pause) {
+	if (game_state == GameState::PLAY) {
 		glfwGetCursorPos(window, &posx, &posy);
 		player.RotateCamera(
 			(mouse_pos_y - posy) / sensitivity,
 			(mouse_pos_x - posx) / sensitivity);
-		glfwSetCursorPos(window, mouse_pos_x, mouse_pos_y); 
+		glfwSetCursorPos(window, mouse_pos_x, mouse_pos_y);
 	}
 
 	const auto rotation = static_cast<float>(-player.camera.zRot / 180 * M_PI);
@@ -240,9 +241,13 @@ void Client::ReloadChunks() {
 	world->Clear();
 }
 
+void Client::DrawChat() {
+	chat.Render();
+}
+
 void Client::DrawMenu() {
-	if (MenuPos.y < 0) MenuPos.y = 0;
-	if (MenuPos.y >= page->count) MenuPos.y = page->count - 1;
+	if (menu_pos.y < 0) menu_pos.y = 0;
+	if (menu_pos.y >= page->count) menu_pos.y = page->count - 1;
 
 	float indent = 0;
 
@@ -252,7 +257,7 @@ void Client::DrawMenu() {
 		std::string btn = page->buttons[i]->name;
 		indent += page->indents[i];
 
-		if (MenuPos.y == i) {
+		if (menu_pos.y == i) {
 			btn = ">" + btn + "<";
 			g = 0;
 			b = 0;
@@ -265,7 +270,7 @@ void Client::DrawMenu() {
 
 	if (enter) {
 		enter = false;
-		page->buttons[MenuPos.y]->DoFunc();
+		page->buttons[menu_pos.y]->DoFunc();
 	}
 
 	menu.Render();
@@ -305,9 +310,9 @@ void Client::CameraUpdate() {
 void Client::Render() {
 	Resize();
 
-	world->Render(main_texture); 
+	world->Render(main_texture);
 
-	if (!pause) UpdatePhantomPos();
+	if (game_state == GameState::PLAY) UpdatePhantomPos();
 
 	for (int i = 0; i < particles.size(); i++) {
 		if (particles[i]->working) {
@@ -328,21 +333,57 @@ void Client::Resize() {
 	ui.SetSize(width, height);
 	menu.SetSize(width, height);
 	inventory.ui.SetSize(width, height);
+	chat.ui.SetSize(width, height);
 }
 
 void Client::RenderUI() {
 	ui.Render();
-
-	if (pause) DrawMenu();
-	else inventory.DrawInventory();
+	switch (game_state)
+	{
+	case GameState::PLAY:
+		inventory.DrawInventory();
+		break;
+	case GameState::PAUSE:
+		DrawMenu();
+		break;
+	case GameState::CHAT:
+		DrawChat();
+		break;
+	}
 }
 
 void Client::CopyBlock() {
 	inventory.AddBlock(world->GetBlockID(player.look_pos));
 }
 
+void Client::Escape() {
+	switch (game_state)
+	{
+	case GameState::PLAY:
+		game_state = GameState::PAUSE;
+		break;
+	case GameState::PAUSE:
+	case GameState::CHAT:
+		game_state = GameState::PLAY;
+		break;
+	}
+
+	Pause(game_state != GameState::PLAY);
+	chat.active = false;
+}
+
+void Client::OpenChat() {
+	game_state = game_state == GameState::CHAT ?
+		GameState::PLAY :
+		GameState::CHAT;
+
+	Pause(game_state == GameState::CHAT);
+	chat.active = game_state == GameState::CHAT;
+}
+
 void Client::Clear() {
-	pause = false;
+	game_state = GameState::PLAY;
+	chat.active = false;
 	close = false;
 
 	ui.Clear();

@@ -18,6 +18,7 @@ struct KeyConfig
 	int explode		= GLFW_KEY_B;
 
 	int pause		= GLFW_KEY_ESCAPE;
+	int chat		= GLFW_KEY_TAB;
 	int enter		= GLFW_KEY_ENTER;
 	int up_arrow	= GLFW_KEY_UP;
 	int down_arrow	= GLFW_KEY_DOWN;

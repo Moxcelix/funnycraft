@@ -15,6 +15,8 @@
 #include "UI.h"
 #include "KeyConfig.h"
 #include "ChunkLoader.h"
+#include "Chat.h"
+#include "GameState.h"
 
 struct Modifier;
 
@@ -32,7 +34,9 @@ public:
 	Modifier* modifier{};
 
 	UI ui, menu;
-	Vector2Int MenuPos;
+	Vector2Int menu_pos;
+	Chat chat;
+	GameState game_state;
 
 	Player player;
 	Inventory inventory;
@@ -44,7 +48,6 @@ public:
 
 	std::vector<Particles*> particles;
 
-	bool pause = false;
 	bool enter = false;
 	bool close = false;
 
@@ -75,6 +78,8 @@ public:
 	void ButtonDown();
 	void ButtonRight();
 	void ButtonLeft();
+	void Escape();
+	void OpenChat();
 
 	void SetBlock(int, int, int, block_id);
 	void SetBlock(Vector3, block_id);
@@ -98,6 +103,7 @@ public:
 	void Render();
 	void RenderUI();
 	void DrawMenu();
+	void DrawChat();
 
 	struct Button {
 		std::string name;
