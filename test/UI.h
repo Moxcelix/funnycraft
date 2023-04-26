@@ -17,14 +17,11 @@ struct UIElement;
 
 class UI {
 private:
-	int IDCounter = 0; // счетчик ID
-	int flags = 0;	// флаги отрисовки
-	int winWidth = 1, winHeight = 1;	// габариты окна
-	int debug_line_counter = 0;			// счетчик количества строк отладки
+	int IDCounter = 0;
+	int flags = 0;
+	int window_width = 1, window_height = 1;
+	int debug_line_counter = 0;	
 public:
-	/// <summary>
-	/// перечисление углов
-	/// </summary>
 	enum class Corner
 	{
 		left_up,
@@ -79,7 +76,6 @@ struct UIElement {
 	UVData* uvs_data;
 	UI::Corner corner;
 
-
 	float rect[12] = {
 		1, 0, 0,
 		0, 0, 0,
@@ -123,7 +119,6 @@ struct Text : UIElement {
 		0, iheight, 0,
 		iwidth, iheight, 0
 	};
-
 
 	Text(int x, int y, float size, float r, float g, float b,
 		std::string text, UI::Corner corner) {

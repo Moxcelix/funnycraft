@@ -1,6 +1,9 @@
 #include "UI.h"
 void UI::PrintText(Text t) {
 	int l = t.text.length();
+
+	if (l == 0) return;
+
 	t.ID = IDCounter;
 	t.vertices = new float[l * 12];
 	t.colors = new float[l * 12];
@@ -9,15 +12,16 @@ void UI::PrintText(Text t) {
 
 	t.uvs_data->xUVSize = t.width;
 	t.uvs_data->yUVSize = t.height;
+	//t.uvs_data->accuracy = window_height % 2 == 0? 0.0000001 : 0;
 
-	float q = winHeight / float(winWidth);
+	float q = window_height / float(window_width);
 
 	Vector2 gab = GetCorner(t.corner, t.iwidth * l * t.size, t.iheight * t.size, 4, 4);
 
-	t.size *= 2. / winHeight;
+	t.size *= 2. / window_height;
 
-	float xs = 2 * t.x / float(winWidth);
-	float ys = 2 * t.y / float(winHeight);
+	float xs = 2 * t.x / float(window_width);
+	float ys = 2 * t.y / float(window_height);
 
 	const char* s = t.text.c_str();
 	for (int i = 0; i < l; i++)
@@ -28,7 +32,7 @@ void UI::PrintText(Text t) {
 		{
 			t.vertices[i * 12 + 3 * j] = (t.quad[j * 3] + shift) * t.size * q + gab.x + xs;
 			t.vertices[i * 12 + 3 * j + 1] = t.quad[j * 3 + 1] * t.size + gab.y - ys;
-			t.vertices[i * 12 + 3 * j + 2] = 1;
+			t.vertices[i * 12 + 3 * j + 2] = 0;
 		}
 		for (int j = 0; j < 4; j++)
 		{
@@ -44,34 +48,39 @@ void UI::PrintText(Text t) {
 		else
 			k = s[i] - '!';
 
-		if (s[i] == ' ')
+		if (s[i] == ' ') {
 			t.uvs_data->AddUV((int)0, 0);
-		else
-			t.uvs_data->AddUV(int(k % t.wCount), 15 - int(k / t.wCount));
+		}
+		else {
+			t.uvs_data->AddUV(
+				static_cast<float>(k % t.wCount),
+				15 - static_cast<float>(k / t.wCount));
+		}
 	}
+
 	t.uvs = &t.uvs_data->UVs[0];
 	IDCounter++;
 	texts.push_back(t);
 }
 
 void UI::PrintPlane(Plane p) {
-	float q = winHeight / float(winWidth);
+	float q = window_height / float(window_width);
 
 	p.vertices = new float[12];
 	p.colors = new float[12];
 
 	Vector2 gab = GetCorner(p.corner, p.w * p.size, p.h * p.size, 4, 4);
 
-	p.size *= 2. / winHeight;
+	p.size *= 2. / window_height;
 
-	float xs = 2 * p.x / float(winWidth);
-	float ys = 2 * p.y / float(winHeight);
+	float xs = 2 * p.x / float(window_width);
+	float ys = 2 * p.y / float(window_height);
 
 	for (int j = 0; j < 4; j++)
 	{
 		p.vertices[3 * j] = p.rect[j * 3] * p.size * p.w * q + gab.x + xs;
 		p.vertices[3 * j + 1] = p.rect[j * 3 + 1] * p.size * p.h + gab.y - ys;
-		p.vertices[3 * j + 2] = 1;
+		p.vertices[3 * j + 2] = 0;
 	}
 	for (int j = 0; j < 4; j++)
 	{
@@ -92,10 +101,10 @@ void UI::PrintText(Corner corner, float size, int x, int y,
 
 Vector2 UI::GetCorner(Corner corner, float width,
 	float height, int xShift, int yShift) {
-	float xs = 2 * xShift / float(winWidth);
-	float ys = 2 * yShift / float(winHeight);
-	height *= 2 / float(winHeight);
-	width *= 2 / float(winWidth);
+	float xs = 2 * xShift / float(window_width);
+	float ys = 2 * yShift / float(window_height);
+	height *= 2 / float(window_height);
+	width *= 2 / float(window_width);
 
 	switch (corner)
 	{
@@ -128,7 +137,9 @@ void UI::PrintDebug(std::string str, float r, float g, float b) {
 
 void UI::Render() {
 	PrintStatic();
+
 	glPushMatrix();
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -155,10 +166,9 @@ void UI::Render() {
 	glDisableClientState(GL_COLOR_ARRAY);
 	glPopMatrix();
 
-	if(flags & UI_DRAW_CROSS)
-		cross.Draw(winWidth, winHeight);
-	//bg = BackGround(1, 1, 1, 0.5);
-	//bg.Draw(winWidth, winHeight);
+	if (flags & UI_DRAW_CROSS) {
+		cross.Draw(window_width, window_height);
+	}
 
 	for (const Text& t : texts)
 	{
@@ -180,7 +190,7 @@ void UI::Render() {
 }
 
 void UI::PrintStatic() {
-	float q = winHeight / float(winWidth);
+	float q = window_height / float(window_width);
 	for (const Plane& p : static_planes) {
 		PrintPlane(p);
 	}
@@ -224,8 +234,8 @@ Plane UI::AddStaticPlane(Corner corner, float size,
 }
 
 void UI::SetSize(int w, int h) {
-	winHeight = h;
-	winWidth = w;
+	window_height = h;
+	window_width = w;
 }
 
 void UI::SetFlags(int flags) {

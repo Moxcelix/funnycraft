@@ -26,15 +26,16 @@ void UVData::AddUV(float coords[], int length)
 /// <param name="y"></param>
 void UVData::AddUV(float x, float y)
 {
-	y = 15 - y;
-	UVs.push_back(x * xUVSize + xUVSize);
-	UVs.push_back(y * yUVSize + yUVSize);
-	UVs.push_back(x * xUVSize);
-	UVs.push_back(y * yUVSize + yUVSize);
-	UVs.push_back(x * xUVSize);
-	UVs.push_back(y * yUVSize);
-	UVs.push_back(x * xUVSize + xUVSize);
-	UVs.push_back(y * yUVSize);
+	y = 15.f - y;
+
+	UVs.push_back(x * xUVSize + xUVSize - accuracy);
+	UVs.push_back(y * yUVSize + yUVSize - accuracy);
+	UVs.push_back(x * xUVSize + accuracy);
+	UVs.push_back(y * yUVSize + yUVSize - accuracy);
+	UVs.push_back(x * xUVSize + accuracy);
+	UVs.push_back(y * yUVSize + accuracy);
+	UVs.push_back(x * xUVSize + xUVSize - accuracy);
+	UVs.push_back(y * yUVSize + accuracy);
 }
 /// <summary>
 /// Добавление UV

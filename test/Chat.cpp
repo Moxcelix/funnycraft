@@ -31,16 +31,19 @@ void Chat::Render() {
 	time += delta_time.Get();
 
 	if (time > cursor_period) {
-		time -= cursor_period;
+		const auto count = static_cast<int>(time) / cursor_period;
+		time -= cursor_period * count;
 		visible = !visible;
 	}
 
 	ui.PrintText(UI::Corner::middle, font_size, -width/2 + shift +
 		tab, -(height - input_height) / 2, temp_text, 1, 1, 0);
 
+	//ui.PrintText(UI::Corner::middle, font_size,0, 0, "asas", 1, 1, 0);
+
 	if (visible) {
 		ui.PrintText(UI::Corner::middle, font_size, -width / 2 +
-			pos * font_size * 6 + tab + 3 * font_size,
+			pos * font_size * 6 + tab + static_cast<unsigned long long>(3) * font_size,
 			-(height - input_height) / 2 - cursor_shift, "_", 1, 1, 0);
 	}
 
