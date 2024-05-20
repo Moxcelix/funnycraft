@@ -162,6 +162,7 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DeltaTime.cpp" />
+    <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="LightMap.cpp" />
     <ClCompile Include="Modifier.cpp" />
     <ClCompile Include="Particles.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="font.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="KeyConfig.h" />
+    <ClInclude Include="Lexer.h" />
     <ClInclude Include="LightMap.h" />
     <ClInclude Include="light_utilities.h" />
     <ClInclude Include="Modifier.h" />

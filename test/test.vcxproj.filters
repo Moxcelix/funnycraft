@@ -22,6 +22,15 @@
     <Filter Include="Исходные файлы\utilitarian\sources">
       <UniqueIdentifier>{e3edc230-9ffc-472a-88cd-1292adf80f80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\comlang">
+      <UniqueIdentifier>{59b2ee6c-cf14-4265-983c-f207f154e419}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\comlang\sources">
+      <UniqueIdentifier>{d4df1eed-5591-4820-95b4-a5fe77f52fa2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\comlang\headers">
+      <UniqueIdentifier>{f0e66683-2f88-4d1e-a9cb-3f4fe5db4402}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -104,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="Chat.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Lexer.cpp">
+      <Filter>Исходные файлы\comlang\sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +232,9 @@
     </ClInclude>
     <ClInclude Include="GameState.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Lexer.h">
+      <Filter>Исходные файлы\comlang\headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
