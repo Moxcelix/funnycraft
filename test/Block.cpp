@@ -1,156 +1,260 @@
 #include "Block.h"
-struct Chunk; // заголовок чанка
-vector<Block*> Block::BlockList = vector<Block*>(); // инициализация списка блоков
-Block** Block::blocks = new Block * (); // массив блоков
-/// <summary>
-/// конструктор блока
-/// </summary>
-Block::Block()
-{
+#include "Client.h"
 
-}
-/// <summary>
-/// Добавление данных меша
-/// </summary>
-/// <param name="data"></param>
-/// <param name="uv"></param>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-/// <param name="chunk"></param>
-void Block::GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, Chunk* chunk)
+struct Chunk;
+std::vector<Block*> Block::BlockList = std::vector<Block*>();
+Block** Block::blocks = new Block * ();
+
+Block::Block() {}
+
+void Block::GetMeshData(VertexData* data, UVData* uv,
+	int x, int y, int z, Chunk* chunk) const
 {
-	// добавление сторон куба в соответствии с расположением в чанке
 	if (chunk->GetBlock(x, y, z + 1)->GetLayer() != GetLayer()
-		&& chunk->GetBlock(x, y, z + 1) != null)
-	{
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z + 1), Color(Direction::Up));
-		ColorSquad squad{ color };
-		data->FaceUp(x, y, z, squad); // добавление вершин грани блока
+		&& chunk->GetBlock(x, y, z + 1) != null) {
+		auto squad = CalculateFaceUpColor(x, y, z, chunk);
 
-		float i = TileCoord(Direction::Up).x; // получение абсциссы текстуры в атласе
-		float j = TileCoord(Direction::Up).y; // получение ординаты текстуры в атласе
+		data->FaceUp(
+			static_cast<float>(x),
+			static_cast<float>(y), 
+			static_cast<float>(z), squad);
 
-		uv->AddUV(i, j); // добавление UV-координат грани блока
+		auto i = TileCoord(Direction::Up).x;
+		auto j = TileCoord(Direction::Up).y;
+
+		uv->AddUV(i, j);
 	}
-	// остальные грани - аналогично
-	if (chunk->GetBlock(x, y, z - 1)->GetLayer() != GetLayer()
-		&& chunk->GetBlock(x, y, z - 1) != null)
-	{
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z - 1), Color(Direction::Down));
-		ColorSquad squad{ color };
-		data->FaceDown(x, y, z, squad);
 
-		float i = TileCoord(Direction::Down).x;
-		float j = TileCoord(Direction::Down).y;
+	if (chunk->GetBlock(x, y, z - 1)->GetLayer() != GetLayer()
+		&& chunk->GetBlock(x, y, z - 1) != null) {
+		auto squad = CalculateFaceDownColor(x, y, z, chunk);
+
+		data->FaceDown(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
+
+		auto i = TileCoord(Direction::Down).x;
+		auto j = TileCoord(Direction::Down).y;
 
 		uv->AddUV(i, j);
 	}
 	if (chunk->GetBlock(x, y + 1, z)->GetLayer() != GetLayer()
-		&& chunk->GetBlock(x, y + 1, z) != null)
-	{
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y + 1, z), Color(Direction::Front));
-		ColorSquad squad{ color };
-		data->FaceFront(x, y, z, squad);
+		&& chunk->GetBlock(x, y + 1, z) != null) {
+		auto squad = CalculateFaceFrontColor(x, y, z, chunk);
 
-		float i = TileCoord(Direction::Front).x;
-		float j = TileCoord(Direction::Front).y;
+		data->FaceFront(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
+
+		auto i = TileCoord(Direction::Front).x;
+		auto j = TileCoord(Direction::Front).y;
 
 		uv->AddUV(i, j);
 	}
 	if (chunk->GetBlock(x, y - 1, z)->GetLayer() != GetLayer()
-		&& chunk->GetBlock(x, y - 1, z) != null)
-	{
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y - 1, z), Color(Direction::Back));
-		ColorSquad squad{ color };
-		data->FaceBack(x, y, z, squad);
+		&& chunk->GetBlock(x, y - 1, z) != null) {
+		auto squad = CalculateFaceBackColor(x, y, z, chunk);
 
-		float i = TileCoord(Direction::Back).x;
-		float j = TileCoord(Direction::Back).y;
+		data->FaceBack(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
+
+		auto i = TileCoord(Direction::Back).x;
+		auto j = TileCoord(Direction::Back).y;
 
 		uv->AddUV(i, j);
 	}
 	if (chunk->GetBlock(x + 1, y, z)->GetLayer() != GetLayer()
-		&& chunk->GetBlock(x + 1, y, z) != null)
-	{
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x + 1, y, z), Color(Direction::Right));
-		ColorSquad squad{ color };
-		data->FaceRight(x, y, z, squad);
+		&& chunk->GetBlock(x + 1, y, z) != null) {
+		auto squad = CalculateFaceRightColor(x, y, z, chunk);
 
-		float i = TileCoord(Direction::Right).x;
-		float j = TileCoord(Direction::Right).y;
+		data->FaceRight(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
+
+		auto i = TileCoord(Direction::Right).x;
+		auto j = TileCoord(Direction::Right).y;
 
 		uv->AddUV(i, j);
 	}
 	if (chunk->GetBlock(x - 1, y, z)->GetLayer() != GetLayer()
-		&& chunk->GetBlock(x - 1, y, z) != null)
-	{
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x - 1, y, z), Color(Direction::Left));
-		ColorSquad squad{ color };
-		data->FaceLeft(x, y, z, squad);
+		&& chunk->GetBlock(x - 1, y, z) != null) {
+		auto squad = CalculateFaceLeftColor(x, y, z, chunk);
 
-		float i = TileCoord(Direction::Left).x;
-		float j = TileCoord(Direction::Left).y;
+		data->FaceLeft(
+			static_cast<float>(x),
+			static_cast<float>(y),
+			static_cast<float>(z), squad);
+
+		auto i = TileCoord(Direction::Left).x;
+		auto j = TileCoord(Direction::Left).y;
 
 		uv->AddUV(i, j);
 	}
 }
-/// <summary>
-/// границы блока
-/// </summary>
-/// <returns></returns>
-Bound Block::GetBounds() 
-{
+
+ColorSquad Block::CalculateFaceUpColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Up);
+	}
+
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x, y, z + 1), Color(Direction::Up));
+	}
+
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + i - 1, y + j - 1, z + 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Up)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Up)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Up)),
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Up))
+	};
+}
+ColorSquad Block::CalculateFaceDownColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Down);
+	}
+
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x, y, z - 1), Color(Direction::Down));
+	}
+
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + i - 1, y + j - 1, z - 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Down)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Down)),
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Down)),
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Down)),
+	};
+}
+ColorSquad Block::CalculateFaceFrontColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Front);
+	}
+
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x, y + 1, z), Color(Direction::Front));
+	}
+
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + i - 1, y + 1, z + j - 1);
+		}
+	}
+	return{
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Front)),
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Front)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Front)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Front)),
+	};
+}
+ColorSquad Block::CalculateFaceBackColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Back);
+	}
+
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x, y - 1, z), Color(Direction::Back));
+	}
+
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + i - 1, y - 1, z + j - 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Back)),
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Back)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Back)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Back)),
+	};
+}
+ColorSquad Block::CalculateFaceRightColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Right);
+	}
+
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x + 1, y, z), Color(Direction::Right));
+	}
+
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x + 1, y + i - 1, z + j - 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Right)),
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Right)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Right)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Right)),
+	};
+}
+ColorSquad Block::CalculateFaceLeftColor(int x, int y, int z, Chunk* chunk) const {
+	if (Luminosity()) {
+		return Color(Direction::Left);
+	}
+
+	if (!Client::settings.smooth_lighting) {
+		return Vector3::clrm(chunk->GetLigthColor(x - 1, y, z), Color(Direction::Left));
+	}
+
+	Vector3 colors[3][3];
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] = chunk->GetLigthColor(x - 1, y + i - 1, z + j - 1);
+		}
+	}
+	return {
+		LIGHT_SUM(colors[0][0], colors[0][1], colors[1][0], colors[1][1], Color(Direction::Left)),
+		LIGHT_SUM(colors[1][0], colors[1][1], colors[2][0], colors[2][1], Color(Direction::Left)),
+		LIGHT_SUM(colors[1][1], colors[1][2], colors[2][1], colors[2][2], Color(Direction::Left)),
+		LIGHT_SUM(colors[0][1], colors[0][2], colors[1][1], colors[1][2], Color(Direction::Left)),
+	};
+}
+
+Bound Block::GetBounds() const {
 	return Bound();
 }
-/// <summary>
-/// твёрдость
-/// </summary>
-/// <returns>твёрдость блока</returns>
-bool Block::Solid()
-{
+
+bool Block::Solid() const {
 	return true;
 }
-/// <summary>
-/// прозрачность блока для света
-/// </summary>
-/// <returns>прозрачность блока</returns>
-bool Block::Transparent()
-{
+
+bool Block::Transparent() const {
 	return false;
 }
-/// <summary>
-/// светимость блока
-/// </summary>
-/// <returns>уровень светимости</returns>
-char Block::Luminosity()
-{
+
+char Block::Luminosity() const {
 	return 0;
 }
-/// <summary>
-/// цвет грани блока
-/// </summary>
-/// <param name="direction"></param>
-/// <returns>вектор с RGB каналами</returns>
-Vector3 Block::Color(Direction direction)
-{
+
+Vector3 Block::Color(Direction direction) const {
 	return Vector3(1, 1, 1);
 }
-/// <summary>
-/// координаты текстур граней блока 
-/// </summary>
-/// <param name="direction"></param>
-/// <returns>вектор</returns>
-Vector2 Block::TileCoord(Direction direction)
-{
+
+Vector2 Block::TileCoord(Direction direction) const {
 	return Vector2(0, 0);
 }
-/// <summary>
-/// слой блока
-/// </summary>
-/// <returns>слой блока</returns>
-Block::BlockLayer Block::GetLayer()
-{
+
+Block::BlockLayer Block::GetLayer() const {
 	return BlockLayer::OTHER;
 }
 
@@ -169,150 +273,86 @@ void Block::Init()
 	BlockList.clear();
 }
 
-/// <param name="name"></param>
-Block::Block(block_id id, string name)
+Block::Block(block_id id, std::string name)
 {
 	this->id = id;				// ID блока
 	this->name = name;			// имя блока
 	BlockList.push_back(this);	// добавление ссылки в список блоков
 }
-/// <summary>
-/// слой рендеринга
-/// </summary>
-/// <returns>номер слоя</returns>
-char Block::GetRenderLayer()
-{
+
+char Block::GetRenderLayer() const {
 	return 0;
 }
 
-//Блоки
-
-/// <summary>
-///  блок воздуха
-/// </summary>
-class BlockAir : public Block
-{
+class BlockAir : public Block{
 public:
 	using Block::Block;
-	/// <summary>
-	/// твёрдость 
-	/// </summary>
-	/// <returns>твёрдость</returns>
-	virtual bool Solid()  // нетвёрдый
-	{
+
+	virtual bool Solid() const override {
 		return false;
 	}
-	/// <summary>
-	/// данные меша
-	/// </summary>
-	virtual void GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, Chunk* chunk)
-	{
-		// блок воздуха не обладает геометрией
+
+	virtual void GetMeshData(VertexData* data, UVData* uv,
+		int x, int y, int z, Chunk* chunk) const override {}
+
+	virtual BlockLayer GetLayer() const override {
+		return BlockLayer::AIR;
 	}
-	/// <summary>
-	/// слой
-	/// </summary>
-	/// <returns>слой</returns>
-	virtual BlockLayer GetLayer()
-	{
-		return BlockLayer::AIR; // слой воздуха
-	}
-	/// <summary>
-	/// прозрачность
-	/// </summary>
-	/// <returns>прозрачность</returns>
-	virtual bool Transparent()
-	{
-		return true; // прозрачный
+
+	virtual bool Transparent() const override {
+		return true;
 	}
 };
-/// <summary>
-/// блок земли с травой 
-/// </summary>
+
 class BlockGrass : public Block
 {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		switch (direction)
 		{
-		case Direction::Up:		// верхняя грань
+		case Direction::Up:
 			return Vector2(0, 15);
-		case Direction::Down:	// нижняя грань
+		case Direction::Down:
 			return Vector2(2, 15);
 
 		}
-		// остальные грани
 		return Vector2(3, 15);
 	}
-	/// <summary>
-	/// цвет 
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>цвет грани</returns>
-	virtual Vector3 Color(Direction direction) // верхняя грань блока окрашивается в зелёный
-	{
+
+	virtual Vector3 Color(Direction direction) const override {
 		if (direction == Direction::Up)
 			return Vector3(0.56, 0.81, 0.3);
+
 		return Vector3(1, 1, 1);
 	}
 
 };
-/// <summary>
-/// блок камня
-/// </summary>
-class BlockStone : public Block
-{
+
+class BlockStone : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
-		return Vector2(1, 15);
 
+	virtual Vector2 TileCoord(Direction direction) const override {
+		return Vector2(1, 15);
 	}
 };
-/// <summary>
-/// блок земли
-/// </summary>
-class BlockDirt : public Block
-{
+
+class BlockDirt : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(2, 15);
 	}
 };
-/// <summary>
-/// блок дуба
-/// </summary>
-class BlockOak : public Block
-{
+
+class BlockOak : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		switch (direction)
 		{
 		case Direction::Up:
@@ -322,67 +362,45 @@ public:
 		}
 		return Vector2(4, 14);
 	}
-
 };
-/// <summary>
-/// блок булыжника
-/// </summary>
-class BlockCobblestone : public Block
-{
+
+class BlockCobblestone : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(0, 14);
 	}
 };
-/// <summary>
-/// блок замшелого булыжника
-/// </summary>
-class BlockMossyCobblestone : public Block
-{
+
+class BlockMossyCobblestone : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(4, 13);
 	}
 };
-/// <summary>
-/// блок листвы
-/// </summary>
-class BlockLeaves : public Block
-{
+
+class BlockLeaves : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// данные меша
-	/// </summary>
-	virtual void GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, Chunk* chunk)
-	{
+
+	virtual void GetMeshData(VertexData* data, UVData* uv,
+		int x, int y, int z, Chunk* chunk)  const override {
 		// верхняя грань
-		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z + 1), Color(Direction::Up));
-		ColorSquad squad{ color };
+		auto squad = CalculateFaceUpColor(x, y, z, chunk);
+
 		data->FaceUp(x, y, z, squad); // добавление вершин грани блока
 
-		float i = TileCoord(Direction::Up).x; // получение абсциссы текстуры в атласе
-		float j = TileCoord(Direction::Up).y; // получение ординаты текстуры в атласе
+		auto i = TileCoord(Direction::Up).x; // получение абсциссы текстуры в атласе
+		auto j = TileCoord(Direction::Up).y; // получение ординаты текстуры в атласе
 
 		uv->AddUV(i, j); // добавление UV-координат грани блока
 
 		// нижняя грань
-		color = Vector3::clrm(chunk->GetLigthColor(x, y, z - 1), Color(Direction::Down));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceDownColor(x, y, z, chunk);
+
 		data->FaceDown(x, y, z, squad);
 
 		i = TileCoord(Direction::Down).x;
@@ -391,8 +409,8 @@ public:
 		uv->AddUV(i, j);
 
 		// передняя грань
-		color = Vector3::clrm(chunk->GetLigthColor(x, y + 1, z), Color(Direction::Front));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceFrontColor(x, y, z, chunk);
+
 		data->FaceFront(x, y, z, squad);
 
 		i = TileCoord(Direction::Front).x;
@@ -401,8 +419,8 @@ public:
 		uv->AddUV(i, j);
 
 		// задняя грань
-		color = Vector3::clrm(chunk->GetLigthColor(x, y - 1, z), Color(Direction::Back));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceBackColor(x, y, z, chunk);
+
 		data->FaceBack(x, y, z, squad);
 
 		i = TileCoord(Direction::Back).x;
@@ -411,18 +429,18 @@ public:
 		uv->AddUV(i, j);
 
 		// правая грань
-		color = Vector3::clrm(chunk->GetLigthColor(x + 1, y, z), Color(Direction::Right));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceRightColor(x, y, z, chunk);
+
 		data->FaceRight(x, y, z, squad);
 
 		i = TileCoord(Direction::Right).x;
 		j = TileCoord(Direction::Right).y;
 
 		uv->AddUV(i, j);
-		
+
 		// левая грань
-		color = Vector3::clrm(chunk->GetLigthColor(x - 1, y, z), Color(Direction::Left));
-		squad = ColorSquad{ color };
+		squad = CalculateFaceLeftColor(x, y, z, chunk);
+
 		data->FaceLeft(x, y, z, squad);
 
 		i = TileCoord(Direction::Left).x;
@@ -430,139 +448,76 @@ public:
 
 		uv->AddUV(i, j);
 	}
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(4, 12);
 	}
-	/// <summary>
-	/// цвет
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>цвет грани</returns>
-	virtual Vector3 Color(Direction direction)
-	{
-		return Vector3(0.4, 0.75, 0.25); // все грани окрашиваются в зелёный
+
+	virtual Vector3 Color(Direction direction)  const override {
+		return Vector3(0.4, 0.75, 0.25);
 	}
-	/// <summary>
-	/// слой
-	/// </summary>
-	/// <returns>слой</returns>
-	virtual BlockLayer GetLayer()
-	{
-		return BlockLayer::LEAVES; // слой листвы
+
+	virtual BlockLayer GetLayer() const override {
+		return BlockLayer::LEAVES;
 	}
 };
-/// <summary>
-/// блок листвы
-/// </summary>
-class BlockBirchLeaves : public BlockLeaves
-{
+
+class BlockBirchLeaves : public BlockLeaves {
 public:
 	using BlockLeaves::BlockLeaves;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(4, 12);
 	}
-	/// <summary>
-	/// цвет
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>цвет грани</returns>
-	virtual Vector3 Color(Direction direction)
-	{
-		return Vector3(0.5, 0.7, 0.33); // все грани окрашиваются в зелёный
+
+	virtual Vector3 Color(Direction direction) const override {
+		return Vector3(0.5, 0.7, 0.33);
 	}
 };
-/// <summary>
-/// блок стекла
-/// </summary>
-class BlockGlass : public Block
-{
+
+class BlockGlass : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(1, 12);
 	}
-	/// <summary>
-	/// слой
-	/// </summary>
-	/// <returns>слой</returns>
-	virtual BlockLayer GetLayer()
-	{
-		return BlockLayer::GLASS; // слой стекла
+
+	virtual BlockLayer GetLayer() const override {
+		return BlockLayer::GLASS;
 	}
-	/// <summary>
-	/// прозрачность
-	/// </summary>
-	/// <returns>прозрачность</returns>
-	virtual bool Transparent()
-	{
+
+	virtual bool Transparent() const override {
 		return true;
 	}
 };
-/// <summary>
-/// технический блок пустоты
-/// </summary>
-class BlockNull : public Block
-{
+
+class BlockNull : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// данные меша
-	/// </summary>
-	virtual void GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, Chunk* chunk)
-	{
 
+	virtual void GetMeshData(VertexData* data, UVData* uv,
+		int x, int y, int z, Chunk* chunk) const override {}
+
+	virtual BlockLayer GetLayer() const override {
+		return BlockLayer::VOID;
 	}
-	/// <summary>
-	/// слой
-	/// </summary>
-	/// <returns>слой</returns>
-	virtual BlockLayer GetLayer()
-	{
-		return BlockLayer::VOID; // слой пустоты
-	}
-	/// <summary>
-	/// твёрдость
-	/// </summary>
-	/// <returns>твёрдость</returns>
-	virtual bool Solid()
-	{
+
+	virtual bool Solid() const override {
 		return false;
 	}
+
+	virtual bool Transparent() const override {
+		return true;
+	}
 };
-/// <summary>
-/// блок берёзы 
-/// </summary>
-class BlockBirch : public Block
-{
+
+class BlockBirch : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
-		switch (direction)
-		{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
+		switch (direction) {
 		case Direction::Up:
 		case Direction::Down:
 			return Vector2(5, 14);
@@ -572,44 +527,28 @@ public:
 	}
 
 };
-/// <summary>
-/// блок высокой травы 
-/// </summary>
-class BlockTallGrass : public Block
-{
+
+class BlockTallGrass : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(7, 13);
 	}
-	/// <summary>
-	/// твёрдость
-	/// </summary>
-	/// <returns>твёрдость</returns>
-	virtual bool Solid() 
-	{
+
+	virtual bool Solid() const override {
 		return false;
 	}
 
-	/// <summary>
-	/// данные меша
-	/// </summary>
-	virtual void GetMeshData(VertexData* data, UVData* uv, int x, int y, int z, Chunk* chunk)
-	{
-		// отличная от кубической геометрия
+	virtual void GetMeshData(VertexData* data, UVData* uv,
+		int x, int y, int z, Chunk* chunk) const override {
 		float i = TileCoord(Direction::Up).x; // абсцисса текстуры
 		float j = TileCoord(Direction::Up).y; // ордината текстуры
 
 		// цвет
 		Vector3 color = Vector3::clrm(chunk->GetLigthColor(x, y, z), Color(Direction::Up));
 		ColorSquad squad{ color };
-		
+
 		data->FaceCrossRFLB(x, y, z, squad); // первая диагональная грань
 		data->FaceCrossRBLF(x, y, z, squad); // вторая диагональная грань
 		// добавление UV текстуры
@@ -618,158 +557,74 @@ public:
 		uv->AddUV(i, j);
 		uv->AddUV(i, j);
 	}
-	/// <summary>
-	/// прозрачность
-	/// </summary>
-	/// <returns>прозрачность</returns>
-	virtual bool Transparent()
-	{
+
+	virtual bool Transparent() const override {
 		return true;
 	}
-	/// <summary>
-	/// цвет
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>цвет грани</returns>
-	virtual Vector3 Color(Direction direction)
-	{
+
+	virtual Vector3 Color(Direction direction) const override {
 		return grass->Color(Direction::Up);
 	}
-	/// <summary>
-	/// слой
-	/// </summary>
-	/// <returns>слой</returns>
-	virtual BlockLayer GetLayer()
-	{
-		return BlockLayer::HERB; // слой для кресто-образных объектов
+
+	virtual BlockLayer GetLayer() const override {
+		return BlockLayer::HERB;
 	}
-	/// <summary>
-	/// границы
-	/// </summary>
-	/// <returns></returns>
-	virtual Bound GetBounds() 
-	{
+
+	virtual Bound GetBounds() const override {
 		return Bound(.7f, .7f, .7f);
 	}
 };
-/// <summary>
-/// блок мака
-/// </summary>
-class BlockPoppy : public BlockTallGrass
-{
+
+class BlockPoppy : public BlockTallGrass {
 public:
 	using BlockTallGrass::BlockTallGrass;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(12, 15);
 	}
-	/// <summary>
-	/// цвет
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>цвет грани</returns>
-	virtual Vector3 Color(Direction direction)
-	{
+
+	virtual Vector3 Color(Direction direction) const override {
 		return Vector3(1, 1, 1);
 	}
-	/// <summary>
-	/// границы
-	/// </summary>
-	/// <returns></returns>
-	virtual Bound GetBounds()
-	{
+
+	virtual Bound GetBounds() const override {
 		return Bound(.4f, .4f, .6f);
 	}
 };
-/// <summary>
-/// блок одуванчика
-/// </summary>
-class BlockDandelion : public BlockPoppy
-{
+
+class BlockDandelion : public BlockPoppy {
 public:
 	using BlockPoppy::BlockPoppy;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(13, 15);
 	}
 };
-/// <summary>
-/// блок досок
-/// </summary>
-class BlockPlanks : public Block
-{
+
+class BlockPlanks : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(4, 15);
 	}
 };
-/// <summary>
-/// блок песка 
-/// </summary>
-class BlockSand : public Block
-{
+
+class BlockSand : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(2, 14);
 	}
 };
-/// <summary>
-/// блок шерсти
-/// </summary>
-class BlockWool : public Block
-{
+
+class BlockTNT : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
-		return Vector2(0, 11);
-	}
-};
-/// <summary>
-/// блок тнт 
-/// </summary>
-class BlockTNT : public Block
-{
-public:
-	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="name"></param>
-	virtual Vector2 TileCoord(Direction direction)
-	{
-		switch (direction)
-		{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
+		switch (direction) {
 		case Direction::Up:
 			return Vector2(9, 15);
 		case Direction::Down:
@@ -779,103 +634,191 @@ public:
 		return Vector2(8, 15);
 	}
 };
-/// <summary>
-/// блок обсидиана
-/// </summary>
-class BlockObsidian : public Block
-{
+
+class BlockObsidian : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(7, 4);
 	}
 };
-/// <summary>
-/// блок обсидиана
-/// </summary>
-class BlockBricks : public Block
-{
+
+class BlockBricks : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(7, 15);
 	}
 };
-/// <summary>
-/// блок коренной породы
-/// </summary>
-class BlockBedrock : public Block
-{
+
+class BlockBedrock : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns>вектор</returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(1, 14);
 	}
 };
-/// <summary>
-/// блок обсидиана 
-/// </summary>
-class BlockGlowstone : public Block
-{
+
+class BlockGlowstone : public Block {
 public:
 	using Block::Block;
-	/// <summary>
-	/// координаты текстуры
-	/// </summary>
-	/// <param name="direction"></param>
-	/// <returns></returns>
-	virtual Vector2 TileCoord(Direction direction)
-	{
+
+	virtual Vector2 TileCoord(Direction direction) const override {
 		return Vector2(9, 9);
 	}
-	/// <summary>
-	/// светимость
-	/// </summary>
-	/// <returns>яркость</returns>
-	virtual char Luminosity()
-	{
-		return Chunk::MaxLight;
+
+	virtual char Luminosity() const override {
+		return LightMap::max_light;
 	}
 };
-// ссылки на статичные экземпляры блоков
-Block* Block::null = new BlockNull(-1, "none");
-Block* Block::air = new BlockAir(0, "air");
-Block* Block::stone = new BlockStone(1, "stone");
-Block* Block::dirt = new BlockDirt(2, "dirt");
-Block* Block::cobblestone = new BlockCobblestone(3, "cobblestone");
-Block* Block::grass = new BlockGrass(4, "grass");
-Block* Block::oak = new BlockOak(5, "oak");
-Block* Block::glass = new BlockGlass(6, "glass");
-Block* Block::leaves = new BlockLeaves(7, "leaves");
-Block* Block::birch = new BlockBirch(8, "birch");
-Block* Block::tall_grass = new BlockTallGrass(9, "tall_grass");
-Block* Block::poppy = new BlockPoppy(10, "poppy");
-Block* Block::dandelion = new BlockDandelion(11, "dandelion");
-Block* Block::planks = new BlockPlanks(12, "planks");
-Block* Block::sand = new BlockSand(13, "sand");
-Block* Block::wool = new BlockWool(14, "wool");
-Block* Block::tnt = new BlockTNT(15, "tnt");
-Block* Block::obsidian = new BlockObsidian(16, "obsidian");
-Block* Block::glowstone = new BlockGlowstone(17, "glowstone");
-Block* Block::birch_leaves = new BlockBirchLeaves(18, "birch_leaves");
-Block* Block::bedrock = new BlockBedrock(19, "bedrock");
-Block* Block::mossy_cobblestone = new BlockMossyCobblestone(20, "mossy_cobblestone");
-Block* Block::bricks = new BlockBricks(21, "bricks");
+
+class BlockSandstone : public Block {
+public:
+	using Block::Block;
+
+	virtual Vector2 TileCoord(Direction direction) const override {
+		switch (direction)
+		{
+		case Direction::Up:
+			return Vector2(0, 4);
+		case Direction::Down:
+			return Vector2(0, 2);
+		}
+		return Vector2(0, 3);
+	}
+};
+
+class BlockCactus : public Block {
+public:
+	using Block::Block;
+
+	virtual Vector2 TileCoord(Direction direction) const override {
+		switch (direction)
+		{
+		case Direction::Up:
+			return Vector2(5, 11);
+		case Direction::Down:
+			return Vector2(7, 11);
+		}
+		return Vector2(6, 11);
+	}
+
+	virtual void GetMeshData(VertexData* data, UVData* uv,
+		int x, int y, int z, Chunk* chunk) const override {
+		const auto shift = 1.f / 16.f;
+		if (chunk->GetBlock(x, y, z + 1)->GetLayer() != GetLayer()
+			&& chunk->GetBlock(x, y, z + 1) != null) {
+			auto squad = CalculateFaceUpColor(x, y, z, chunk);
+
+			data->FaceUp(x, y, z, squad);
+
+			auto i = TileCoord(Direction::Up).x;
+			auto j = TileCoord(Direction::Up).y;
+
+			uv->AddUV(i, j);
+		}
+
+		if (chunk->GetBlock(x, y, z - 1)->GetLayer() != GetLayer()
+			&& chunk->GetBlock(x, y, z - 1) != null) {
+			auto squad = CalculateFaceDownColor(x, y, z, chunk);
+
+			data->FaceDown(x, y, z, squad);
+
+			auto i = TileCoord(Direction::Down).x;
+			auto j = TileCoord(Direction::Down).y;
+
+			uv->AddUV(i, j);
+		}
+
+		auto squad = CalculateFaceFrontColor(x, y, z, chunk);
+
+		data->FaceFront(x, y - shift, z, squad);
+
+		auto i = TileCoord(Direction::Front).x;
+		auto j = TileCoord(Direction::Front).y;
+
+		uv->AddUV(i, j);
+
+		squad = CalculateFaceBackColor(x, y, z, chunk);
+
+		data->FaceBack(x, y + shift, z, squad);
+
+		i = TileCoord(Direction::Back).x;
+		j = TileCoord(Direction::Back).y;
+
+		uv->AddUV(i, j);
+
+		squad = CalculateFaceRightColor(x, y, z, chunk);
+
+		data->FaceRight(x - shift, y, z, squad);
+
+		i = TileCoord(Direction::Right).x;
+		j = TileCoord(Direction::Right).y;
+
+		uv->AddUV(i, j);
+
+		squad = CalculateFaceLeftColor(x, y, z, chunk);
+
+		data->FaceLeft(x + shift, y, z, squad);
+
+		i = TileCoord(Direction::Left).x;
+		j = TileCoord(Direction::Left).y;
+
+		uv->AddUV(i, j);
+	}
+
+	virtual BlockLayer GetLayer() const override {
+		return BlockLayer::CACTUS;
+	}
+
+	virtual bool Transparent() const override {
+		return true;
+	}
+};
+
+class BlockWool : public Block {
+private:
+	Vector3 color;
+public:
+	using Block::Block;
+
+	BlockWool(block_id id, std::string name, Vector3 color) : Block(id, name), color(color){}
+
+	virtual Vector2 TileCoord(Direction direction) const override {
+		return Vector2(0, 11);
+	}
+
+	virtual Vector3 Color(Direction direction) const override {
+		return this->color;
+	}
+};
+
+const Block* Block::null = new BlockNull(-1, "none");
+const Block* Block::air = new BlockAir(0, "air");
+const Block* Block::stone = new BlockStone(1, "stone");
+const Block* Block::dirt = new BlockDirt(2, "dirt");
+const Block* Block::cobblestone = new BlockCobblestone(3, "cobblestone");
+const Block* Block::grass = new BlockGrass(4, "grass");
+const Block* Block::oak = new BlockOak(5, "oak");
+const Block* Block::glass = new BlockGlass(6, "glass");
+const Block* Block::leaves = new BlockLeaves(7, "leaves");
+const Block* Block::birch = new BlockBirch(8, "birch");
+const Block* Block::tall_grass = new BlockTallGrass(9, "tall_grass");
+const Block* Block::poppy = new BlockPoppy(10, "poppy");
+const Block* Block::dandelion = new BlockDandelion(11, "dandelion");
+const Block* Block::planks = new BlockPlanks(12, "planks");
+const Block* Block::sand = new BlockSand(13, "sand");
+const Block* Block::cactus = new BlockCactus(14, "cactus");
+const Block* Block::tnt = new BlockTNT(15, "tnt");
+const Block* Block::obsidian = new BlockObsidian(16, "obsidian");
+const Block* Block::glowstone = new BlockGlowstone(17, "glowstone");
+const Block* Block::birch_leaves = new BlockBirchLeaves(18, "birch_leaves");
+const Block* Block::bedrock = new BlockBedrock(19, "bedrock");
+const Block* Block::mossy_cobblestone = new BlockMossyCobblestone(20, "mossy_cobblestone");
+const Block* Block::bricks = new BlockBricks(21, "bricks");
+const Block* Block::sandstone = new BlockSandstone(22, "sandstone");
+const Block* Block::wool_white = new BlockWool(23, "wool_white", {1.f, 1.f, 1.f});
+const Block* Block::wool_black = new BlockWool(24, "wool_black", {.1f, .1f, .1f});

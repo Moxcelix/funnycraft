@@ -16,12 +16,12 @@ void Phantom::Render(int x, int y, int z, World* world)
 	front = world->GetBlockID(x, y + 1, z);
 	back = world->GetBlockID(x, y - 1, z);
 
-	Block* block = world->GetBlock(x, y, z);
+	const auto block = world->GetBlock(x, y, z);
 
-	float w = block->GetBounds().width / 2.f;
-	float l = block->GetBounds().length / 2.f;
-	float h0 = .5f;
-	float h1 = block->GetBounds().height - .5f;
+	const auto w = block->GetBounds().width / 2.f;
+	const auto l = block->GetBounds().length / 2.f;
+	const auto h0 = .5f;
+	const auto h1 = block->GetBounds().height - .5f;
 
 	glBegin(GL_LINES); // режим линий
 	glColor3f(0, 0, 0);

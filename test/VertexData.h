@@ -9,44 +9,38 @@ constexpr auto DOWN_MULT = 0.5;
 constexpr auto Y_MULT = 0.67;
 constexpr auto X_MULT = 0.83;
 
-/// <summary>
-/// свкад цветов
-/// </summary>
 struct ColorSquad
 {
-	Vector3 colors[4]; // массив цветов
-	float alpha[4]{ 1,1,1,1 }; // массив значений альфа-канала
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="color"></param>
+	Vector3 colors[4];
+	float alpha[4]{ 1,1,1,1 };
+
 	ColorSquad(Vector3 color)
 	{
 		for (int i = 0; i < 4; i++)
 			colors[i] = color;
 	}
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="color"></param>
+
 	ColorSquad()
 	{
 		for (int i = 0; i < 4; i++)
 			colors[i] = {0,0,0};
 	}
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	/// <param name="colors"></param>
+
 	ColorSquad(Vector3 colors[4])
 	{
 		for (int i = 0; i < 4; i++)
 			this->colors[i] = colors[i];
 	}
+
+	ColorSquad(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+	{
+		colors[0] = a;
+		colors[1] = b;
+		colors[2] = c;
+		colors[3] = d;
+	}
 };
-/// <summary>
-/// класс данных вершин
-/// </summary>
+
 class VertexData
 {
 private:
@@ -69,24 +63,24 @@ public:
 	VertexData(); // конструктор
 	~VertexData(); // деструктор
 
-	void FaceUp(int x, int y, int z);		// верхняя грань
-	void FaceDown(int x, int y, int z);		// нижняя грань
-	void FaceRight(int x, int y, int z);	// правая грань
-	void FaceLeft(int x, int y, int z);		// левая грань
-	void FaceFront(int x, int y, int z);	// передняя грань
-	void FaceBack(int x, int y, int z);		// задняя грань
+	void FaceUp(float x, float y, float z);
+	void FaceDown(float x, float y, float z);
+	void FaceRight(float x, float y, float z);
+	void FaceLeft(float x, float y, float z);
+	void FaceFront(float x, float y, float z);
+	void FaceBack(float x, float y, float z);
 
-	void FaceUp(int x, int y, int z, ColorSquad colors);		// верхняя грань
-	void FaceDown(int x, int y, int z, ColorSquad colors);		// нижняя грань
-	void FaceRight(int x, int y, int z, ColorSquad colors);		// правая грань
-	void FaceLeft(int x, int y, int z, ColorSquad colors);		// левая грань
-	void FaceFront(int x, int y, int z, ColorSquad colors);		// передняя грань
-	void FaceBack(int x, int y, int z, ColorSquad colors);		// задняя грань
+	void FaceUp(float x, float y, float z, ColorSquad colors);		// верхняя грань
+	void FaceDown(float x, float y, float z, ColorSquad colors);		// нижняя грань
+	void FaceRight(float x, float y, float z, ColorSquad colors);		// правая грань
+	void FaceLeft(float x, float y, float z, ColorSquad colors);		// левая грань
+	void FaceFront(float x, float y, float z, ColorSquad colors);		// передняя грань
+	void FaceBack(float x, float y, float z, ColorSquad colors);		// задняя грань
 
-	void FaceParticle(int x, int y, int z, float scale, ColorSquad colors);		// грань
+	void FaceParticle(float x, float y, float z, float scale, ColorSquad colors);		// грань
 
-	void FaceCrossRFLB(int x, int y, int z, ColorSquad colors); // диагональная грань
-	void FaceCrossRBLF(int x, int y, int z, ColorSquad colors); // диагональная грань
+	void FaceCrossRFLB(float x, float y, float z, ColorSquad colors); // диагональная грань
+	void FaceCrossRBLF(float x, float y, float z, ColorSquad colors); // диагональная грань
 
 	void SetLayer(int layer);  // установка слоя
 

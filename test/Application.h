@@ -11,21 +11,21 @@
 
 class Application {
 public:
-	const int SIZE_X = 1280;	// первоначальна€ ширина окна в пиксел€х
-	const int SIZE_Y = 720;		// первоначальна€ высота окна в пиксел€х
+	const int SIZE_X = 1280;
+	const int SIZE_Y = 720;
+	const char* const WIN_TITLE = "Funnycraft";
 
-	GLFWwindow* window;			// указатель на экземл€р окна
-	DeltaTime delta_time{};		// экземпл€р дельты времени
+	GLFWwindow* window{};
+	DeltaTime delta_time{};
 
-	float d_time{};				// дельта времени
-	double fps{};					// количество кадров в секунду
-	int lfps = 0, ms = 1;		// округленное количество кадров в секунду
-	bool wireframe = false;		// режим рамочного рендеренга
+	float d_time{};
+	double fps{};
+	int lfps = 0;
+	int ms = 1;
+	bool wireframe = false;
 
-	Client client;				// экземпл€р клиента
-
-	void Resize(int x, int y);	// измениние содержимого под размер окна
-	void Resize();				// измениние содержимого под размер окна
+	void Resize(int, int);
+	void Resize();
 	void CalculateFPS();
 	void Update();
 	void RenderUI();
@@ -34,7 +34,7 @@ public:
 	void StopWindow();
 	void Run();
 	void Render();
-	void TextureInit(unsigned int& texture, const char* name);
+	void TextureInit(unsigned int&, const char*);
 	void GameInit();
 	void LoadIcon();
 	void LoadResources();
@@ -43,7 +43,8 @@ public:
 
 }inline app;
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouse_button_callback(GLFWwindow*, int, int, int);
+void key_callback(GLFWwindow*, int, int, int, int);
+void scroll_callback(GLFWwindow*, double, double);
+void character_callback(GLFWwindow*, unsigned int );
 

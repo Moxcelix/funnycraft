@@ -1,31 +1,30 @@
 #pragma once
-class Vector3
-{
-public:
-	float x, y, z; // координаты
-	Vector3(float x, float y, float z); // конструктор
-	Vector3(); // конструктор
-	Vector3 operator+ (Vector3 val); // оператор сложения
-	Vector3 operator- (Vector3 val); // оператор вычитания
-	Vector3 operator* (float val);  // умножение на число
-	bool operator== (Vector3 val); // оператор сравнения
-	bool operator< (Vector3 val);  // оператор меншье
-	bool operator> (Vector3 val);  // оператор больше
-	bool operator<= (Vector3 val); // оператор меньше или равно
-	bool operator>= (Vector3 val); // оператор больше или равно
-	float Module(); // длина вектора
 
-	static Vector3 clrm(Vector3 a, Vector3 b); // умножение цвета
+class Vector3 {
+public:
+	float x, y, z;
+	Vector3(float, float, float);
+	Vector3();
+	Vector3 operator+ (Vector3);
+	Vector3 operator- (Vector3);
+	Vector3 operator* (float);
+	bool operator== (const Vector3&) const;
+	bool operator< (Vector3);
+	bool operator> (Vector3);
+	bool operator<= (Vector3);
+	bool operator>= (Vector3);
+	float Module();
+
+	static Vector3 clrm(Vector3, Vector3);
+	static Vector3 lerp(Vector3, Vector3, double);
 };
 
-struct Vector3Int 
-{
+struct Vector3Int {
 public:
-	int x, y, z; // координаты
-	Vector3Int(int x, int y, int z); // конструктор
-	Vector3Int(); // конструктор
-	~Vector3Int(); // деструктор
-	int GetHashCode() // хэш код
+	int x, y, z;
+	Vector3Int(int x, int y, int z);
+	Vector3Int();
+	int GetHashCode()
 	{
 		int hash = 47;
 		hash = hash * 227 + x;
@@ -33,15 +32,15 @@ public:
 		hash = hash * 227 + z;
 		return hash;
 	}
-	Vector3Int operator+ (Vector3Int val); // оператор сложения
-	Vector3Int operator- (Vector3Int val); // оператор вычитания
-	Vector3Int operator* (float val); // умножение на число
-	bool operator< (Vector3Int val);  // оператор меншье
-	bool operator> (Vector3Int val);  // оператор больше
-	bool operator<= (Vector3Int val); // оператор меньше или равно
-	bool operator>= (Vector3Int val); // оператор больше или равно
-	bool operator== (Vector3Int val); // оператор сравнения
-	static float Distance(Vector3Int a, Vector3Int b); // расстаяние
-	float Module(); // длина вектора
+	Vector3Int operator+ (Vector3Int);
+	Vector3Int operator- (Vector3Int);
+	Vector3Int operator* (float);
+	bool operator< (Vector3Int);
+	bool operator> (Vector3Int);
+	bool operator<= (Vector3Int);
+	bool operator>= (Vector3Int);
+	bool operator== (const Vector3Int&) const;
+	static float Distance(Vector3Int a, Vector3Int b);
+	float Module();
 };
 

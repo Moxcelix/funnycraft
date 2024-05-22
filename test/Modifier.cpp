@@ -21,8 +21,8 @@ void Modifier::Place(bool state)
 /// </summary>
 void Modifier::Update() 
 {
-	static float dc = 0, dt = max;
-	static float pc = 0, pt = max;
+	static float dc = 0, dt = static_cast<float>(max);
+	static float pc = 0, pt = static_cast<float>(max);
 	static DeltaTime time;
 
 	float delta_time = time.Get();
@@ -37,19 +37,19 @@ void Modifier::Update()
 		else if (dc < dt)
 		{
 			// увеличение значения таймера в зависимости от скорости
-			dc += delta_time * (.3 + client->player.GetVelocity() * 100);
+			dc += delta_time * (.3f + client->player.GetVelocity() * 100);
 		}
 		else
 		{
-			dc = 0;				// обнуление счётчика 
-			dt = d_repeat_max;	// обновление порога
+			dc = 0;
+			dt = static_cast<float>(d_repeat_max);
 		}
 	}
 	else
 	{
 		// восстановление начальных значений
 		dc = 0;
-		dt = max;
+		dt = static_cast<float>(max);
 	}
 
 	if (p_repeat) // установка блоков
@@ -62,18 +62,18 @@ void Modifier::Update()
 		else if (pc < pt)
 		{
 			// увеличение значения таймера в зависимости от скорости
-			pc += delta_time * (.3 + client->player.GetVelocity() * 100);
+			pc += delta_time * (.3f + client->player.GetVelocity() * 100);
 		}
 		else
 		{
-			pc = 0;				// обнуление счётчика 
-			pt = p_repeat_max;	// обновление порога
+			pc = 0;
+			pt = static_cast<float>(p_repeat_max);
 		}
 	}
 	else
 	{
 		// восстановление начальных значений
 		pc = 0;
-		pt = max;
+		pt = static_cast<float>(max);
 	}
 }

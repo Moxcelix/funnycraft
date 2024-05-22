@@ -7,94 +7,108 @@
 #include "Terrain.h"
 #include "Player.h"
 #include "Debug.h"
-#include "PosQueue.h"
+#include "LightMap.h"
+#include "WorldTime.h"
+#include "ChunkUpdateTask.h"
 #include "Sky.h"
+
+#include "static_queue.h"
 
 class Terrain;
 class Player;
 struct Chunk;
-/// <summary>
-/// класс мира
-/// </summary>
-class World
-{
-public:	
-	static struct Settings 
-	{
-		const static int count = 4;
-		bool params[count]{true, true, true, true};
 
-		void Clear() 
-		{
+class World {
+public:
+	static struct Settings {
+		const static int count = 4;
+		bool params[count]{ true, true, true, true };
+
+		void Clear() {
 			for (int i = 0; i < count; i++)
 				params[i] = true;
 		}
 	}settings;
 
-	struct BlockPos
-	{
+	struct BlockPos {
 		int x, y, z;
 		block_id block;
 	};
 
-	static bool is_day; // флаг дня
-	const static int MaxChunksCount = 512 * 8; // максимальное количество чанков
-	const static int WorldHeight = 16; // максимальная высота мира
+	constexpr static int max_chunks_count = 512 * 8;
+	constexpr static int world_height = 16;
 
-	PosQueue *render_queue; // очередь рпервичного обновления
-	PosQueue *update_queue; // очередь обновления
-	PosQueue *create_queue; // очерель на создание
-	Player* player; // указатель на игрока
-	Chunk* Chunks[MaxChunksCount]; // массив чанков
-	Sky* sky;
+	std::vector<BlockPos> global_buffer;
+	std::vector<int> to_remove;
 
-	std::queue<Vector3Int> *global_update_queue; // очередь на глобальное обновление
-	std::vector<BlockPos> GlobalBuffer; // глобальный буфер блоков
-	std::vector<int> toRemove;; // вектора позиций буфера на удаление
+	Player* player;
+	Chunk* chunks[max_chunks_count];
 
-	inline Chunk* GetChunk(int x, int y, int z); // получить чанк
+	Sky sky;
+	WorldTime time;
 
-	static int seed; // зерно генерации
-	static int render_distance; // дальность прорисовки
-	static std::string name; // имя мира
+	unsigned int render_distance;
 
-	int chunksUpdateing = 0; // количесвтво обновляющихся чанков 
-	int chunks_loaded = 0; // количество загруженных чанков
-	 
-	Block* GetBlock(int x, int y, int z); // указатель на блок
-	Block* GetBlock(Vector3 pos); // указатель на блок
+	inline Chunk* GetChunk(int x, int y, int z);
 
-	block_id GetBlockID(int x, int y, int z); // ID блока
-	block_id GetBlockID(Vector3 pos); // ID блока
+	static int seed;
+	static std::string name;
 
-	bool CreateChunk(int x, int y, int z); // создание чанка
-	void UpdateIfExcist(int x, int y, int z); // обновить чанк, если существует
-	void RenderIfExcist(int x, int y, int z); // отрисовать чанк, если существует
-	void AddToRender(int x, int y, int z); // добавить в очередь первичной отрисовки
-	void AddToUpdate(int x, int y, int z); // добавить в очередь обновления
-	void AddToCreate(int x, int y, int z); // добавление чанка в очередь создания
-	void AddToRender(Chunk* chunk); // добавить чанк в очередь первичной отрисовки
-	void AddToUpdate(Chunk* chunk); // добавить чанк в очередь обновления 
-	void Update(); // обновление
-	void UpdateWorldLighting(); // обновление глобального освещения
-	void Generate(Chunk* chunk); // генерация чанка
-	void SetBlock(int x, int y, int z, block_id block, bool update = false); // установка блока
-	void SetBlock(Vector3 pos, block_id block, bool update = false); // установка блока
-	void Render(unsigned int texture); // рендер мира
-	void Clear(); // очистка мира
-	void Create(); // создание мира
-	void DeleteChunk(int index); // удаление чанка
-	void RationalizeBuffer(); // рационализация буфера блоков
-	void RemoveCash(); // удаление кэша блоков
-	void UpdateAtPoint(int x, int y, int z); // обновить чанки в точке
-	void AddToUpdateAtPoint(int x, int y, int z); // добавить в очередь обновления в точке
-	void UpdateIfEqual(int value1, int value2, int x, int y, int z); // обновление при условии
-	void Explode(int x, int y, int z); // расчистка территории
-	void Explode(Vector3 pos); // расчистка территории
-	void AddToUpdateColumn(int x, int y, int z); // добавить в очередь колонну чанков
-	void SetBufferBlock(int x, int y, int z, block_id block); // добавить блок в буффер
-	char GetLight(int x, int y, int z); // значение света по координатами
+	int chunks_updating = 0;
+	int chunks_loaded = 0;
 
-	World(Player* player); // конструктор
-	~World(); // деструктор
+	Block const* GetBlock(int x, int y, int z);
+	Block const* GetBlock(Vector3 pos);
+
+	block_id GetBlockID(int x, int y, int z);
+	block_id GetBlockID(Vector3 pos);
+
+	void AddToCreate(Vector3Int);
+	void AddToDelete(Vector3Int);
+	bool CreateChunk(Vector3Int pos);
+
+	void AddToRender(Chunk* chunk);
+	void AddToRender(Vector3Int pos);
+	void RenderIfExcist(Vector3Int pos);
+
+	void AddToUpdate(Chunk* chunk, ChunkUpdateTask task);
+	void AddToUpdate(Vector3Int pos, ChunkUpdateTask task);
+	void UpdateIfExcist(Vector3Int pos, ChunkUpdateTask task);
+
+	void Update();
+	void UpdateWorldLighting();
+	void Generate(Chunk* chunk);
+	void SetBlock(int x, int y, int z, block_id block, bool update = false);
+	void SetBlock(Vector3 pos, block_id block, bool update = false);
+	void Render(unsigned int texture);
+	void Clear();
+	void Create();
+	void DeleteChunk(Vector3Int);
+	void RationalizeBuffer();
+	void RemoveCash();
+	void UpdateAtPoint(Vector3Int pos, ChunkUpdateTask task);
+	void UpdateIfEqual(int value1, int value2, int x, int y, int z);
+	void Explode(int x, int y, int z);
+	void Explode(Vector3 pos);
+	void AddToUpdateColumn(int x, int y, int z);
+	void SetBufferBlock(int x, int y, int z, block_id block);
+	void UpdateSkyLightIfNeed();
+	void DoDeleteChunksCycle();
+	void DoRenderChunksCycle();
+	void DoCreateChunksCycle();
+	void DoUpdateChunksCycle();
+	void DoGlobalUpdateChunksCycle();
+	Light GetLight(int x, int y, int z);
+
+	World(Player* player);
+	~World();
+
+private:
+	utl::static_queue<Vector3Int> render_queue;
+	utl::static_queue<Vector3Int> create_queue;
+	utl::static_queue<Vector3Int> delete_queue;
+	utl::static_queue<Vector3Int> global_update_queue;
+	utl::static_queue<std::pair<Vector3Int, ChunkUpdateTask>> update_queue;
+
+	double prev_time_value{};
 };

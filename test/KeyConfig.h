@@ -1,8 +1,6 @@
 #pragma once
 #include<GLFW/glfw3.h>
-/// <summary>
-/// структруа конфигурации клавиш
-/// </summary>
+
 struct KeyConfig
 {
 	int forward		= GLFW_KEY_W;
@@ -20,7 +18,10 @@ struct KeyConfig
 	int explode		= GLFW_KEY_B;
 
 	int pause		= GLFW_KEY_ESCAPE;
+	int chat		= GLFW_KEY_TAB;
 	int enter		= GLFW_KEY_ENTER;
-	int up			= GLFW_KEY_UP;
-	int down		= GLFW_KEY_DOWN;
+	int up_arrow	= GLFW_KEY_UP;
+	int down_arrow	= GLFW_KEY_DOWN;
+	int left_arrow	= GLFW_KEY_LEFT;
+	int right_arrow	= GLFW_KEY_RIGHT;
 };

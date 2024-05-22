@@ -1,6 +1,6 @@
 #include "Particles.h"
 
-Particles::Particles(Block* block, World* world, Vector3 pos, int count) {
+Particles::Particles(Block const * block, World* world, Vector3 pos, int count) {
 	this->world = world;	// указатель на мир
 	this->pos = pos;		// позиция центра
 
@@ -31,7 +31,7 @@ void Particles::Render(unsigned int texture) {
 	GLfloat* uvs = &uvData.UVs[0];
 	GLfloat* colors = &vertexData.Colors[0];
 
-	int size = particles.size();
+	const auto size = particles.size();
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexCoordPointer(2, GL_FLOAT, 0, uvs);
 	glVertexPointer(3, GL_FLOAT, 0, vertices);
@@ -41,9 +41,9 @@ void Particles::Render(unsigned int texture) {
 	{
 		if (particles[i]->is_dead) 
 			continue;
-		float alpha = particles[i]->alpha * M_1_PI * 180 - 90;
-		float beta = -abs(particles[i]->beta * M_1_PI * 180) + 90;
-		float gamma = abs(particles[i]->gamma * M_1_PI * 180) - 90;
+		float alpha = static_cast<float>(particles[i]->alpha * M_1_PI * 180 - 90);
+		float beta = static_cast<float>(-abs(particles[i]->beta * M_1_PI * 180) + 90);
+		float gamma = static_cast<float>(abs(particles[i]->gamma * M_1_PI * 180) - 90);
 		glTranslatef(particles[i]->my_pos.x, particles[i]->my_pos.y, particles[i]->my_pos.z);
 		glPushMatrix();
 		glRotatef(alpha, 1, 0, 0);
@@ -56,11 +56,11 @@ void Particles::Render(unsigned int texture) {
 	}
 }
 
-void Particles::Update(double deltaTime) {
+void Particles::Update(float deltaTime) {
 	vertexData.Clear();
 	uvData.Clear();
 
-	int size = particles.size();
+	const auto size = particles.size();
 
 	working = false; 
 

@@ -14,73 +14,102 @@
 #include "Particles.h"
 #include "UI.h"
 #include "KeyConfig.h"
+#include "ChunkLoader.h"
+#include "Chat.h"
+#include "GameState.h"
 
 struct Modifier;
 
 class Client {
 public:
 	struct Page;
+	static struct Settings {
+		bool smooth_lighting = true;
+		bool recursive_lighting = false;
+	} settings;
+
+	GLFWwindow* window{};
+	World* world{};
+	Page* page{};
+	Modifier* modifier{};
+
+	UI ui, menu;
+	Vector2Int menu_pos;
+	Chat chat;
+	GameState game_state;
+
+	Player player;
+	Inventory inventory;
+	Phantom phantom;
+
+	ChunkLoader chunk_loader;
+	World::Settings gen_params;
+	KeyConfig key_config;
+
+	std::vector<Particles*> particles;
+
+	bool enter = false;
+	bool close = false;
+
+	double mouse_pos_x = 0, mouse_pos_y = 0;
+	unsigned int main_texture = 0;
 
 	Client();
-	~Client();
+	~Client() = default;
 
-	void Pause(bool active);					// активность меню
-	void ToSettings();							// переход к странице настроек
-	void ToMenu();								// переход к главной странице меню
-	void ToAgree();								// переход к странице согласия
-	void ToNewWorld();							// переход к странице создания нового мира
-	void ToRenderDistance();					// переход к настройкам дальности прорисовки
-	void ButtonUp();							// кнопка вверх
-	void ButtonDown();							// кнопка вверх
-	
-	void SetBlock(int x, int y, int z, block_id id);	// установка блока
-	void SetBlock(Vector3 pos, block_id id);			// установка блока
-	void SetBlock();									// установка блока
-	void DestroyBlock(int x, int y, int z);				// разрушение блока
-	void DestroyBlock(Vector3 pos);						// разрушение блока
-	void DestroyBlock();								// разрушение блока
-	void CopyBlock();									// копирование блока
+	[[nodiscard]] static auto instance() -> Client& {
+		static Client client;
+		return client;
+	}
 
-	void Resize();									// изменение размеров окна
-	void MoveCamera(double delta_time);				// движение камеры
-	void UpdatePhantomPos();						// обновление позиции фантома
-	void CameraUpdate();							// обновление камеры
-	void NewWorld();								// создание нового мира
-	void SetRenderDistance(int d);					// установка дальности прорисовки
+	Client(Client const&) noexcept = delete;
+	Client(Client const&&) noexcept = delete;
+	Client& operator=(Client const&) noexcept = delete;
+	Client& operator=(Client&&) noexcept = delete;
 
-	void Init();									// инициализация
-	void Update(float deltaTime);					// обновление 
-	void Clear();									// очистка
-	void Render();									// рендеринг
-	void RenderUI();								// рендеринг UI
-	void DrawMenu();								// отрисовка меню
+	void Pause(bool active);
+	void ToSettings();
+	void ToMenu();
+	void ToAgree();
+	void ToNewWorld();
+	void ToRenderDistance();
+	void ToTimeSet();
+	void ButtonUp();
+	void ButtonDown();
+	void ButtonRight();
+	void ButtonLeft();
+	void Escape();
+	void OpenChat();
 
-	GLFWwindow* window;			// указатель на экземляр окна
-	UI ui, Menu, Settings;		// экземпляры пользовательского интерфейса
-	Player player;				// экземпляр игрока
-	World* world;				// указатель на экземпляр мира
-	Page* page;					// указатель на текущую страницу меню
-	Vector2Int MenuPos;			// позиция в меню
-	Phantom phantom;			// фантом (рамки)
-	Inventory inventory;		// инвентарь
-	World::Settings gen_params;	// параметры генерации
-	Modifier* modifier;			// модификатор
-	KeyConfig key_config;		// конфигурация клавишей
+	void SetBlock(int, int, int, block_id);
+	void SetBlock(Vector3, block_id);
+	void SetBlock();
+	void DestroyBlock(int, int, int);
+	void DestroyBlock(Vector3);
+	void DestroyBlock();
+	void CopyBlock();
 
-	vector<Particles*> particles;
+	void Resize();
+	void MoveCamera(double);
+	void UpdatePhantomPos();
+	void CameraUpdate();
+	void NewWorld();
+	void SetRenderDistance(int);
+	void ReloadChunks();
 
-	bool pause = false; // флаг паузы
-	bool enter = false; // флаг подтверждения
-	bool close = false; // флаг закрытия
-
-	double mouse_pos_x, mouse_pos_y; // центральное положение курсора
-	unsigned int main_texture; // тексутрный атлас
+	void Init();
+	void Update(float);
+	void Clear();
+	void Render();
+	void RenderUI();
+	void DrawMenu();
+	void DrawChat();
 
 	struct Button {
-		string name;				// заголовок кнопки
-		std::function<void()> func; // ссылка на процедуру
+		std::string name;
+		std::function<void()> func;
 		Button() :name("?"), func([] {}) {}
-		Button(string name, std::function<void()> func) :name(name), func(func) {}
+		Button(std::string name, std::function<void()> func) :name(name), func(func) {}
 		virtual void DoFunc() {
 			func();
 		}
@@ -91,12 +120,8 @@ public:
 	Button btn_continue{ "Продолжить игру", [&] {Pause(false); } };		// кнопка продолжения игры
 	Button btn_close{ "Выйти из игры", [&] {close = true; } };			// кнопка выхода из игры
 	Button btn_render_distance{ "Дальность прорисовки", [&] {ToRenderDistance(); } }; // кнопка дальности прорисовки
-	Button btn_day{ "Сменить время суток", [&]()						// кнопка смены времени суток
-	{
-		World::is_day = !World::is_day;
-		world->UpdateWorldLighting();
-	}, };
-	Button btn_back{ "Назад", [&]{ToMenu(); } };					// кнопка перехода в меню
+	Button btn_time{ "Установить время", [&] {ToTimeSet(); } };
+	Button btn_back{ "Назад", [&] {ToMenu(); } };					// кнопка перехода в меню
 	Button btn_small{ "Маленькая", [&] {SetRenderDistance(3); } };	// кнопка установки маленькой дальности прорисовки
 	Button btn_medium{ "Средняя", [&] {SetRenderDistance(4); } };	// кнопка установки средней дальности прорисовки
 	Button btn_normal{ "Нормальная", [&] {SetRenderDistance(5); } };// кнопка установки большой дальности прорисовки
@@ -105,19 +130,36 @@ public:
 	Button btn_cancel{ "Отменить", [&] {ToMenu(); } };				// кнопка отмены
 	Button btn_create{ "Создать", [&] {ToAgree(); } };				// кнопка создания мира
 
-	struct Switcher : Button {
-		string name;	// заголовок переключателя
-		bool* value;	// ссылка на переключаемое значение
+	Button btn_day{ "День", [&]{world->time.set(0);} };
+	Button btn_sunrise{ "Вечер", [&]{world->time.set(1000);} };
+	Button btn_night{ "Ночь", [&]{world->time.set(1200);} };
+	Button btn_sunset{ "Рассвет", [&]{world->time.set(2200);} };
 
-		Switcher(string name, bool* value) :name(name), value(value)
-		{
+	struct Switcher : Button {
+		std::string name;
+		bool* value;
+
+		Switcher(std::string name, bool* value) :Button{}, name(name), value(value) {
 			Button::name = name + (*value ? " On" : " Off");
 		}
 
-		virtual void DoFunc()
-		{
+		virtual void DoFunc() {
 			*value = !(*value);
 			Button::name = name + (*value ? " On" : " Off");
+		}
+	};
+
+	struct LamdaSwitcher : Switcher {
+
+		LamdaSwitcher(std::string name, bool* value, std::function<void()> func) :
+			Switcher(name, value) {
+			this->func = func;
+		}
+
+		virtual void DoFunc() override {
+			*value = !(*value);
+			Button::name = name + (*value ? " On" : " Off");
+			func();
 		}
 	};
 
@@ -126,16 +168,20 @@ public:
 	Switcher swt_trees{ "Деревья", &gen_params.params[2] };		// выключатель деревьев
 	Switcher swt_grass{ "Трава", &gen_params.params[3] };		// выключатель травы
 
+	LamdaSwitcher swt_smooth_lighting{ "Плавное освещение", &settings.smooth_lighting, [&] {world->UpdateWorldLighting(); } };
+	LamdaSwitcher swt_recursive_lighting{ "Рекурсивное освещение", &settings.recursive_lighting, [&] {world->UpdateWorldLighting(); } };
+
 	struct Page {
-		int count;			// количество параметров
-		string name;		// заголовок страницы
-		Button** buttons;	// массив кнопок
-		float* indents;		// массив разметки по вертикали 
+		int count;		
+		std::string name;
+		Button** buttons;
+		float* indents;	 
 	};
 	// страницы меню
-	Page page_menu{ 4, "Меню", new Button * [] {&btn_settings, &btn_new_world, &btn_continue, &btn_close}, new float[] {0, 0, 0, 0} };
-	Page page_settings{ 3, "Настройки", new Button * [] {&btn_render_distance,& btn_day,& btn_back}, new float[] {0, 0, 20} };
-	Page page_render_distance{ 5, "Дальность прорисовки", new Button * [] {&btn_small,&btn_medium, &btn_normal, &btn_large,& btn_back}, new float[] {0, 0, 0, 0, 20} };
+	Page page_menu{ 4, "Меню", new Button * [] {&btn_settings,& btn_new_world,& btn_continue,& btn_close}, new float[] {0, 0, 0, 0} };
+	Page page_settings{ 5, "Настройки", new Button * [] {&btn_render_distance,& btn_time,& swt_smooth_lighting, & swt_recursive_lighting,& btn_back}, new float[] {0, 0, 0, 0, 20} };
+	Page page_render_distance{ 5, "Дальность прорисовки", new Button * [] {&btn_small,& btn_medium,& btn_normal,& btn_large,& btn_back}, new float[] {0, 0, 0, 0, 20} };
 	Page page_agree{ 2, "Текущий мир будет удален", new Button * [] {&btn_confirm,& btn_cancel}, new float[] {0,0} };
 	Page page_new_world{ 6, "Параметры нового мира", new Button * [] {&swt_mountains,& swt_plains,& swt_trees,& swt_grass,& btn_create,& btn_back},new float[] {0, 0, 0, 0, 20, 0} };
+	Page page_time{5, "Установить время", new Button*[]{&btn_day, &btn_sunrise, &btn_night, &btn_sunset, &btn_back},new float[] {0, 0, 0, 0, 20} };
 };

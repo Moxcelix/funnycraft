@@ -29,7 +29,7 @@ void VertexData::Clear()
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <param name="z"></param>
-void VertexData::FaceUp(int x, int y, int z)
+void VertexData::FaceUp(float x, float y, float z)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -52,7 +52,7 @@ void VertexData::FaceUp(int x, int y, int z)
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <param name="z"></param>
-void VertexData::FaceDown(int x, int y, int z)
+void VertexData::FaceDown(float x, float y, float z)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -75,7 +75,7 @@ void VertexData::FaceDown(int x, int y, int z)
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <param name="z"></param>
-void VertexData::FaceRight(int x, int y, int z)
+void VertexData::FaceRight(float x, float y, float z)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -98,7 +98,7 @@ void VertexData::FaceRight(int x, int y, int z)
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <param name="z"></param>
-void VertexData::FaceLeft(int x, int y, int z)
+void VertexData::FaceLeft(float x, float y, float z)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -121,7 +121,7 @@ void VertexData::FaceLeft(int x, int y, int z)
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <param name="z"></param>
-void VertexData::FaceFront(int x, int y, int z)
+void VertexData::FaceFront(float x, float y, float z)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -144,7 +144,7 @@ void VertexData::FaceFront(int x, int y, int z)
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <param name="z"></param>
-void VertexData::FaceBack(int x, int y, int z)
+void VertexData::FaceBack(float x, float y, float z)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -168,7 +168,7 @@ void VertexData::FaceBack(int x, int y, int z)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <param name="colors"></param>
-void VertexData::FaceUp(int x, int y, int z, ColorSquad colors)
+void VertexData::FaceUp(float x, float y, float z, ColorSquad colors)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -197,7 +197,7 @@ void VertexData::FaceUp(int x, int y, int z, ColorSquad colors)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <param name="colors"></param>
-void VertexData::FaceDown(int x, int y, int z, ColorSquad colors)
+void VertexData::FaceDown(float x, float y, float z, ColorSquad colors)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -225,7 +225,7 @@ void VertexData::FaceDown(int x, int y, int z, ColorSquad colors)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <param name="colors"></param>
-void VertexData::FaceRight(int x, int y, int z, ColorSquad colors)
+void VertexData::FaceRight(float x, float y, float z, ColorSquad colors)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -253,7 +253,7 @@ void VertexData::FaceRight(int x, int y, int z, ColorSquad colors)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <param name="colors"></param>
-void VertexData::FaceLeft(int x, int y, int z, ColorSquad colors)
+void VertexData::FaceLeft(float x, float y, float z, ColorSquad colors)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -274,14 +274,8 @@ void VertexData::FaceLeft(int x, int y, int z, ColorSquad colors)
 		Colors.push_back(colors.colors[i].z * X_MULT);
 	}
 }
-/// <summary>
-/// передн€€ грань
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-/// <param name="colors"></param>
-void VertexData::FaceFront(int x, int y, int z, ColorSquad colors)
+
+void VertexData::FaceFront(float x, float y, float z, ColorSquad colors)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)
@@ -302,15 +296,8 @@ void VertexData::FaceFront(int x, int y, int z, ColorSquad colors)
 		Colors.push_back(colors.colors[i].z * Y_MULT);
 	}
 }
-/// <summary>
-/// задн€€ грань
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="z"></param>
-/// <param name="colors"></param>
-void VertexData::FaceBack(int x, int y, int z, ColorSquad colors)
-{
+
+void VertexData::FaceBack(float x, float y, float z, ColorSquad colors) {
 	face_count++;
 	for (int i = 0; i < 12; i++)
 	{
@@ -337,7 +324,7 @@ void VertexData::FaceBack(int x, int y, int z, ColorSquad colors)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <param name="colors"></param>
-void VertexData::FaceCrossRFLB(int x, int y, int z, ColorSquad colors)
+void VertexData::FaceCrossRFLB(float x, float y, float z, ColorSquad colors)
 {
 	face_count += 2;
 	for (int i = 0; i < 24; i++)
@@ -365,7 +352,7 @@ void VertexData::FaceCrossRFLB(int x, int y, int z, ColorSquad colors)
 /// <param name="y"></param>
 /// <param name="z"></param>
 /// <param name="colors"></param>
-void VertexData::FaceCrossRBLF(int x, int y, int z, ColorSquad colors)
+void VertexData::FaceCrossRBLF(float x, float y, float z, ColorSquad colors)
 {
 	face_count += 2;
 	for (int i = 0; i < 24; i++)
@@ -386,7 +373,7 @@ void VertexData::FaceCrossRBLF(int x, int y, int z, ColorSquad colors)
 		Colors.push_back(colors.colors[i % 4].z * UP_MULT);
 	}
 }
-void VertexData::FaceParticle(int x, int y, int z, float scale, ColorSquad colors)
+void VertexData::FaceParticle(float x, float y, float z, float scale, ColorSquad colors)
 {
 	face_count++;
 	for (int i = 0; i < 12; i++)

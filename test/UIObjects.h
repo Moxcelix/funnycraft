@@ -91,6 +91,6 @@ struct BackGround :UIObject
 	{
 		glScalef(213, 123, 123);
 		glDrawPixels(1, 1, GL_RGBA, GL_FLOAT, pixels);
-		glScalef(1./213, 1./123, 1./123);
+		glScalef(1.f/213, 1.f/123, 1.f/123);
 	}
 };

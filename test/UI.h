@@ -14,20 +14,14 @@
 struct Text;
 struct Plane;
 struct UIElement;
-/// <summary>
-/// класс пользовательского интерфейса
-/// </summary>
-class UI
-{
+
+class UI {
 private:
-	int IDCounter = 0; // счетчик ID
-	int flags = 0;	// флаги отрисовки
-	int winWidth = 1, winHeight = 1;	// габариты окна
-	int debug_line_counter = 0;			// счетчик количества строк отладки
+	int IDCounter = 0;
+	int flags = 0;
+	int window_width = 1, window_height = 1;
+	int debug_line_counter = 0;	
 public:
-	/// <summary>
-	/// перечисление углов
-	/// </summary>
 	enum class Corner
 	{
 		left_up,
@@ -41,53 +35,48 @@ public:
 		right_down
 	};
 
-	unsigned int font;					// текстура шрифта
+	unsigned int font;					
 
-	vector<Text> texts;				// вектор текстов
-	vector<Text> static_texts;		// вектор статичных текстов
-	vector<Plane> static_planes;	// вектор статичных панелей
-	vector<Plane> planes;			// вектор панелей
+	std::vector<Text> texts;			
+	std::vector<Text> static_texts;		
+	std::vector<Plane> static_planes;	
+	std::vector<Plane> planes;			
 
 	Cross cross;
 	BackGround bg;
 
-	void PrintText(Corner corner, float size, int x, int y, string str, float r, float g, float b); // Вывод текста на экран
-	void PrintText(Text t);			// Вывод текста на экран
-	void PrintStatic();				// Печать статичных объектов
-	void Render();					// Рендеринг элементов
-	void PrintDebug(string str, float r, float g, float b); // Вывод на экран отладочного текста
-	void PrintPlane(Plane p);		// Вывод на экран панели
-	void RemoveStaticText(Text t);	// Удаление статичного тектса
-	void RemoveStaticText();		// Удаление статичных текстов
-	void SetSize(int w, int h);		// Установка размеров окна
-	void Clear();					// Очистка
-	void SetFlags(int flags);		// установка флагов
+	void PrintText(Corner corner, float size, int x, int y, std::string str, float r, float g, float b); 
+	void PrintText(Text t);	
+	void PrintStatic();		
+	void Render();			
+	void PrintDebug(std::string str, float r, float g, float b); 
+	void PrintPlane(Plane p);	
+	void RemoveStaticText(Text t);
+	void RemoveStaticText();	
+	void SetSize(int w, int h);	
+	void Clear();				
+	void SetFlags(int flags);	
 
-	Vector2 GetCorner(Corner corner, float xScale, float yScale, int xShift = 0, int yShift = 0); // Угол привязки 
-	Text AddStaticText(Corner corner, float size, int x, int y, string str, float r, float g, float b); // Добавление статичного текста 
-	Plane AddStaticPlane(Corner corner, float size, int x, int y, int w, int h, ColorSquad colors); // Добавление статичной панели
+	Vector2 GetCorner(Corner corner, float xScale, float yScale, int xShift = 0, int yShift = 0);
+	Text AddStaticText(Corner corner, float size, int x, int y, std::string str, float r, float g, float b);
+	Plane AddStaticPlane(Corner corner, float size, int x, int y, int w, int h, ColorSquad colors);
 };
-/// <summary>
-/// UI элемент
-/// </summary>
-struct UIElement 
-{
-	int ID;				// ID
 
-	int x, y;			// координаты
-	float r, g, b;		// цвет
-	float size;			// размер
+struct UIElement {
+	int ID;
 
-	float* vertices;	// массив вершин
-	float* colors;		// массив цветов
-	float* uvs;			// массив UV координат
+	int x, y;
+	float r, g, b;
+	float size;
 
-	UVData* uvs_data;	// UV данные 
-	UI::Corner corner;	// угол привязки
+	float* vertices;
+	float* colors;
+	float* uvs;
 
-	// массив вершин квадрата
-	float rect[12] =
-	{
+	UVData* uvs_data;
+	UI::Corner corner;
+
+	float rect[12] = {
 		1, 0, 0,
 		0, 0, 0,
 		0, 1, 0,
@@ -99,19 +88,13 @@ struct UIElement
 		return ID == val.ID;
 	}
 };
-/// <summary>
-/// структура панели
-/// </summary>
-struct Plane : UIElement
-{
-	int w, h;			// габариты
-	ColorSquad squad;	// цвета углов
 
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	Plane(int x, int y, int w, int h, float size, ColorSquad squad, UI::Corner corner)
-	{
+struct Plane : UIElement {
+	int w, h;
+	ColorSquad squad;
+
+	Plane(int x, int y, int w, int h, float size,
+		ColorSquad squad, UI::Corner corner){
 		this->x = x;
 		this->y = y;
 		this->w = w;
@@ -121,18 +104,14 @@ struct Plane : UIElement
 		this->corner = corner;
 	}
 };
-/// <summary>
-/// структура текста
-/// </summary>
-struct Text : UIElement
-{
-	string text; // текст
 
-	float width = 6. / 128., height = .0625f;	// ширина шрифта
-	float iwidth = 6, iheight = 8;				// ширина шрифта в пикселях
-	int wCount = 21, hCount = 16;				// количество строк и столбцов в шрифте
+struct Text : UIElement {
+	std::string text; 
 
-	// массив вершин буквы
+	float width = 6. / 128., height = .0625f;
+	float iwidth = 6, iheight = 8;			
+	int wCount = 21, hCount = 16;			
+
 	float quad[12] =
 	{
 		iwidth, 0, 0,
@@ -141,11 +120,8 @@ struct Text : UIElement
 		iwidth, iheight, 0
 	};
 
-	/// <summary>
-	/// конструктор
-	/// </summary>
-	Text(int x, int y, float size, float r, float g, float b, string text, UI::Corner corner)
-	{
+	Text(int x, int y, float size, float r, float g, float b,
+		std::string text, UI::Corner corner) {
 		this->x = x;
 		this->y = y;
 		this->size = size;
